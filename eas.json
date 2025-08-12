@@ -1,0 +1,43 @@
+{
+  "cli": {
+    "version": ">= 5.9.2",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "autoIncrement": true,
+      "cache": {
+        "disabled": true
+      },
+      "env": {
+        "NODE_ENV": "production",
+        "API_URL_PROD": "https://api.repasserapido.com.br/api"
+      }
+    },
+    "production": {
+      "distribution": "store",
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "autoIncrement": true,
+      "env": {
+        "NODE_ENV": "production",
+        "API_URL_PROD": "https://api.repasserapido.com.br/api"
+      }
+    }
+  },
+  "submit": {
+    "preview": {},
+    "production": {}
+  }
+}
