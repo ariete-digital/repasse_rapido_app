@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
+import { Alert, View } from 'react-native';
 
 import { useFilters } from '@hooks/useFilters';
+import Select from '@components/Select';
 import BaseFilterModal from '../../BaseFilter';
 
 interface YearFilterProps {
@@ -16,25 +16,26 @@ const YearFilter = ({
   handleCancel,
   handleConfirm,
 }: YearFilterProps) => {
-  const [openMin, setOpenMin] = useState(false);
-  const [openMax, setOpenMax] = useState(false);
   const { filterParams, setFilterParams, isLoading } = useFilters();
-  const [minYear, setMinYear] = useState<number>();
-  const [maxYear, setMaxYear] = useState<number>();
+  const [minYear, setMinYear] = useState<string>('');
+  const [maxYear, setMaxYear] = useState<string>('');
 
   const handleSubmit = () => {
-    if (minYear && maxYear && minYear > maxYear) {
+    const minYearNum = minYear ? parseInt(minYear) : undefined;
+    const maxYearNum = maxYear ? parseInt(maxYear) : undefined;
+    
+    if (minYearNum && maxYearNum && minYearNum > maxYearNum) {
       Alert.alert('Atenção', 'O ano mínimo deve ser menor ou igual o máximo!');
       return;
     }
 
-    setFilterParams({ ...filterParams, ano: { min: minYear, max: maxYear } });
+    setFilterParams({ ...filterParams, ano: { min: minYearNum, max: maxYearNum } });
     handleConfirm();
   };
 
-  const years: { label: string; value: number }[] = [];
+  const years: { label: string; value: string }[] = [];
   for (let i = 2024; i >= 1924; i--) {
-    years.push({ label: i.toString(), value: i });
+    years.push({ label: i.toString(), value: i.toString() });
   }
 
   return (
@@ -48,34 +49,32 @@ const YearFilter = ({
         return (
           <View
             style={{
-              zIndex: 999,
               flexDirection: 'column',
               gap: 16,
-              alignItems: 'center',
-              justifyContent: 'center',
+              paddingHorizontal: 16,
             }}
           >
-            <DropDownPicker
-              open={openMin}
-              value={minYear as number}
-              items={years}
-              setOpen={setOpenMin}
-              setValue={setMinYear}
-              zIndex={999}
-              style={pickerStyles.input}
+            <Select
+              label="Ano Mínimo"
+              options={years}
+              selectedValue={minYear}
+              onSelect={setMinYear}
               placeholder="Mínimo"
-              dropDownContainerStyle={pickerStyles.container}
+              enableSearch={true}
+              searchPlaceholder="Buscar ano..."
+              labelFontStyle="p-14-regular"
+              placeholderFontStyle="p-14-regular"
             />
-            <DropDownPicker
-              open={openMax}
-              value={maxYear as number}
-              items={years}
-              setOpen={setOpenMax}
-              setValue={setMaxYear}
-              zIndex={998}
-              style={pickerStyles.input}
+            <Select
+              label="Ano Máximo"
+              options={years}
+              selectedValue={maxYear}
+              onSelect={setMaxYear}
               placeholder="Máximo"
-              dropDownContainerStyle={pickerStyles.container}
+              enableSearch={true}
+              searchPlaceholder="Buscar ano..."
+              labelFontStyle="p-14-regular"
+              placeholderFontStyle="p-14-regular"
             />
           </View>
         );
@@ -83,22 +82,5 @@ const YearFilter = ({
     />
   );
 };
-
-const pickerStyles = StyleSheet.create({
-  input: {
-    borderWidth: 1,
-    borderColor: '#DBE2EF',
-    backgroundColor: '#A0A4AC1A',
-    borderRadius: 4,
-    width: '80%',
-    alignSelf: 'center',
-    marginVertical: 8,
-  },
-  container: {
-    maxWidth: '81%',
-    marginLeft: 34,
-    zIndex: 5000,
-  },
-});
 
 export default YearFilter;

@@ -6,16 +6,17 @@ import Text from '@components/Text';
 
 import * as D from './styles';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SearchStackParamList } from '@routes/app.routes';
+import { RootStackParamList } from '@routes/app.routes';
 import Testimonials from './components/Testimonials';
 import BasicButton from '@components/BasicButton';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FullscreenIcon, AddPhotoIcon, PhoneIcon, ChatIcon } from '@components/CustomIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SecurityModal from '@components/Modals/Security';
+import { useAuth } from '@hooks/useAuth';
 
 const { width } = Dimensions.get('window');
 
-type DetailsProps = NativeStackScreenProps<SearchStackParamList, 'adDetails'>;
+type DetailsProps = NativeStackScreenProps<RootStackParamList, 'adDetails'>;
 
 // Adicionar mockData antes do componente
 const mockData = {
@@ -158,6 +159,7 @@ const mockTestimonials = [
 
 const Details = ({ route, navigation }: DetailsProps) => {
   const intents = useSafeAreaInsets();
+  const { user } = useAuth();
   console.log(intents);
   
   // Estado para controlar o modal de visualização de imagem
@@ -197,11 +199,25 @@ const Details = ({ route, navigation }: DetailsProps) => {
   const error = null;
 
   const handleCall = () => {
+    // Verifica se o usuário está logado
+    if (!user || !user.id) {
+      // @ts-ignore - navigation type
+      navigation.navigate('auth', { screen: 'login' });
+      return;
+    }
+    
     setPendingAction('call');
     setSecurityModalVisible(true);
   };
 
   const handleWhatsApp = () => {
+    // Verifica se o usuário está logado
+    if (!user || !user.id) {
+      // @ts-ignore - navigation type
+      navigation.navigate('auth', { screen: 'login' });
+      return;
+    }
+    
     setPendingAction('whatsapp');
     setSecurityModalVisible(true);
   };
@@ -280,7 +296,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
                 )}
               />
               <D.ExpandButton onPress={() => handleOpenImageViewer()}>
-                <MaterialIcons name="fullscreen" size={24} color="white" />
+                <FullscreenIcon size={24} color="white" />
               </D.ExpandButton>
             </D.SwiperContainer>
             <View style={{ width: '100%', marginTop: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -299,7 +315,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
                   gap: 10,
                 }}
               >
-                <MaterialIcons name="add-a-photo" size={20} color="#353535" />
+                <AddPhotoIcon size={20} color="#353535" />
                 <Text fontStyle="c-12-bold" color="black-400">Solicitar mais fotos</Text>
               </BasicButton>
             </View>
@@ -323,7 +339,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
           backgroundColor="#25513C" 
           onPress={handleCall}
         >
-          <MaterialIcons name="phone" size={20} color="white" />
+          <PhoneIcon size={20} color="white" />
           <Text fontStyle="p-14-bold" color="white">Ligar</Text>
         </D.FloatingButton>
         
@@ -331,7 +347,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
           backgroundColor="#38AE76" 
           onPress={handleWhatsApp}
         >
-          <MaterialIcons name="chat" size={20} color="white" />
+          <ChatIcon size={20} color="white" />
           <Text fontStyle="p-14-bold" color="white">WhatsApp</Text>
         </D.FloatingButton>
       </D.FloatingButtonsContainer>

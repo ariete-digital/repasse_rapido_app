@@ -9,3 +9,9 @@ export const Container = styled.View`
   padding: 8px 16px 8px 16px;
   background-color: ${(props) => props.theme.colors['clear-white']};
 `;
+
+export const IconText = styled.Text`
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
+`;

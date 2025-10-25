@@ -11,6 +11,7 @@ export const theme = {
     'brand-blue': '#001E47',
     'brand-red': '#E11138',
     'brand-red-dark': '#9A0B26',
+    'gray-500': "#353535",
     'gray-300': '#DBE2EF',
     'gray-200': '#F1F4F9',
     'gray-100': '#F9F7F7',

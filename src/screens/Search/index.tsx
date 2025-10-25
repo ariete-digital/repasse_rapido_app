@@ -28,23 +28,22 @@ const Search = () => {
 
   const navigation = useNavigation<SearchNavigationProps>();
 
+
   const toggleCarOrBycicle = async (vehicleType: 'C' | 'M') => {
     resetFilters('C');
     setFilterParams((prev) => ({
       ...prev,
       tipo_veiculo: vehicleType,
+      tipo_venda: 'C',
     }));
-    await refetchSearchResults({ throwOnError: false, cancelRefetch: true });
+    // Navega imediatamente, os dados serão carregados automaticamente
     navigation.navigate('searchScreen');
   };
 
   const doSearch = async () => {
     setFilterParams({ ...filterParams, tipo_venda: 'C', marca: value });
-    await refetchSearchResults({ throwOnError: false, cancelRefetch: true });
-
-    if (searchResults || !isRefetching) {
-      navigation.navigate('searchScreen');
-    }
+    // Navega imediatamente, os dados serão carregados automaticamente
+    navigation.navigate('searchScreen');
   };
 
   useEffect(() => {
@@ -101,6 +100,18 @@ const Search = () => {
             </Text>
           )}
         </GradientButton>
+        
+        <View style={{ marginTop: 10 }}>
+          <GradientButton
+            paddingY={16}
+            onPress={() => navigation.navigate('searchScreen')}
+            disabled={isRefetching}
+          >
+            <Text color="white" fontStyle="p-14-bold">
+              Ver Todos os Anúncios
+            </Text>
+          </GradientButton>
+        </View>
       </S.Container>
     </S.Wrapper>
   );

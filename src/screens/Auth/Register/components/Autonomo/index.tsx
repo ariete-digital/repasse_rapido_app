@@ -1,10 +1,11 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useToast } from 'react-native-toast-notifications';
 import * as yup from 'yup';
 
 import { Text, TextInput } from '@components/index';
+import Select from '@components/Select';
 import ImagePickerExample from '../FilePicker';
 import { api } from '@lib/api';
 
@@ -15,6 +16,8 @@ import * as I from './styles';
 import { View } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { theme } from '@theme/GlobalStyles';
+import { maskCPF, maskCNPJ, maskPhone, maskCEP, unmask } from '@utils/masks';
+import axios from 'axios';
 
 const signUpSchema = yup.object({
   nome: yup.string().required('Informe o nome completo!'),
@@ -26,7 +29,7 @@ const signUpSchema = yup.object({
   numero: yup.string().required('Informe o número!'),
   complemento: yup.string(),
   bairro: yup.string().required('Informe o bairro!'),
-  cidade: yup.string().required('Informe a cidade!'),
+  id_cidade: yup.number().required('Informe a cidade!'),
   senha: yup.string().required('Informe a senha!'),
   confirmarSenha: yup
     .string()
@@ -45,7 +48,7 @@ interface AutonomoFormProps {
   numero: string;
   complemento?: string;
   bairro: string;
-  cidade: string;
+  id_cidade: number;
   senha: string;
   confirmarSenha: string;
 }
@@ -54,19 +57,94 @@ const Autonomo = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false)
+  const [citiesOptions, setCitiesOptions] = useState<Array<{label: string, value: string}>>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
   const toast = useToast();
 
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<AutonomoFormProps>({
     resolver: yupResolver(signUpSchema),
   });
 
-  const handleRegister = (data: AutonomoFormProps) => {
+  useEffect(() => {
+    loadCities('');
+  }, []);
 
+  const loadCities = async (filtro: string = '') => {
+    try {
+      setLoadingCities(true);
+      const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
+      if (response.data?.content) {
+        // Converter value de number para string
+        const cities = response.data.content.map((city: any) => ({
+          label: city.label,
+          value: city.value.toString()
+        }));
+        setCitiesOptions(cities);
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar cidades:', error);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  const fetchAddressByCEP = async (cep: string) => {
+    const cleanCep = unmask(cep);
+    
+    if (cleanCep.length !== 8) return;
+
+    try {
+      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      console.log('ViaCEP response:', response.data);
+
+      if (response.data && !response.data.erro) {
+        const { logradouro, bairro, localidade } = response.data;
+        
+        console.log('Setting endereço:', logradouro);
+        console.log('Setting bairro:', bairro);
+        
+        setValue('endereço', logradouro);
+        setValue('bairro', bairro);
+        
+        // Buscar id_cidade
+        try {
+          const cityData = await api.get(`/cliente/listagem/todas_cidades?filtro=${localidade}`);
+          console.log('City search result:', cityData.data);
+          
+          if (cityData.data?.content?.[0]) {
+            const cityId = cityData.data.content[0].value;
+            console.log('Setting id_cidade:', cityId);
+            setValue('id_cidade', cityId);
+            // Atualizar a lista de cidades para incluir a cidade encontrada
+            const cityOption = {
+              label: cityData.data.content[0].label,
+              value: cityId.toString()
+            };
+            if (!citiesOptions.find(c => c.value === cityId.toString())) {
+              setCitiesOptions([...citiesOptions, cityOption]);
+            }
+          }
+        } catch (error) {
+          console.warn('Erro ao buscar cidade:', error);
+        }
+        
+        toast.show('Endereço encontrado!', { type: 'success' });
+      } else {
+        toast.show('CEP não encontrado', { type: 'warning' });
+      }
+    } catch (error) {
+      console.warn('Erro ao buscar CEP:', error);
+      toast.show('Erro ao buscar CEP', { type: 'danger' });
+    }
+  };
+
+  const handleRegister = async (data: AutonomoFormProps) => {
     const { 
       nome, 
       email,
@@ -77,7 +155,7 @@ const Autonomo = () => {
       numero,
       complemento,
       bairro,
-      cidade, 
+      id_cidade, 
       senha
     } = data;
     
@@ -85,41 +163,39 @@ const Autonomo = () => {
       nome,
       email,
       senha,
-      cpf,
+      num_documento: cpf,
       telefone,
       cep,
-      endereço,
+      logradouro: endereço,
       numero,
       complemento,
       bairro,
-      cidade,
-      tipo: 'autonomo',
+      id_cidade,
+      tipo: 'A', // Anônimo type as per API documentation
     };
 
     setIsLoading(true);
 
-    api
-      .post('/cadastrar', userData)
-      .then(async (res) => {
-        if (res.status >= 200 && res.status <= 400) {
-          toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
-          navigation.navigate('registerSuccess');
-          return;
-        } else {
-          toast.show(
-            'Oops! Usuário já cadastrado, \n verifique seus dados ou faça login!',
-            { type: 'danger' }
-          );
-          return;
-        }
-      })
-      .catch(() => {
-        toast.show(
-          'Bip Bop! Um erro ocorreu, \n tente novamente mais tarde...',
-          { type: 'danger' }
-        );
-      })
-      .finally(() => setIsLoading(false));
+    try {
+      console.log("RegisterAutonomo userData", userData);
+      const response = await api.post('/cadastrar', userData);
+      console.log("RegisterAutonomo response", response);
+      console.log("RegisterAutonomo response.data", response.data);
+      
+      if (response.data) {
+        toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
+        navigation.navigate('registerSuccess');
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error.message);
+      
+      const errorMessage = error.response?.data?.message || 
+                          'Erro ao cadastrar usuário. Verifique os dados e tente novamente!';
+      
+      toast.show(errorMessage, { type: 'danger' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -151,45 +227,57 @@ const Autonomo = () => {
       <Controller
         control={control}
         name="cpf"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="CPF"
+            value={maskCPF(value || '')}
             keyboardType="numeric"
-            onChangeText={onChange}
+            onChangeText={(text) => onChange(text)}
             errorMessage={errors.cpf?.message}
+            maxLength={14}
           />
         )}
       />
       <Controller
         control={control}
         name="telefone"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="Telefone"
+            value={maskPhone(value || '')}
             keyboardType="phone-pad"
-            onChangeText={onChange}
+            onChangeText={(text) => onChange(text)}
             errorMessage={errors.telefone?.message}
+            maxLength={15}
           />
         )}
       />
       <Controller
         control={control}
         name="cep"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="CEP"
+            value={maskCEP(value || '')}
             keyboardType="numeric"
-            onChangeText={onChange}
+            onChangeText={(text) => {
+              onChange(text);
+              if (unmask(text).length === 8) {
+                fetchAddressByCEP(text);
+              }
+            }}
             errorMessage={errors.cep?.message}
+            maxLength={9}
           />
         )}
       />
       <Controller
         control={control}
         name="endereço"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="Endereço"
+            value={value}
             onChangeText={onChange}
             errorMessage={errors.endereço?.message}
           />
@@ -198,9 +286,10 @@ const Autonomo = () => {
       <Controller
         control={control}
         name="numero"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="Número"
+            value={value}
             keyboardType="numeric"
             onChangeText={onChange}
             errorMessage={errors.numero?.message}
@@ -210,9 +299,10 @@ const Autonomo = () => {
       <Controller
         control={control}
         name="complemento"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="Complemento"
+            value={value}
             onChangeText={onChange}
             errorMessage={errors.complemento?.message}
           />
@@ -221,9 +311,10 @@ const Autonomo = () => {
       <Controller
         control={control}
         name="bairro"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="Bairro"
+            value={value}
             onChangeText={onChange}
             errorMessage={errors.bairro?.message}
           />
@@ -231,12 +322,20 @@ const Autonomo = () => {
       />
       <Controller
         control={control}
-        name="cidade"
-        render={({ field: { onChange } }) => (
-          <TextInput
+        name="id_cidade"
+        render={({ field: { onChange, value } }) => (
+          <Select
             label="Cidade"
-            onChangeText={onChange}
-            errorMessage={errors.cidade?.message}
+            options={citiesOptions}
+            selectedValue={value?.toString()}
+            onSelect={(selectedValue) => onChange(Number(selectedValue))}
+            placeholder="Selecione uma cidade"
+            error={errors.id_cidade?.message}
+            disabled={loadingCities}
+            enableSearch={true}
+            searchPlaceholder="Buscar cidade..."
+            labelFontStyle="p-14-regular"
+            placeholderFontStyle="p-14-regular"
           />
         )}
       />

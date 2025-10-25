@@ -7,9 +7,8 @@ import { storageAuthTokenGet } from '@lib/storage/storageAuthToken';
 import { useToast } from 'react-native-toast-notifications';
 
 interface DataProps {
-  anunciosDestaque: Offer[];
-  anunciosNormais: Offer[];
-  outrosAnuncios: Offer[];
+  anuncios: Offer[];
+  total: number;
 }
 
 interface DataFetchProps {
@@ -37,9 +36,8 @@ export const HomeContextProvider: React.FC<HomeContextProviderProps> = ({
   const toast = useToast();
 
   const [homePageData, setHomePageData] = useState<DataProps>({
-    anunciosDestaque: [],
-    anunciosNormais: [],
-    outrosAnuncios: [],
+    anuncios: [],
+    total: 0,
   });
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -51,12 +49,24 @@ export const HomeContextProvider: React.FC<HomeContextProviderProps> = ({
   const loadHomePageData = async () => {
     try {
       setIsLoading(true);
-      const res: AxiosResponse<DataFetchProps> = await api.get<DataFetchProps>(
-        '/cliente/home',
-        { headers: { Authorization: `Bearer ${authToken}` } }
+      console.log("LoadHomePageData - Fetching latest 4 ads");
+      
+      const res: AxiosResponse<DataFetchProps> = await api.post(
+        '/cliente/anuncios/filtrar',
+        {
+          limit: 4,
+          page: 1,
+        }
       );
+      
+      console.log("LoadHomePageData response", res);
+      console.log("LoadHomePageData response.data", res.data);
+      
       if (res && res.data && res.data.content) {
-        setHomePageData(res.data.content);
+        setHomePageData({
+          anuncios: res.data.content.anuncios || [],
+          total: res.data.content.total || 0,
+        });
       } else {
         toast.show(
           'Bip Bop! Um erro ocorreu, \n tente novamente mais tarde...',
@@ -65,6 +75,7 @@ export const HomeContextProvider: React.FC<HomeContextProviderProps> = ({
         return Promise.reject(new Error('Invalid response structure'));
       }
     } catch (error) {
+      console.error('Error loading home page data:', error);
       toast.show('Bip Bop! Um erro ocorreu, \n tente novamente mais tarde...', {
         type: 'danger',
       });

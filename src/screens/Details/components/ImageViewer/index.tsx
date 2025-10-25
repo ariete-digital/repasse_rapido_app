@@ -8,7 +8,7 @@ import {
   StatusBar,
   ScrollView,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { CloseIcon, ChevronLeftIcon, ChevronRightIcon } from '@components/CustomIcons';
 import styled from 'styled-components/native';
 
 const { width, height } = Dimensions.get('window');
@@ -55,7 +55,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
       <Container>
         <Header>
           <CloseButton onPress={onClose}>
-            <MaterialIcons name="close" size={24} color="white" />
+            <CloseIcon size={24} color="white" />
           </CloseButton>
           <ImageCounter>
             {currentIndex + 1} / {images.length}
@@ -102,8 +102,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
               onPress={goToPrevious}
               disabled={currentIndex === 0}
             >
-              <MaterialIcons 
-                name="chevron-left" 
+              <ChevronLeftIcon 
                 size={30} 
                 color={currentIndex === 0 ? "#666" : "white"} 
               />
@@ -113,8 +112,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
               onPress={goToNext}
               disabled={currentIndex === images.length - 1}
             >
-              <MaterialIcons 
-                name="chevron-right" 
+              <ChevronRightIcon 
                 size={30} 
                 color={currentIndex === images.length - 1 ? "#666" : "white"} 
               />

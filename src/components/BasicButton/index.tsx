@@ -23,6 +23,7 @@ const BasicButton = ({ children, label, onPress, disabled, width = "100%", color
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
+        opacity: disabled ? 0.5 : 1,
         ...customStyles 
       }}>
         {

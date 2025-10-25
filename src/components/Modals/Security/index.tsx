@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Modal, SafeAreaView, ScrollView, View, Pressable } from 'react-native'
 import BouncyCheckbox from 'react-native-bouncy-checkbox'
-import { MaterialIcons } from '@expo/vector-icons'
+import { CloseIcon } from '@components/CustomIcons'
 
 import * as S from './styles'
 import Text from '@components/Text'
@@ -37,7 +37,7 @@ const Security = ({ visible, setModalVisible, onAccept }: SecurityModalProps) =>
           {/* Header com botão de fechar */}
           <S.HeaderContainer>
             <Pressable onPress={handleClose} style={{ padding: 10 }}>
-              <MaterialIcons name="close" size={24} color="#353535" />
+              <CloseIcon size={24} color="#353535" />
             </Pressable>
           </S.HeaderContainer>
           

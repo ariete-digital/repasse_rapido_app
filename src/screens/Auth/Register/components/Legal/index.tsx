@@ -1,12 +1,13 @@
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { View } from 'react-native';
 import { useToast } from 'react-native-toast-notifications';
 import * as yup from 'yup';
 
 import { Text, TextInput } from '@components/index';
+import Select from '@components/Select';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { api } from '@lib/api';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
@@ -16,6 +17,7 @@ import { SubmitForm } from '../shared/SubmitForm';
 import * as L from './styles';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { theme } from '@theme/GlobalStyles';
+import { maskCNPJ, maskCPF, maskPhone, maskCEP, unmask } from '@utils/masks';
 
 interface LegalFormProps {
   nome: string;
@@ -30,12 +32,12 @@ interface LegalFormProps {
   logradouro: string;
   bairro: string;
   numero: string;
-  complemento: string;
+  complemento?: string; // Opcional
   nome_responsavel: string;
   cpf_responsavel: string;
   id_cidade: number;
   inscricao_estadual: string;
-  rg: string;
+  rg?: string; // Opcional
   // comprovEnd?: File
   // cnh?: File
   // docComplementar?: File
@@ -58,20 +60,21 @@ const signUpSchema = yup.object({
   logradouro: yup.string().required('Informe o logradouro!'),
   bairro: yup.string().required('Informe o bairro!'),
   numero: yup.string().required('Informe o número!'),
-  complemento: yup.string().required('Informe o complemento!'),
+  complemento: yup.string().optional(), // Opcional
   nome_responsavel: yup.string().required('Informe o nome do responsável!'),
   cpf_responsavel: yup.string().required('Informe o CPF do responsável'),
   id_cidade: yup.number().required('Informe a cidade!'),
   inscricao_estadual: yup
     .string()
     .required('Informe o nome a inscrição estadual!'),
-  rg: yup.string().required('Informe o número do RG!'),
+  rg: yup.string().optional(), // Opcional
 });
 
 const Legal = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [cityLabel, setCityLabel] = useState('');
+  const [citiesOptions, setCitiesOptions] = useState<Array<{label: string, value: string}>>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
   const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false)
   const [toggleCheckBox1, setToggleCheckBox1] = useState<boolean>(false)
   const [toggleCheckBox2, setToggleCheckBox2] = useState<boolean>(false)
@@ -89,45 +92,107 @@ const Legal = () => {
     resolver: yupResolver(signUpSchema),
   });
 
-  const handleRegister = (data: LegalFormProps) => {
+  useEffect(() => {
+    loadCities('');
+  }, []);
+
+  const loadCities = async (filtro: string = '') => {
+    try {
+      setLoadingCities(true);
+      const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
+      if (response.data?.content) {
+        // Converter value de number para string
+        const cities = response.data.content.map((city: any) => ({
+          label: city.label,
+          value: city.value.toString()
+        }));
+        setCitiesOptions(cities);
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar cidades:', error);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  const handleRegister = async (data: LegalFormProps) => {
+    console.log("handleRegister CALLED!");
+    console.log("handleRegister data:", data);
+    
     const legalPersonData = {
       tipo: 'PJ',
       ...data,
     };
 
-    api
-      .post('/cadastrar', legalPersonData)
-      .then(async (res) => {
+    setIsLoading(true);
+
+    try {
+      console.log("RegisterLegal legalPersonData", legalPersonData);
+      const response = await api.post('/cadastrar', legalPersonData);
+      console.log("RegisterLegal response", response);
+      console.log("RegisterLegal response.data", response.data);
+      if (response.data) {
         toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
         navigation.navigate('registerSuccess');
-      })
-      .catch(() =>
-        toast.show(
-          'Bip Bop! Um erro ocorreu, \n tente novamente mais tarde...',
-          { type: 'danger' }
-        )
-      )
-      .finally(() => setIsLoading(false));
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error.message);
+      
+      const errorMessage = error.response?.data?.message || 
+                          'Erro ao cadastrar usuário. Verifique os dados e tente novamente!';
+      
+      toast.show(errorMessage, { type: 'danger' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleSubmitWithValidation = (data: LegalFormProps) => {
+    console.log("handleSubmitWithValidation CALLED!");
+    console.log("Form errors:", errors);
+    handleRegister(data);
   };
 
   const fetchAddressByCEP = async (cep: string) => {
-    try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+    const cleanCep = unmask(cep);
+    
+    if (cleanCep.length !== 8) return;
 
-      if (response.data) {
+    try {
+      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+
+      if (response.data && !response.data.erro) {
         const { bairro, logradouro, localidade } = response.data;
         setValue('bairro', bairro);
         setValue('logradouro', logradouro);
-        const cityData = await api.get<RequestProps>(
-          `/cliente/listagem/cidades?filtro=${localidade}`
-        );
-        setValue('id_cidade', cityData.data.content[0].value);
-        setCityLabel(cityData.data.content[0].label);
+        
+        try {
+          const cityData = await api.get<RequestProps>(
+            `/cliente/listagem/todas_cidades?filtro=${localidade}`
+          );
+          if (cityData.data?.content?.[0]) {
+            const cityId = cityData.data.content[0].value;
+            setValue('id_cidade', cityId);
+            // Atualizar a lista de cidades para incluir a cidade encontrada
+            const cityOption = {
+              label: cityData.data.content[0].label,
+              value: cityId.toString()
+            };
+            if (!citiesOptions.find(c => c.value === cityId.toString())) {
+              setCitiesOptions([...citiesOptions, cityOption]);
+            }
+          }
+        } catch (error) {
+          console.warn('Erro ao buscar cidade:', error);
+        }
+        
+        toast.show('Endereço encontrado!', { type: 'success' });
+      } else {
+        toast.show('CEP não encontrado', { type: 'warning' });
       }
     } catch (error) {
-      console.warn(error);
-      toast.show('Erro ao obter dados do CEP!', { type: 'danger' });
-      // Handle error
+      console.warn('Erro ao buscar CEP:', error);
+      toast.show('Erro ao buscar CEP', { type: 'danger' });
     }
   };
 
@@ -160,12 +225,14 @@ const Legal = () => {
       <Controller
         control={control}
         name="num_documento"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="CNPJ"
+            value={maskCNPJ(value || '')}
             keyboardType="number-pad"
-            onChangeText={onChange}
+            onChangeText={(text) => onChange(text)}
             errorMessage={errors.num_documento?.message}
+            maxLength={18}
           />
         )}
       />
@@ -185,24 +252,28 @@ const Legal = () => {
       <Controller
         control={control}
         name="celular"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="Celular"
+            value={maskPhone(value || '')}
             keyboardType="phone-pad"
-            onChangeText={onChange}
+            onChangeText={(text) => onChange(text)}
             errorMessage={errors.celular?.message}
+            maxLength={15}
           />
         )}
       />
       <Controller
         control={control}
         name="telefone"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="Telefone Fixo"
+            value={maskPhone(value || '')}
             keyboardType="phone-pad"
-            onChangeText={onChange}
+            onChangeText={(text) => onChange(text)}
             errorMessage={errors.telefone?.message}
+            maxLength={15}
           />
         )}
       />
@@ -210,17 +281,19 @@ const Legal = () => {
       <Controller
         control={control}
         name="cep"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="CEP"
-            autoCapitalize="none"
-            onChangeText={(value) => {
-              onChange(value);
-              if (value.length === 8) {
-                fetchAddressByCEP(value);
+            value={maskCEP(value || '')}
+            keyboardType="numeric"
+            onChangeText={(text) => {
+              onChange(text);
+              if (unmask(text).length === 8) {
+                fetchAddressByCEP(text);
               }
             }}
             errorMessage={errors.cep?.message}
+            maxLength={9}
           />
         )}
       />
@@ -234,7 +307,6 @@ const Legal = () => {
             autoCapitalize="none"
             onChangeText={onChange}
             errorMessage={errors.logradouro?.message}
-            editable={false}
           />
         )}
       />
@@ -274,16 +346,27 @@ const Legal = () => {
             autoCapitalize="none"
             onChangeText={onChange}
             errorMessage={errors.bairro?.message}
-            editable={false}
           />
         )}
       />
-      <TextInput
-        label="Cidade"
-        value={cityLabel}
-        autoCapitalize="none"
-        errorMessage={errors.nome_responsavel?.message}
-        editable={false}
+      <Controller
+        control={control}
+        name="id_cidade"
+        render={({ field: { onChange, value } }) => (
+          <Select
+            label="Cidade"
+            options={citiesOptions}
+            selectedValue={value?.toString()}
+            onSelect={(selectedValue) => onChange(Number(selectedValue))}
+            placeholder="Selecione uma cidade"
+            error={errors.id_cidade?.message}
+            disabled={loadingCities}
+            enableSearch={true}
+            searchPlaceholder="Buscar cidade..."
+            labelFontStyle="p-14-regular"
+            placeholderFontStyle="p-14-regular"
+          />
+        )}
       />
       <Controller
         control={control}
@@ -312,13 +395,15 @@ const Legal = () => {
       <Controller
         control={control}
         name="cpf_responsavel"
-        render={({ field: { onChange } }) => (
+        render={({ field: { onChange, value } }) => (
           <TextInput
             label="CPF do Responsável"
+            value={maskCPF(value || '')}
             keyboardType="number-pad"
             autoCapitalize="none"
-            onChangeText={onChange}
+            onChangeText={(text) => onChange(text)}
             errorMessage={errors.cpf_responsavel?.message}
+            maxLength={14}
           />
         )}
       />
@@ -358,7 +443,7 @@ const Legal = () => {
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
-          paddingRight: 22,
+          paddingRight: 36,
           marginTop: 32
         }}
       >
@@ -392,7 +477,7 @@ const Legal = () => {
           flexDirection: 'row',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
-          paddingRight: 22,
+          paddingRight: 30,
           marginTop: 20
         }}
       >
@@ -475,7 +560,10 @@ const Legal = () => {
       </View>
 
       <SubmitForm
-        handleRegister={handleSubmit(handleRegister)}
+        handleRegister={handleSubmit(handleSubmitWithValidation, (errors) => {
+          console.log("Validation errors:", errors);
+          toast.show('Preencha todos os campos obrigatórios', { type: 'danger' });
+        })}
         disabled={isLoading}
       />
       <View>

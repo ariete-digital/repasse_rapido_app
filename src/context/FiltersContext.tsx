@@ -111,7 +111,6 @@ export const FiltersContextProvider = ({
   const [filterParams, setFilterParams] = useState<FilterOptions>({
     tipo_veiculo: 'C',
     tipo_venda: 'C',
-    status_veiculo: 'U',
     ordenacao: '',
     ano: {
       min: undefined,
@@ -195,11 +194,16 @@ export const FiltersContextProvider = ({
     queryKey: ['search-results', filterKey],
     queryFn: ({ queryKey }) => {
       const parsedParams = JSON.parse(queryKey[1]);
-      // console.log('Buscando com filtros:', parsedParams);
+      console.log('Buscando com filtros:', parsedParams);
       return getFilteredData(parsedParams);
     },
-    enabled: false,
+    enabled: true, // Mudado para true para executar automaticamente
   });
+
+  // Carrega todos os anúncios ao iniciar
+  useEffect(() => {
+    console.log('FiltersContext inicializado - carregando anúncios iniciais');
+  }, []);
 
   const {
     data: transferSearchResults,
@@ -271,7 +275,7 @@ export const FiltersContextProvider = ({
       num_portas: undefined,
       opcionais: undefined,
       quilometragem: undefined,
-      status_veiculo: 'U',
+      status_veiculo: undefined,
       tipo_venda: tipoVenda || undefined,
     });
   };

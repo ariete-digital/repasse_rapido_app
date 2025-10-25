@@ -24,7 +24,10 @@ export const TabButton = styled.TouchableOpacity`
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border-radius: 16px 16px 0px 0px;
+  border-width: 1px;
+  border-color: #F3F2ED;
+  border-top-right-radius: 16px;
+  border-top-left-radius: 16px;
 `;
 
 export const TabContent = styled.View`

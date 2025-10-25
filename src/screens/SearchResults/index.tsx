@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
 import Text from '@components/Text';
 import { ArrowOrder, Filter } from '@icons/index';
@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Order } from '@screens/Filter/components/filters';
 import * as S from './styles';
 import ItemCard from '@components/ItemCard';
+import { useFilters } from '@hooks/useFilters';
 
 type NavigationProps = CompositeNavigationProp<
   BottomTabNavigationProp<RootTabParamList, 'search'>,
@@ -23,6 +24,7 @@ type NavigationProps = CompositeNavigationProp<
 
 const SearchResults = () => {
   const [orderingOpen, setOrderingOpen] = useState(false);
+  const { searchResults, isSearchResultsLoading, isRefetching } = useFilters();
 
   const handleConfirm = () => {
     toggleOrderingModal();
@@ -57,6 +59,48 @@ const SearchResults = () => {
     setOrderingOpen(!orderingOpen);
   };
 
+  // Helper function to get image URL
+  const getImageUrl = (imagens: any) => {
+    if (!imagens || imagens.length === 0) return undefined;
+    const firstImage = imagens[0];
+    if (typeof firstImage === 'string') return firstImage;
+    return firstImage.link || firstImage.arquivo || undefined;
+  };
+
+  const renderAds = () => {
+    if (isSearchResultsLoading || isRefetching) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
+          <ActivityIndicator size="large" color="#E11138" />
+        </View>
+      );
+    }
+
+    if (!searchResults?.anuncios || searchResults.anuncios.length === 0) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
+          <Text color="black-500" fontStyle="p-18-regular">
+            Nenhum anúncio encontrado
+          </Text>
+        </View>
+      );
+    }
+
+    return searchResults.anuncios.map((ad) => (
+      <ItemCard
+        key={ad.codigo}
+        itemID={ad.id}
+        imageUrl={getImageUrl(ad.imagens)}
+        brand={ad.marca_veiculo}
+        model={ad.modelo_veiculo}
+        price={ad.valor ? ad.valor.toString() : '0'}
+        fipePrice={ad.valor_fipe ? ad.valor_fipe.toString() : '0'}
+        storeName={ad.cliente?.nome || 'Anunciante'}
+        description={ad.submodelo || ''}
+        isVendido={!!ad.vendido_em}
+      />
+    ));
+  };
 
   return (
     <S.Wrapper>
@@ -78,7 +122,7 @@ const SearchResults = () => {
       />
       <View style={{ paddingLeft: 30, paddingTop: 20 }}>
         <Text color="black" fontStyle="t-24" style={{ fontWeight: 'bold' }}>
-          Ofertas (3501)
+          Ofertas ({searchResults?.total || 0})
         </Text>
       </View>
       <S.HeaderButtonsRow>
@@ -96,50 +140,7 @@ const SearchResults = () => {
         </S.Pressable>
       </S.HeaderButtonsRow>
       <S.Container>
-        <ItemCard
-          key={"001"}
-          itemID={1}
-          imageUrl={"https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2024/02/Hyundai-HB20-Platinum-Plus.jpg?w=1200&h=675&crop=1"}
-          brand={"Hyundai"}
-          model={"HB20"}
-          price={"100000"}
-          fipePrice={"100000"}
-          storeName={"Loja Teste Repasses"}
-          description={"1.0 Comfort Style (Flex)"}
-        />
-        <ItemCard
-          key={"001"}
-          itemID={1}
-          imageUrl={"https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2024/02/Hyundai-HB20-Platinum-Plus.jpg?w=1200&h=675&crop=1"}
-          brand={"Hyundai"}
-          model={"HB20"}
-          price={"100000"}
-          fipePrice={"100000"}
-          storeName={"Loja Teste Repasses"}
-          description={"1.0 Comfort Style (Flex)"}
-        />
-        <ItemCard
-          key={"001"}
-          itemID={1}
-          imageUrl={"https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2024/02/Hyundai-HB20-Platinum-Plus.jpg?w=1200&h=675&crop=1"}
-          brand={"Hyundai"}
-          model={"HB20"}
-          price={"100000"}
-          fipePrice={"100000"}
-          storeName={"Loja Teste Repasses"}
-          description={"1.0 Comfort Style (Flex)"}
-        />
-        <ItemCard
-          key={"001"}
-          itemID={1}
-          imageUrl={"https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2024/02/Hyundai-HB20-Platinum-Plus.jpg?w=1200&h=675&crop=1"}
-          brand={"Hyundai"}
-          model={"HB20"}
-          price={"100000"}
-          fipePrice={"100000"}
-          storeName={"Loja Teste Repasses"}
-          description={"1.0 Comfort Style (Flex)"}
-        />
+        {renderAds()}
       </S.Container>
     </S.Wrapper>
   );

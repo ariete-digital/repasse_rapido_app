@@ -12,7 +12,7 @@ import {
   findNodeHandle,
   ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronUpIcon, ChevronDownIcon } from '@components/CustomIcons';
 import styled from 'styled-components/native';
 import { Portal } from 'react-native-paper';
 
@@ -184,11 +184,11 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             editable
           />
           <IconContainer>
-            <Ionicons
-              name={dropdownVisible ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color="gray"
-            />
+            {dropdownVisible ? (
+              <ChevronUpIcon size={20} color="gray" />
+            ) : (
+              <ChevronDownIcon size={20} color="gray" />
+            )}
           </IconContainer>
         </InputContainer>
       </TouchableOpacity>

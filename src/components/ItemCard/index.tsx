@@ -13,13 +13,14 @@ import {
   RootStackParamList,
 } from '@routes/app.routes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NoPhotoIcon } from '@components/CustomIcons';
 
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface ItemCardProps {
   itemID: number;
-  imageUrl: string;
+  imageUrl?: string;
   brand: string;
   model: string;
   price: string;
@@ -27,6 +28,7 @@ interface ItemCardProps {
   storeName: string;
   description: string;
   itemPerRow?: number;
+  isVendido?: boolean;
 }
 
 const ItemCard = ({
@@ -39,6 +41,7 @@ const ItemCard = ({
   description,
   storeName,
   itemPerRow = 1,
+  isVendido = false,
 }: ItemCardProps) => {
   const navigation = useNavigation<NavigationProp>();
   const seeOffer = () => {
@@ -49,13 +52,63 @@ const ItemCard = ({
     <I.ItemCardContainer
       style={{ width: itemPerRow === 1 ? '100%' : '50%' }}
     >
-      <TouchableOpacity onPress={seeOffer}>
-        <I.ItemCardImage
-          source={imageUrl}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-          style={{ height: itemPerRow === 1 ? 200 : 120}}
-        />
+      <TouchableOpacity onPress={seeOffer} style={{ position: 'relative' }}>
+        {imageUrl ? (
+          <I.ItemCardImage
+            source={imageUrl}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            style={{ height: itemPerRow === 1 ? 200 : 120}}
+          />
+        ) : (
+          <View style={{
+            height: itemPerRow === 1 ? 200 : 120,
+            backgroundColor: '#E0E0E0',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <NoPhotoIcon size={itemPerRow === 1 ? 60 : 40} color="#9E9E9E" />
+            <Text color="black-500" fontStyle={itemPerRow === 1 ? "p-14-bold" : "c-12-regular"}>
+              Sem imagem
+            </Text>
+          </View>
+        )}
+        
+        {/* Carimbo de VENDIDO */}
+        {isVendido && (
+          <View style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <View style={{
+              backgroundColor: '#CE2020',
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 8,
+              borderWidth: 3,
+              borderColor: 'white',
+              transform: [{ rotate: '-15deg' }],
+            }}>
+              <Text 
+                fontStyle="p-18-bold" 
+                color="white"
+                style={{ 
+                  fontSize: itemPerRow === 1 ? 20 : 16, 
+                  fontWeight: 'bold',
+                  letterSpacing: 2,
+                }}
+              >
+                VENDIDO
+              </Text>
+            </View>
+          </View>
+        )}
       </TouchableOpacity>
       <I.ItemCardTitleContainer>
         <Text

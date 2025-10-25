@@ -91,7 +91,7 @@ export interface FilterOptions {
   id_loja?: number;
   modelo?: string;
   versao_veiculo?: string;
-  status_veiculo: 'U' | 'N';
+  status_veiculo?: 'U' | 'N';
   ano?: {
     min?: number;
     max?: number;
@@ -110,10 +110,13 @@ export interface FilterOptions {
   num_portas?: number[];
   cor?: number;
   opcionais?: number[];
+  limit?: number;
+  page?: number;
 }
 
 export interface FilteredApiResponse {
   anuncios: Offer[];
+  total: number;
   listaOpcionais: GenericItem[];
   listaTiposCambio: GenericItem[];
   listaTiposCombustivel: GenericItem[];

@@ -1,6 +1,6 @@
 import { TextInputProps } from 'react-native';
 import * as React from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { EyeIcon, EyeOffIcon } from '@components/CustomIcons';
 import * as I from './styles';
 
 interface ITextInputProps extends TextInputProps {
@@ -31,11 +31,11 @@ const TextInput = ({
         />
         {showPasswordButton && (
           <I.ShowPasswordButton onPress={onShowPasswordToggle}>
-            <Ionicons
-              name={props.secureTextEntry ? 'eye' : 'eye-off'}
-              size={24}
-              color="black"
-            />
+            {props.secureTextEntry ? (
+              <EyeIcon size={24} color="black" />
+            ) : (
+              <EyeOffIcon size={24} color="black" />
+            )}
           </I.ShowPasswordButton>
         )}
       </I.InputContainer>

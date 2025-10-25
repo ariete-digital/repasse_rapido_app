@@ -1,12 +1,15 @@
 import { useNavigation } from '@react-navigation/native';
 import { Controller, useForm } from 'react-hook-form';
 import { TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { useToast } from 'react-native-toast-notifications';
 
 import { HeaderLogo, Text, TextInput } from '@components/index';
 import BasicButton from '@components/BasicButton';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
+import { api } from '@lib/api';
 import * as S from './styles';
-import { MaterialIcons } from '@expo/vector-icons';
+import { ChevronLeftIcon } from '@components/CustomIcons';
 
 type ForgotPasswordForm = {
   email: string;
@@ -14,6 +17,8 @@ type ForgotPasswordForm = {
 
 const ForgotPassword = () => {
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const toast = useToast();
 
   const {
     control,
@@ -21,8 +26,29 @@ const ForgotPassword = () => {
     formState: { errors },
   } = useForm<ForgotPasswordForm>();
 
-  const onSubmit = () => {
-    navigation.navigate('forgotPasswordSuccess');
+  const onSubmit = async (data: ForgotPasswordForm) => {
+    setIsLoading(true);
+
+    try {
+      const response = await api.post('/recuperar_senha', {
+        email: data.email,
+        url: 'exp://repasse-rapido.com/forgot-password' // Deep link para o app
+      });
+
+      if (response.data) {
+        toast.show('E-mail de recuperação enviado com sucesso!', { type: 'success' });
+        navigation.navigate('forgotPasswordSuccess');
+      }
+    } catch (error: any) {
+      console.error('Forgot password error:', error.response?.data || error.message);
+      
+      const errorMessage = error.response?.data?.message || 
+                          'Erro ao enviar e-mail de recuperação. Verifique o e-mail e tente novamente!';
+      
+      toast.show(errorMessage, { type: 'danger' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,7 +72,7 @@ const ForgotPassword = () => {
             alignItems: 'center',
           }}
         >
-          <MaterialIcons name="chevron-left" size={38} color={'#272A30'} />
+          <ChevronLeftIcon size={38} color={'#272A30'} />
           <Text fontStyle="p-18-regular" color="black-400" style={{ fontFamily: 'Cabin' }}>
             Voltar
           </Text>
@@ -94,6 +120,7 @@ const ForgotPassword = () => {
             onPress={handleSubmit(onSubmit)}
             backgroundColor="#9A0B26"
             color="white"
+            disabled={isLoading}
           />
         </View>
       </S.Form>

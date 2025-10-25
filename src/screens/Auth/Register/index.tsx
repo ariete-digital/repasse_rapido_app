@@ -5,7 +5,7 @@ import { HeaderLogo, Text } from '@components/index';
 import Individual from './components/Individual';
 import Legal from './components/Legal';
 import * as R from './styles';
-import { MaterialIcons } from '@expo/vector-icons';
+import { ChevronLeftIcon } from '@components/CustomIcons';
 import { useNavigation } from '@react-navigation/native';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 import Autonomo from './components/Autonomo';
@@ -43,7 +43,7 @@ const Register = () => {
             alignItems: 'center',
           }}
         >
-          <MaterialIcons name="chevron-left" size={38} color={"#272A30"} />
+          <ChevronLeftIcon size={38} color={"#272A30"} />
           <Text fontStyle="p-18-regular" color="black-400" style={{ fontFamily: 'Cabin'}}>
             Voltar
           </Text>

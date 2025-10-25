@@ -4,11 +4,33 @@ import { USER_STORAGE } from '@lib/storage/storageConfig';
 
 export interface UserDTO {
   id: number;
-  access_token: string;
+  access_token?: string;
   email: string;
   nome: string;
   role: string;
-  tipo: 'PF' | 'PJ';
+  tipo: 'PF' | 'PJ' | 'A';
+  // Campos comuns
+  telefone?: string;
+  celular?: string;
+  cep?: string;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  id_cidade?: number;
+  // Campos PF
+  num_documento?: string;
+  data_nasc?: string;
+  // Campos PJ
+  nome_fantasia?: string;
+  nome_responsavel?: string;
+  cpf_responsavel?: string;
+  inscricao_estadual?: string;
+  rg?: string;
+  // Outros
+  [key: string]: any;
 }
 
 export async function storageUserSave(user: UserDTO) {

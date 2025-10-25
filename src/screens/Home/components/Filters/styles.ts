@@ -36,6 +36,12 @@ export const AnoContainer = styled.View`
   gap: 10px;
 `;
 
+export const RowContainer = styled.View`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+`;
+
 export const FilterContainer = styled.View`
   display: flex;
   flex-direction: column;

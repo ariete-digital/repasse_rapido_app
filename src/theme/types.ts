@@ -39,6 +39,7 @@ export interface Color {
     | 'brand-blue'
     | 'brand-red'
     | 'brand-red-dark'
+    | 'gray-500'
     | 'gray-300'
     | 'gray-200'
     | 'gray-100'

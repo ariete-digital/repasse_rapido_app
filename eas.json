@@ -20,11 +20,13 @@
       },
       "env": {
         "NODE_ENV": "production",
-        "API_URL_PROD": "https://api.repasserapido.com.br/api"
+        "API_URL_PROD": "https://api-repasses.arietedigital.com.br/api",
+        "EXPO_NO_DEV": "true",
+        "EXPO_OFFLINE": "true"
       }
     },
     "production": {
-      "distribution": "store",
+      "distribution": "internal",
       "android": {
         "buildType": "apk",
         "image": "latest"
@@ -32,7 +34,7 @@
       "autoIncrement": true,
       "env": {
         "NODE_ENV": "production",
-        "API_URL_PROD": "https://api.repasserapido.com.br/api"
+        "API_URL_PROD": "https://api-repasses.arietedigital.com.br/api"
       }
     }
   },

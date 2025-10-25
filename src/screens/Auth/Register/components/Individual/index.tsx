@@ -44,7 +44,7 @@ const Individual = () => {
     resolver: yupResolver(signUpSchema),
   });
 
-  const handleRegister = (data: IndividualFormProps) => {
+  const handleRegister = async (data: IndividualFormProps) => {
     const { nome, email, senha } = data;
     const userData = {
       nome,
@@ -55,33 +55,25 @@ const Individual = () => {
 
     setIsLoading(true);
 
-    toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
-    navigation.navigate('registerSuccess');
-    setIsLoading(false);
-    return;
-
-    // api
-    //   .post('/cadastrar', userData)
-    //   .then(async (res) => {
-    //     if (res.status >= 200 && res.status <= 400) {
-    //       toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
-    //       navigation.navigate('registerSuccess');
-    //       return;
-    //     } else {
-    //       toast.show(
-    //         'Oops! Usuário já cadastrado, \n verifique seus dados ou faça login!',
-    //         { type: 'danger' }
-    //       );
-    //       return;
-    //     }
-    //   })
-    //   .catch(() => {
-    //     toast.show(
-    //       'Bip Bop! Um erro ocorreu, \n tente novamente mais tarde...',
-    //       { type: 'danger' }
-    //     );
-    //   })
-    //   .finally(() => setIsLoading(false));
+    try {
+      console.log("RegisteIndividual userData", userData);
+      const response = await api.post('/cadastrar', userData);
+      console.log("RegisterIndividual response", response);
+      console.log("RegisterIndividual response.data", response.data);
+      if (response.data) {
+        toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
+        navigation.navigate('registerSuccess');
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error.message);
+      
+      const errorMessage = error.response?.data?.message || 
+                          'Erro ao cadastrar usuário. Verifique os dados e tente novamente!';
+      
+      toast.show(errorMessage, { type: 'danger' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

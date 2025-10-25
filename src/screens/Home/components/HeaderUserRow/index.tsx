@@ -1,5 +1,5 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
+import { PersonIcon, LogoutIcon } from '@components/CustomIcons';
 
 import HeaderLogo from '@components/HeaderLogo';
 import { useAuth } from '@hooks/useAuth';
@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RootTabParamList } from '@routes/app.routes';
 import { theme } from '@theme/GlobalStyles';
 import { useToast } from 'react-native-toast-notifications';
-import { expo } from '../../../../../app.json';
+import appConfig from '../../../../../app.config';
 import * as H from './styles';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
@@ -19,7 +19,7 @@ export default function HeaderUserRow() {
   const navigation = useNavigation<NavigationProps>();
 
   const showAppVersion = () => {
-    toast.show(`Current app version: v${expo.version}`, { type: 'warning' });
+    toast.show(`Current app version: v${appConfig.expo.version}`, { type: 'warning' });
   };
 
   const handleButtonAction = () => {
@@ -48,11 +48,11 @@ export default function HeaderUserRow() {
         }}
         activeOpacity={0.8}
       >
-        <MaterialIcons
-          name={user.access_token ? 'logout' : 'person'}
-          size={22}
-          color={"#fff"}
-        />
+        {user.access_token ? (
+          <LogoutIcon size={22} color="#fff" />
+        ) : (
+          <PersonIcon size={22} color="#fff" />
+        )}
       </TouchableOpacity>
     </H.Container>
   );

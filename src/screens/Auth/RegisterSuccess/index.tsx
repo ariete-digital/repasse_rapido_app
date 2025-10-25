@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { Image, View } from 'react-native';
 
-import { GradientButton, HeaderLogo, Text } from '@components/index';
+import { HeaderLogo, Text } from '@components/index';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 import * as R from './styles';
 import BasicButton from '@components/BasicButton';

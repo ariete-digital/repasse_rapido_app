@@ -12,6 +12,13 @@ interface SubmitFormProps {
 
 export const SubmitForm = ({ handleRegister, disabled }: SubmitFormProps) => {
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  
+  const handlePress = () => {
+    console.log("SubmitForm button clicked!");
+    console.log("Disabled:", disabled);
+    handleRegister();
+  };
+  
   return (
     <S.Container>
       <S.Terms>
@@ -38,7 +45,7 @@ export const SubmitForm = ({ handleRegister, disabled }: SubmitFormProps) => {
       >
         <BasicButton
           label="Cadastrar"
-          onPress={handleRegister}
+          onPress={handlePress}
           backgroundColor='#9A0B26'
           color='white'
           disabled={disabled}

@@ -17,7 +17,7 @@ import { useState } from 'react';
 import { useToast } from 'react-native-toast-notifications';
 import ForgotPasswordButton from './components/ForgotPassword';
 import * as L from './styles';
-import { MaterialIcons } from '@expo/vector-icons';
+import { ChevronLeftIcon } from '@components/CustomIcons';
 import BasicButton from '@components/BasicButton';
 
 interface ILoginForm {
@@ -70,7 +70,7 @@ const Login = () => {
             alignItems: 'center',
           }}
         >
-          <MaterialIcons name="chevron-left" size={38} color={"#272A30"} />
+          <ChevronLeftIcon size={38} color={"#272A30"} />
           <Text fontStyle="p-18-regular" color="black-400" style={{ fontFamily: 'Cabin'}}>
             Voltar
           </Text>

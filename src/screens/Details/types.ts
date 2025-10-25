@@ -90,23 +90,43 @@ interface Offer {
   num_cliques: number;
   obs_moderacao?: any;
   created_at: string;
+  publicado_em?: string | null;
+  vendido_em?: string | null;
   ativo: boolean;
   pausado: boolean;
   codigo: string;
   cidadeAnunciante: string;
+  is_vencido?: boolean;
+  cliente?: {
+    id: number;
+    nome: string;
+    num_documento: string;
+    isPJ: boolean;
+    telefone: string;
+    celular: string | null;
+    nome_fantasia: string | null;
+    nome_responsavel: string | null;
+    cpf_responsavel: string | null;
+    selo: string | null;
+    cidade?: {
+      id: number;
+      nome: string;
+    };
+  };
   cor: Item;
   tipo_cambio: Item;
   tipo_combustivel: Item;
   tipo_pneu: Item;
   tipo_parabrisa: Item;
   opcionais: Item[];
-  imagens: string[];
-  imagemPrincipal: string;
-  usuarioModeracao: {
+  imagens: Array<{ link: string; principal?: number; arquivo?: string }> | string[];
+  imagemPrincipal?: string;
+  usuarioModeracao?: {
     email: string;
     id: number;
     nome: string;
   };
+  avaliacoes?: any[];
 }
 
 interface Item {

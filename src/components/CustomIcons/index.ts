@@ -1,0 +1,20 @@
+export { default as PersonIcon } from './PersonIcon';
+export { default as LogoutIcon } from './LogoutIcon';
+export { default as SearchIcon } from './SearchIcon';
+export { default as ArrowDownIcon } from './ArrowDownIcon';
+export { default as NoPhotoIcon } from './NoPhotoIcon';
+export { default as DeleteIcon } from './DeleteIcon';
+export { default as SettingsIcon } from './SettingsIcon';
+export { default as CameraIcon } from './CameraIcon';
+export { default as ChevronLeftIcon } from './ChevronLeftIcon';
+export { default as ChevronRightIcon } from './ChevronRightIcon';
+export { default as FullscreenIcon } from './FullscreenIcon';
+export { default as PhoneIcon } from './PhoneIcon';
+export { default as ChatIcon } from './ChatIcon';
+export { default as CloseIcon } from './CloseIcon';
+export { default as AddPhotoIcon } from './AddPhotoIcon';
+export { default as EyeIcon } from './EyeIcon';
+export { default as EyeOffIcon } from './EyeOffIcon';
+export { default as ChevronUpIcon } from './ChevronUpIcon';
+export { default as ChevronDownIcon } from './ChevronDownIcon';
+

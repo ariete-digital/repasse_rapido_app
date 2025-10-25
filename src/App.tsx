@@ -4,7 +4,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { ActivityIndicator, StatusBar } from 'react-native';
+import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { ToastProvider } from 'react-native-toast-notifications';
 import { ThemeProvider } from 'styled-components/native';
 
@@ -13,19 +13,42 @@ import { FiltersContextProvider } from '@contexts/FiltersContext';
 import { HomeContextProvider } from '@contexts/HomeContext';
 import { Routes } from './routes';
 import { StyledThemeContainer, theme } from './theme/GlobalStyles';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 
-const LoadingIndicator = () => <ActivityIndicator />;
+const LoadingIndicator = () => 
+<View
+  style={{
+    flex: 1,
+    padding: 30,
+    justifyContent: 'center',
+    alignContent: 'center',
+    backgroundColor: "#9A0B26"
+  }}
+>
+  <ActivityIndicator />
+</View>
+;
 const queryClient = new QueryClient();
 
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Cabin: require('./assets/fonts/Cabin-Bold.ttf'),
     MontserratRegular: require('./assets/fonts/Montserrat-Regular.ttf'),
     MontserratMedium: require('./assets/fonts/Montserrat-Medium.ttf'),
     MontserratBold: require('./assets/fonts/Montserrat-Bold.ttf'),
   });
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
     return <LoadingIndicator />;
   }
 

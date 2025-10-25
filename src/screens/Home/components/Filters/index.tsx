@@ -11,16 +11,13 @@ import {
   FlatList,
 } from 'react-native';
 import {
-  AdvancedSearch,
   AnoContainer,
   Container,
   FilterContainer,
   Label,
+  RowContainer,
   SearchButton,
   SearchButtonText,
-  TabButton,
-  TabButtonText,
-  Tabs,
 } from './styles';
 import GradientButton from '@components/GradientButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -36,9 +33,17 @@ type OptionsList = {
   value: string;
 };
 
-const optionsTipo = [
-  { label: 'Carros / Caminhonetes', value: 'C' },
-  { label: 'Motos', value: 'M' },
+const optionsEstado = [
+  { label: 'São Paulo', value: 'SP' },
+  { label: 'Rio de Janeiro', value: 'RJ' },
+  { label: 'Minas Gerais', value: 'MG' },
+  { label: 'Paraná', value: 'PR' },
+  { label: 'Rio Grande do Sul', value: 'RS' },
+  { label: 'Santa Catarina', value: 'SC' },
+  { label: 'Bahia', value: 'BA' },
+  { label: 'Goiás', value: 'GO' },
+  { label: 'Ceará', value: 'CE' },
+  { label: 'Pernambuco', value: 'PE' },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -58,120 +63,93 @@ type NavigationProps = CompositeNavigationProp<
 
 export default function Filters() {
   const navigation = useNavigation<NavigationProps>();
-  const [activeTab, setActiveTab] = useState<'Veiculos' | 'Revendas'>(
-    'Veiculos'
-  );
   const [listaMarcas, setListaMarcas] = useState<OptionsList[]>([]);
   const [listaModelos, setListaModelos] = useState<OptionsList[]>([]);
-  const [tipo, setTipo] = useState<string>();
+  const [estado, setEstado] = useState<string>();
   const [marca, setMarca] = useState<string>();
   const [modelo, setModelo] = useState<string>();
   const [anoMin, setAnoMin] = useState<string>();
   const [anoMax, setAnoMax] = useState<string>();
-  const [listaLojas, setListaLojas] = useState<OptionsList[]>([]);
-  const [listaCidades, setListaCidades] = useState<OptionsList[]>([]);
-  const [cidade, setCidade] = useState<string>();
-  const [loja, setLoja] = useState<string>();
 
-  const handleSelectTipo = (option: { label: string; value: string }) => {
+  const handleSelectEstado = (option: { label: string; value: string }) => {
     // console.log('Selecionado:', option);
-    setTipo(option.value);
+    setEstado(option.value);
+    // Limpar seleções dependentes quando mudar o estado
+    setMarca(undefined);
+    setModelo(undefined);
+    setListaModelos([]);
+    // Recarregar marcas para o novo estado
+    getBrandData(option.value);
   };
 
   const handleSelectMarca = (option: { label: string; value: string }) => {
     // console.log('Selecionado:', option);
     setMarca(option.value);
+    // Limpar modelo selecionado quando mudar marca
+    setModelo(undefined);
     getModelData(option.value);
   };
 
-  const handleSelectCidade = (option: { label: string; value: string }) => {
-    // console.log('Selecionado:', option);
-    setCidade(option.value);
-    getStoreData(option.value);
-  };
 
-  const getBrandData = async () => {
-    // console.log('buscando marcas');
-    const response: AxiosResponse<DataFetchProps> =
-      await api.get<DataFetchProps>(
-        `cliente/listagem/marcas?tipo_veiculo=${tipo}`
-      );
-    // console.log('marcas =', response.data.content);
+  const getBrandData = async (estadoParam?: string) => {
+    try {
+      const estadoToUse = estadoParam || estado;
+      // console.log('buscando marcas para estado:', estadoToUse);
+      const response: AxiosResponse<DataFetchProps> =
+        await api.get<DataFetchProps>(
+          `cliente/listagem/marcas?estado=${estadoToUse}`
+        );
+      // console.log('marcas =', response.data.content);
 
-    if (response.data.content) {
-      setListaMarcas(response.data.content);
+      if (response.data.content) {
+        setListaMarcas(response.data.content);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar marcas:', error);
+      setListaMarcas([]);
     }
   };
 
   const getModelData = async (id_marca?: string) => {
-    // console.log('buscando marcas');
-    const response: AxiosResponse<DataFetchProps> =
-      await api.get<DataFetchProps>(
-        `cliente/listagem/modelos?${id_marca ? `id_marca=${id_marca}` : ''}`
-      );
+    try {
+      if (!id_marca) {
+        setListaModelos([]);
+        return;
+      }
+      
+      // console.log('buscando modelos para marca:', id_marca);
+      const response: AxiosResponse<DataFetchProps> =
+        await api.get<DataFetchProps>(
+          `cliente/listagem/modelos?id_marca=${id_marca}`
+        );
 
-    // console.log('modelos =', response.data.content);
+      // console.log('modelos =', response.data.content);
 
-    if (response.data.content) {
-      setListaModelos(response.data.content);
+      if (response.data.content) {
+        setListaModelos(response.data.content);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar modelos:', error);
+      setListaModelos([]);
     }
   };
 
-  const getStoreData = async (id_cidade?: string) => {
-    // console.log('buscando marcas');
-    const response: AxiosResponse<DataFetchProps> =
-      await api.get<DataFetchProps>(
-        `cliente/lojas/filtrar?${id_cidade ? `id_cidade=${id_cidade}` : ''}`
-      );
-    // console.log('lojas =', response.data.content);
-
-    if (response.data.content) {
-      setListaLojas(
-        response.data.content.lojas.map((l: any) => ({
-          label: l.nome_fantasia,
-          value: l.id,
-        }))
-      );
-    }
-  };
-
-  const getCityData = async () => {
-    // console.log('buscando cidades =', api.getUri());
-    const response: AxiosResponse<DataFetchProps> =
-      await api.get<DataFetchProps>(`cliente/listagem/cidades_cadastradas`);
-    // console.log('cidades =', response.data.content);
-
-    if (response.data.content) {
-      setListaCidades(response.data.content);
-    }
-  };
 
   useEffect(() => {
+    // Carregar marcas iniciais
     getBrandData();
   }, []);
 
-  useEffect(() => {
-    activeTab === 'Revendas' && listaCidades.length == 0 && getCityData();
-  }, [activeTab]);
 
   const handleClickBuscar = () => {
-    let filters = {};
-    if (activeTab === 'Revendas') {
-      filters = {
-        cidade,
-        loja,
-        startSearch: true,
-      };
-    } else {
-      filters = {
-        tipo,
-        marca,
-        modelo,
-        anoMin,
-        anoMax,
-        startSearch: true,
-      };
-    }
+    const filters = {
+      estado,
+      marca,
+      modelo,
+      anoMin,
+      anoMax,
+      startSearch: true,
+    };
     navigation.navigate('search', {
       screen: 'filter',
       params: { filters },
@@ -181,22 +159,29 @@ export default function Filters() {
   return (
     <Container>
       <FilterContainer>
-        <Label>
-        Encontre seu veículo
-        </Label>
+        <Label>Encontre seu veículo</Label>
+        
         <SearchableSelect
           placeholder="ESTADO"
-          options={optionsTipo}
-          onSelect={handleSelectTipo}
-          selectedValue={tipo}
+          options={optionsEstado}
+          onSelect={handleSelectEstado}
+          selectedValue={estado}
         />
 
-        <SearchableSelect
-          placeholder="MARCA/MODELO"
-          options={listaModelos}
-          onSelect={(selected) => setModelo(selected.value)}
-          selectedValue={modelo}
-        />
+        <RowContainer>
+          <SearchableSelect
+            placeholder="MARCA"
+            options={listaMarcas}
+            onSelect={handleSelectMarca}
+            selectedValue={marca}
+          />
+          <SearchableSelect
+            placeholder="MODELO"
+            options={listaModelos}
+            onSelect={(selected) => setModelo(selected.value)}
+            selectedValue={modelo}
+          />
+        </RowContainer>
 
         <AnoContainer>
           <SearchableSelect
@@ -219,9 +204,7 @@ export default function Filters() {
             alignItems: 'center',
           }}
         >
-          <SearchButton
-            onPress={handleClickBuscar}
-          >
+          <SearchButton onPress={handleClickBuscar}>
             <SearchButtonText>VER OFERTAS</SearchButtonText>
           </SearchButton>
         </View>

@@ -1,28 +1,30 @@
-import 'dotenv/config';
-
-const isProd = process.env.NODE_ENV === 'production';
-
-export default {
+ module.exports = {
   expo: {
     name: 'Repasse Rápido',
     slug: 'repasse-rapido',
-    version: '2.3.0',
+    owner: "repasse-rapido",
+    version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'light',
     plugins: [
+      'expo-system-ui',
       [
         'expo-image-picker',
         {
-          photosPermission: 'Este app acessa suas fotos e arquivos de imagens.',
+          photosPermission: 'Este app precisa acessar suas fotos para você adicionar imagens aos seus anúncios.',
+          cameraPermission: 'Este app precisa acessar sua câmera para você tirar fotos dos seus anúncios.',
         },
       ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#9A0B26",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200
+        }
+      ]
     ],
-    splash: {
-      image: './assets/splash.png',
-      resizeMode: 'contain',
-      backgroundColor: '#E11138',
-    },
     assetBundlePatterns: ['**/*'],
     ios: {
       supportsTablet: true,
@@ -47,9 +49,9 @@ export default {
       favicon: './assets/favicon.png',
     },
     extra: {
-      apiUrl: isProd ? process.env.API_URL_PROD : process.env.API_URL_DEV,
+      apiUrl: process.env.API_URL_PROD,
       eas: {
-        projectId: '2ae5524d-9fc1-48b1-a000-6798b747fa4a',
+        projectId: '2b0cf35b-cdb7-43fa-8bf1-bd294cb41b9a',
       },
     },
   },
