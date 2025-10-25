@@ -84,6 +84,7 @@ interface AdvertiseContextData {
   updateStep4Data: (data: Partial<AdvertiseData>) => void;
   updateStep5Data: (data: Partial<AdvertiseData>) => void;
   clearAdvertiseData: () => void;
+  clearEditCache: () => void;
   loadAdDataForEdit: (codigo: string) => Promise<void>;
 }
 
@@ -144,7 +145,12 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
 
   const updateStep3Data = (data: Partial<AdvertiseData>) => {
     console.log('Updating Step3 data:', data);
-    setAdvertiseData(prev => ({ ...prev, ...data }));
+    console.log('Current advertiseData before Step3 update:', advertiseData);
+    setAdvertiseData(prev => {
+      const newData = { ...prev, ...data };
+      console.log('New advertiseData after Step3 update:', newData);
+      return newData;
+    });
   };
 
   const updateStep4Data = (data: Partial<AdvertiseData>) => {
@@ -162,13 +168,25 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
     setAdvertiseData({});
   };
 
+  const clearEditCache = () => {
+    console.log('Clearing edit cache - removing id_anuncio and edit-related data');
+    setAdvertiseData(prev => {
+      const { id_anuncio, ...rest } = prev;
+      return rest;
+    });
+  };
+
   const loadAdDataForEdit = async (codigo: string) => {
     try {
       console.log('Loading ad data for edit, codigo:', codigo);
       const response = await api.get(`/cliente/anuncios/detalhe?codigo=${codigo}`);
       
       if (response.data.status === 'success' && response.data.content.anuncio) {
+        console.log('Response data:', response.data);
         const ad = response.data.content.anuncio;
+        
+        console.log('Ad data - imagens field:', ad.imagens);
+        console.log('Ad data - imagemPrincipal field:', ad.imagemPrincipal);
         
         // Converter campos numéricos para string (para compatibilidade com os forms)
         const convertToString = (value: any) => value != null ? value.toString() : '';
@@ -222,26 +240,50 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
           passou_leilao: convertBoolToString(ad.passou_leilao),
           
           // Step 4 - Imagens (converter para formato esperado)
-          imagens: ad.imagens ? ad.imagens.map((img: any, index: number) => {
-            // Se img é uma string (URL), usar diretamente
-            if (typeof img === 'string') {
-              return {
-                uri: img,
-                name: `image_${index}.jpg`,
-                type: 'image/jpeg',
-                principal: index === 0, // Primeira imagem é principal
-                index: index
-              };
+          imagens: (() => {
+            console.log('Processing images - ad.imagens:', ad.imagens);
+            console.log('Processing images - ad.imagemPrincipal:', ad.imagemPrincipal);
+            
+            // Se há array de imagens, processar normalmente
+            if (ad.imagens && Array.isArray(ad.imagens) && ad.imagens.length > 0) {
+              console.log('Processing images array:', ad.imagens);
+              return ad.imagens.map((img: any, index: number) => {
+                // Se img é uma string (URL), usar diretamente
+                if (typeof img === 'string') {
+                  return {
+                    uri: img,
+                    name: `image_${index}.jpg`,
+                    type: 'image/jpeg',
+                    principal: index === 0, // Primeira imagem é principal
+                    index: index
+                  };
+                }
+                // Se img é um objeto, usar link ou arquivo
+                return {
+                  uri: img.link || img.arquivo || '',
+                  name: `image_${index}.jpg`,
+                  type: 'image/jpeg',
+                  principal: img.principal === 1,
+                  index: index
+                };
+              });
             }
-            // Se img é um objeto, usar link ou arquivo
-            return {
-              uri: img.link || img.arquivo || '',
-              name: `image_${index}.jpg`,
-              type: 'image/jpeg',
-              principal: img.principal === 1,
-              index: index
-            };
-          }) : [],
+            
+            // Se não há array mas há imagemPrincipal, criar array com ela
+            if (ad.imagemPrincipal) {
+              console.log('Using imagemPrincipal as single image:', ad.imagemPrincipal);
+              return [{
+                uri: ad.imagemPrincipal,
+                name: 'image_0.jpg',
+                type: 'image/jpeg',
+                principal: true,
+                index: 0
+              }];
+            }
+            
+            console.log('No images found, returning empty array');
+            return [];
+          })(),
           
           // Step 5
           descricao: ad.descricao || '',
@@ -269,6 +311,7 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
         updateStep4Data,
         updateStep5Data,
         clearAdvertiseData,
+        clearEditCache,
         loadAdDataForEdit,
       }}
     >

@@ -31,7 +31,7 @@ const Step2 = () => {
     console.log('Step2 - id_anuncio:', advertiseData.id_anuncio);
     console.log('Step2 - opcionais:', advertiseData.opcionais);
     
-    if (advertiseData.id_anuncio && advertiseData.opcionais) {
+    if ((advertiseData.id_anuncio || advertiseData.opcionais) && advertiseData.opcionais && advertiseData.opcionais.length > 0) {
       console.log('Step2 - Loading opcionais for edit:', advertiseData.opcionais);
       setSelectedOptionalIds(advertiseData.opcionais);
     }

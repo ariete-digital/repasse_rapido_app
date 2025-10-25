@@ -35,13 +35,13 @@ const Step5 = () => {
 
   // Preencher campos se estiver editando
   useEffect(() => {
-    if (advertiseData.id_anuncio) {
+    if (advertiseData.id_anuncio || advertiseData.descricao || advertiseData.valor) {
       console.log('Step5 - Loading data for edit');
       if (advertiseData.descricao) setDescription(advertiseData.descricao);
       if (advertiseData.valor) setPrice(formatPriceForDisplay(advertiseData.valor));
       if (advertiseData.aceite_termos === '1' || advertiseData.aceite_termos === 'true') setAgreeTerms(true);
     }
-  }, [advertiseData.id_anuncio]);
+  }, [advertiseData.id_anuncio, advertiseData.descricao, advertiseData.valor]);
 
   // Função para formatar o preço com máscara (exibição)
   const formatPrice = (text: string) => {

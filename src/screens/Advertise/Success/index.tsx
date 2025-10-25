@@ -13,7 +13,7 @@ type SuccessRouteProp = RouteProp<AdvertiseStackParamList, 'advertiseSuccess'>;
 const Success = () => {
   const navigation = useNavigation<SuccessNavigationProp>();
   const route = useRoute<SuccessRouteProp>();
-  const { adNumber } = route.params;
+  const { adNumber, isEditing } = route.params;
 
   return (
     <S.Container>
@@ -30,7 +30,7 @@ const Success = () => {
       
       <View>
         <Text color="brand-red-dark" fontStyle="t-24" align='center'>
-          Anúncio nº {adNumber} cadastrado com sucesso!
+          Anúncio nº {adNumber} {isEditing ? 'atualizado' : 'cadastrado'} com sucesso!
         </Text>
       </View>
       

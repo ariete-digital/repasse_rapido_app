@@ -21,7 +21,7 @@ export type AdvertiseStackParamList = {
   advertiseStep4: undefined;
   advertiseStep5: { images?: ImageData[] };
   advertiseStep6: { step5Data?: Step5Data };
-  advertiseSuccess: { adNumber: string };
+  advertiseSuccess: { adNumber: string; isEditing?: boolean };
   selectOptions: {
     selectedOptions: string[];
     availableOptions?: Array<{id: number, descricao: string}>;

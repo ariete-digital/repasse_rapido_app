@@ -46,10 +46,11 @@ const vehicleSchema = yup.object({
 const Step1 = () => {
   const navigation = useNavigation<Step1NavigationProp>();
   const route = useRoute();
-  const { updateStep1Data, parameters, advertiseData, loadAdDataForEdit } = useAdvertise();
+  const { updateStep1Data, parameters, advertiseData, loadAdDataForEdit, clearEditCache } = useAdvertise();
   
   // Verificar se está editando via parâmetro
   const editCodigo = (route.params as any)?.editCodigo;
+  console.log('step 1::: editCodigo:::', editCodigo);
   const [isLoadingEditData, setIsLoadingEditData] = useState(false);
 
   const {
@@ -64,11 +65,17 @@ const Step1 = () => {
 
   // Carregar dados para edição se editCodigo estiver presente
   useEffect(() => {
+    console.log('step 1::: editCodigo::: useEffect::: ', editCodigo);
     const loadDataForEdit = async () => {
       if (editCodigo) {
         try {
           setIsLoadingEditData(true);
           console.log('Step1 - Loading data for edit with codigo:', editCodigo);
+          
+          // Limpar cache de edição anterior antes de carregar novos dados
+          clearEditCache();
+          console.log('Step1 - Cleared previous edit cache');
+          
           await loadAdDataForEdit(editCodigo);
           console.log('Step1 - Data loaded successfully');
         } catch (error) {
@@ -94,8 +101,11 @@ const Step1 = () => {
 
   // Preencher campos se estiver editando
   useEffect(() => {
-    if (advertiseData.id_anuncio) {
+    if (advertiseData.id_anuncio || (editCodigo && advertiseData.placa)) {
       console.log('Step1 - Loading data for edit, advertiseData:', advertiseData);
+      console.log('Step1 - editCodigo:', editCodigo);
+      console.log('Step1 - id_anuncio:', advertiseData.id_anuncio);
+      
       if (advertiseData.placa) setValue('placa', advertiseData.placa);
       if (advertiseData.marca_veiculo) setValue('marca', advertiseData.marca_veiculo);
       if (advertiseData.modelo_veiculo) setValue('modelo', advertiseData.modelo_veiculo);
@@ -107,7 +117,7 @@ const Step1 = () => {
       if (advertiseData.id_tipo_combustivel) setValue('combustivel', advertiseData.id_tipo_combustivel);
       if (advertiseData.num_portas) setValue('portas', advertiseData.num_portas);
     }
-  }, [advertiseData.id_anuncio]);
+  }, [advertiseData.id_anuncio, advertiseData.placa, advertiseData.marca_veiculo, advertiseData.modelo_veiculo, editCodigo, setValue]);
 
   // Monitorar todos os campos
   const formValues = watch();

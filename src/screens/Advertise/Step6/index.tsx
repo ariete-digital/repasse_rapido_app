@@ -17,7 +17,7 @@ type Step6NavigationProp = NativeStackNavigationProp<AdvertiseStackParamList, 'a
 
 const Step6 = () => {
   const navigation = useNavigation<Step6NavigationProp>();
-  const { advertiseData, clearAdvertiseData } = useAdvertise();
+  const { advertiseData, clearAdvertiseData, clearEditCache } = useAdvertise();
   const { user } = useAuth();
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -162,9 +162,17 @@ const Step6 = () => {
 
       // Step 4 - Imagens (enviar como arquivos)
       if (advertiseData.imagens && advertiseData.imagens.length > 0) {
+        console.log('=== IMAGE PROCESSING ===');
         console.log('Processing images:', advertiseData.imagens.length);
+        console.log('Images data:', advertiseData.imagens);
         
         advertiseData.imagens.forEach((img, index) => {
+          console.log(`Adding image ${index}:`, {
+            uri: img.uri,
+            type: 'image/jpeg',
+            name: `image_${index}.jpg`,
+          });
+          
           formData.append('imagens[]', {
             uri: img.uri,
             type: 'image/jpeg',
@@ -173,7 +181,8 @@ const Step6 = () => {
         });
         console.log(`Added ${advertiseData.imagens.length} images to FormData`);
       } else {
-        console.log('No images to upload');
+        console.log('=== NO IMAGES ===');
+        console.log('No images to upload - advertiseData.imagens:', advertiseData.imagens);
       }
 
       // Step 5 - Valor e Descrição
@@ -223,22 +232,19 @@ const Step6 = () => {
         console.log(isEditing ? 'Ad updated successfully' : 'Ad created successfully', 'with ID:', adNumber);
         
         // Limpar dados do contexto
-        clearAdvertiseData();
+        if (isEditing) {
+          // Se estava editando, limpar apenas o cache de edição
+          clearEditCache();
+        } else {
+          // Se estava criando, limpar todos os dados
+          clearAdvertiseData();
+        }
         
-        // Mostrar mensagem apropriada
-        Alert.alert(
-          'Sucesso!',
-          isEditing ? 'Anúncio atualizado com sucesso!' : 'Anúncio criado com sucesso!',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Navegar para tela de sucesso
-                navigation.navigate('advertiseSuccess', { adNumber: adNumber.toString() });
-              }
-            }
-          ]
-        );
+        // Navegar diretamente para tela de sucesso
+        navigation.navigate('advertiseSuccess', { 
+          adNumber: adNumber.toString(),
+          isEditing: isEditing
+        });
       } else {
         throw new Error(response.data.message || 'Erro ao salvar anúncio');
       }
@@ -361,7 +367,7 @@ const Step6 = () => {
           }}
         >
           <Text fontStyle="p-14-bold" color="white" style={{textAlign: 'center'}}>
-            Selecionar
+            {selectedPlan === 'oficial' ? 'Selecionado' : 'Selecionar'}
           </Text>
         </TouchableOpacity>
       </TouchableOpacity>
@@ -403,7 +409,7 @@ const Step6 = () => {
           }}
         >
           <Text fontStyle="p-14-bold" color="white" style={{textAlign: 'center'}}>
-            Selecionar
+            {selectedPlan === 'gratis' ? 'Selecionado' : 'Selecionar'}
           </Text>
         </TouchableOpacity>
       </TouchableOpacity>

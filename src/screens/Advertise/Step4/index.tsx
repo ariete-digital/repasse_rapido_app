@@ -11,6 +11,7 @@ import { useAdvertise } from '../context/AdvertiseContext';
 import { Text } from '@components/index';
 import * as ImagePicker from 'expo-image-picker';
 import BasicButton from '@components/BasicButton';
+import DeleteIcon from '@components/CustomIcons/DeleteIcon';
 
 type Step4NavigationProp = NativeStackNavigationProp<AdvertiseStackParamList, 'advertiseStep4'>;
 
@@ -25,9 +26,18 @@ const Step4 = () => {
   const { updateStep4Data, advertiseData } = useAdvertise();
   const [photos, setPhotos] = useState<Photo[]>([]);
 
+  // Log para debug
+  console.log('Step4 - Current advertiseData:', advertiseData);
+  console.log('Step4 - Current photos state:', photos);
+
   // Preencher fotos se estiver editando
   useEffect(() => {
-    if (advertiseData.id_anuncio && advertiseData.imagens) {
+    console.log('Step4 - useEffect triggered');
+    console.log('Step4 - advertiseData.id_anuncio:', advertiseData.id_anuncio);
+    console.log('Step4 - advertiseData.imagens:', advertiseData.imagens);
+    console.log('Step4 - advertiseData.imagens length:', advertiseData.imagens?.length);
+    
+    if ((advertiseData.id_anuncio || advertiseData.imagens) && advertiseData.imagens && advertiseData.imagens.length > 0) {
       console.log('Step4 - Loading images for edit:', advertiseData.imagens.length);
       console.log('Step4 - Images data:', advertiseData.imagens);
       const loadedPhotos = advertiseData.imagens.map((img: any, idx: number) => ({
@@ -37,8 +47,13 @@ const Step4 = () => {
       }));
       console.log('Step4 - Loaded photos:', loadedPhotos);
       setPhotos(loadedPhotos);
+    } else {
+      console.log('Step4 - Condition not met for loading images');
+      console.log('Step4 - id_anuncio exists:', !!advertiseData.id_anuncio);
+      console.log('Step4 - imagens exists:', !!advertiseData.imagens);
+      console.log('Step4 - imagens length > 0:', (advertiseData.imagens?.length || 0) > 0);
     }
-  }, [advertiseData.id_anuncio]);
+  }, [advertiseData.id_anuncio, advertiseData.imagens]);
 
   const pickImage = async (index: number) => {
     // Solicitar permissão
@@ -78,20 +93,81 @@ const Step4 = () => {
       // Verificar se já existe uma foto neste índice
       const existingPhotoIndex = photos.findIndex(p => p.index === index);
       
+      let updatedPhotos: Photo[];
+      
       if (existingPhotoIndex >= 0) {
         // Substituir foto existente
-        const updatedPhotos = [...photos];
+        updatedPhotos = [...photos];
         updatedPhotos[existingPhotoIndex] = newPhoto;
-        setPhotos(updatedPhotos);
       } else {
         // Adicionar nova foto
-        setPhotos(prev => [...prev, newPhoto]);
+        updatedPhotos = [...photos, newPhoto];
       }
+      
+      setPhotos(updatedPhotos);
+      
+      // Atualizar o contexto imediatamente
+      const imageData = updatedPhotos.map((photo, arrayIndex) => ({
+        uri: photo.uri,
+        base64: photo.base64,
+        name: `image_${photo.index}.jpg`,
+        type: 'image/jpeg',
+        principal: arrayIndex === 0,
+        index: photo.index
+      }));
+      
+      updateStep4Data({
+        imagens: imageData,
+      });
     }
   };
 
   const handleAddPhoto = (index: number) => {
     pickImage(index);
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    Alert.alert(
+      'Remover imagem',
+      'Tem certeza que deseja remover esta imagem?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Remover', 
+          style: 'destructive',
+          onPress: () => {
+            // Remover a foto do array
+            const updatedPhotos = photos.filter(photo => photo.index !== index);
+            
+            // Reorganizar os índices para manter sequência
+            const reorganizedPhotos = updatedPhotos.map((photo, newIndex) => ({
+              ...photo,
+              index: newIndex
+            }));
+            
+            setPhotos(reorganizedPhotos);
+            console.log('Photo removed, reorganized photos:', reorganizedPhotos);
+            
+            // Atualizar o contexto imediatamente com as imagens reorganizadas
+            const imageData = reorganizedPhotos.map((photo, arrayIndex) => ({
+              uri: photo.uri,
+              base64: photo.base64,
+              name: `image_${photo.index}.jpg`,
+              type: 'image/jpeg',
+              principal: arrayIndex === 0,
+              index: photo.index
+            }));
+            
+            console.log('Step4 - Image removed, updating context with:', imageData.length, 'images');
+            console.log('Step4 - Image data being sent to context:', imageData);
+            
+            updateStep4Data({
+              imagens: imageData,
+            });
+          }
+        }
+      ]
+    );
   };
 
   const isEditing = !!advertiseData.id_anuncio;
@@ -139,47 +215,68 @@ const Step4 = () => {
     const photo = getPhotoByIndex(index);
 
     return (
-      <TouchableOpacity 
-        key={`photo-${index}`}
-        onPress={() => handleAddPhoto(index)}
-        style={[
-          {
-            backgroundColor: '#F1F4F9',
-            borderRadius: 8,
-            justifyContent: 'center',
-            alignItems: 'center',
-            overflow: 'hidden',
-            // Sombra para iOS
-            shadowColor: '#000',
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            // Sombra para Android
-            elevation: 3,
-          },
-          style
-        ]}
-      >
-        {photo ? (
-          <Image 
-            source={{ uri: photo.uri }} 
-            style={{ 
-              width: '100%', 
-              height: '100%',
+      <View key={`photo-${index}`} style={[{ position: 'relative' }, style]}>
+        <TouchableOpacity 
+          onPress={() => handleAddPhoto(index)}
+          style={[
+            {
+              backgroundColor: '#F1F4F9',
               borderRadius: 8,
-            }} 
-            resizeMode="cover"
-          />
-        ) : (
-          <>
-            <Text color="black" style={{ fontSize: 24, fontWeight: 'bold' }}>+</Text>
-            <Text color="black" style={{ fontSize: 12, marginTop: 4 }}>Adicionar</Text>
-          </>
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'hidden',
+              flex: 1,
+              // Sombra para iOS
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              // Sombra para Android
+              elevation: 3,
+            }
+          ]}
+        >
+          {photo ? (
+            <Image 
+              source={{ uri: photo.uri }} 
+              style={{ 
+                width: '100%', 
+                height: '100%',
+                borderRadius: 8,
+              }} 
+              resizeMode="cover"
+            />
+          ) : (
+            <>
+              <Text color="black" style={{ fontSize: 24, fontWeight: 'bold' }}>+</Text>
+              <Text color="black" style={{ fontSize: 12, marginTop: 4 }}>Adicionar</Text>
+            </>
+          )}
+        </TouchableOpacity>
+        
+        {/* Ícone de lixeira - só aparece quando há uma imagem */}
+        {photo && (
+          <TouchableOpacity
+            onPress={() => handleRemovePhoto(index)}
+            style={{
+              position: 'absolute',
+              bottom: 4,
+              left: 4,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              borderRadius: 12,
+              width: 24,
+              height: 24,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <DeleteIcon size={12} color="white" />
+          </TouchableOpacity>
         )}
-      </TouchableOpacity>
+      </View>
     );
   };
 

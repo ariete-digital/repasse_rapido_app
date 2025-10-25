@@ -124,7 +124,7 @@ const Step3 = () => {
 
   // Preencher campos se estiver editando
   useEffect(() => {
-    if (advertiseData.id_anuncio) {
+    if (advertiseData.id_anuncio || advertiseData.status_veiculo || advertiseData.unico_dono) {
       console.log('Step3 - Loading data for edit');
       if (advertiseData.status_veiculo) setValue('status_veiculo', advertiseData.status_veiculo);
       if (advertiseData.unico_dono) setValue('unico_dono', advertiseData.unico_dono);
@@ -151,7 +151,7 @@ const Step3 = () => {
       if (advertiseData.tipo_monta) setValue('tipo_monta', advertiseData.tipo_monta);
       if (advertiseData.passou_leilao) setValue('passou_leilao', advertiseData.passou_leilao);
     }
-  }, [advertiseData.id_anuncio]);
+  }, [advertiseData.id_anuncio, advertiseData.status_veiculo, advertiseData.unico_dono, setValue]);
 
   // Monitorar todos os campos
   const formValues = watch();

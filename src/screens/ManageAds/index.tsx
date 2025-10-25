@@ -110,6 +110,8 @@ const ManageAds = () => {
     
     // Buscar o código do anúncio
     const anuncio = anuncios.find(ad => ad.id.toString() === adId);
+
+    console.log('Anúncio encontrado:', anuncio);
     if (!anuncio) {
       Alert.alert('Erro', 'Anúncio não encontrado');
       return;
