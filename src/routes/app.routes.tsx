@@ -43,6 +43,9 @@ import Step6 from '@screens/Advertise/Step6';
 import Success from '@screens/Advertise/Success';
 import SelectOptions from '@screens/Advertise/SelectOptions';
 
+// Componente para a tela de contato (placeholder)
+const ContactScreen = () => null;
+
 // Stack interno da aba 'search'
 export type SearchStackParamList = {
   searchScreen: undefined;
@@ -218,7 +221,7 @@ const Tabs = () => {
     />
     <Tab.Screen
       name="contact"
-      component={() => null}
+      component={ContactScreen}
       options={{
         title: 'Contato',
         tabBarIcon: ({ color }) => (

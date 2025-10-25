@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import { SearchIcon, ArrowDownIcon } from '@components/CustomIcons';
-import { Text } from '@components/index';
+import Text from '@components/Text';
 
 export interface SearchFiltersProps {
   onAdNumberChange?: (value: string) => void;

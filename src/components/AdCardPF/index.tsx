@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, TouchableOpacity } from 'react-native';
 import { NoPhotoIcon, DeleteIcon, SettingsIcon } from '@components/CustomIcons';
-import { Text } from '@components/index';
+import Text from '@components/Text';
 import BasicButton from '@components/BasicButton';
 import * as S from './styles';
 

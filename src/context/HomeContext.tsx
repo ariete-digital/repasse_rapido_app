@@ -12,7 +12,10 @@ interface DataProps {
 }
 
 interface DataFetchProps {
-  content: DataProps;
+  status: string;
+  content: {
+    anuncios: Offer[];
+  };
 }
 
 export interface HomeContextDataProps {
@@ -49,23 +52,17 @@ export const HomeContextProvider: React.FC<HomeContextProviderProps> = ({
   const loadHomePageData = async () => {
     try {
       setIsLoading(true);
-      console.log("LoadHomePageData - Fetching latest 4 ads");
+      console.log("LoadHomePageData - Fetching home data");
       
-      const res: AxiosResponse<DataFetchProps> = await api.post(
-        '/cliente/anuncios/filtrar',
-        {
-          limit: 4,
-          page: 1,
-        }
-      );
+      const res: AxiosResponse<DataFetchProps> = await api.get('/cliente/home');
       
       console.log("LoadHomePageData response", res);
       console.log("LoadHomePageData response.data", res.data);
       
-      if (res && res.data && res.data.content) {
+      if (res && res.data && res.data.status === 'success' && res.data.content) {
         setHomePageData({
           anuncios: res.data.content.anuncios || [],
-          total: res.data.content.total || 0,
+          total: res.data.content.anuncios?.length || 0,
         });
       } else {
         toast.show(

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Modal, FlatList, TextInput as RNTextInput } from 'react-native';
-import { Text } from '@components/index';
+import Text from '@components/Text';
 import { theme } from '@theme/GlobalStyles';
 import BasicButton from '@components/BasicButton';
 

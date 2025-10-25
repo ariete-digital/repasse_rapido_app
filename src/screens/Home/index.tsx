@@ -35,11 +35,20 @@ const Home = () => {
     }
 
     // Helper function to get image URL
-    const getImageUrl = (imagens: any) => {
-      if (!imagens || imagens.length === 0) return undefined;
-      const firstImage = imagens[0];
-      if (typeof firstImage === 'string') return firstImage;
-      return firstImage.link || firstImage.arquivo || undefined;
+    const getImageUrl = (ad: any) => {
+      // Primeiro, verificar se há imagemPrincipal
+      if (ad.imagemPrincipal) {
+        return ad.imagemPrincipal;
+      }
+      
+      // Depois, verificar se há array de imagens
+      if (ad.imagens && ad.imagens.length > 0) {
+        const firstImage = ad.imagens[0];
+        if (typeof firstImage === 'string') return firstImage;
+        return firstImage.link || firstImage.arquivo || undefined;
+      }
+      
+      return undefined;
     };
 
     // Renderizar os anúncios em pares (2 por linha)
@@ -56,8 +65,8 @@ const Home = () => {
             brand={firstAd.marca_veiculo}
             model={firstAd.modelo_veiculo}
             description={firstAd.submodelo || ''}
-            imageUrl={getImageUrl(firstAd.imagens)}
-            price={firstAd.valor.toString()}
+            imageUrl={getImageUrl(firstAd)}
+            price={firstAd.valor ? firstAd.valor.toString() : '0'}
             fipePrice={firstAd.valor_fipe ? firstAd.valor_fipe.toString() : '0'}
             storeName={firstAd.cliente?.nome || 'Anunciante'}
             itemPerRow={2}
@@ -70,8 +79,8 @@ const Home = () => {
               brand={secondAd.marca_veiculo}
               model={secondAd.modelo_veiculo}
               description={secondAd.submodelo || ''}
-              imageUrl={getImageUrl(secondAd.imagens)}
-              price={secondAd.valor.toString()}
+              imageUrl={getImageUrl(secondAd)}
+              price={secondAd.valor ? secondAd.valor.toString() : '0'}
               fipePrice={secondAd.valor_fipe ? secondAd.valor_fipe.toString() : '0'}
               storeName={secondAd.cliente?.nome || 'Anunciante'}
               itemPerRow={2}

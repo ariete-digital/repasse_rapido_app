@@ -15,6 +15,21 @@ import { api } from '@lib/api';
 import { maskPlaca } from '@utils/masks';
 import { useAdvertise } from '../context/AdvertiseContext';
 
+// Função para converter valor FIPE do formato brasileiro para numérico
+const convertFipeValueToNumeric = (valorFipe: string): string => {
+  if (!valorFipe) return '0';
+  
+  // Remove "R$", espaços e converte vírgula para ponto
+  let valor = valorFipe
+    .replace(/R\$\s*/g, '') // Remove "R$" e espaços
+    .replace(/\./g, '')     // Remove pontos (separadores de milhares)
+    .replace(',', '.');     // Converte vírgula para ponto decimal
+  
+  // Garante que seja um número válido
+  const numero = parseFloat(valor);
+  return isNaN(numero) ? '0' : numero.toFixed(2);
+};
+
 type Step1NavigationProp = NativeStackNavigationProp<AdvertiseStackParamList, 'advertiseStep1'>;
 
 interface VehicleFormProps {
@@ -238,9 +253,18 @@ const Step1 = () => {
               // Armazenar submodelo e valor_fipe no contexto (não são campos do formulário)
               if (data.submodelo || data.modelo) {
                 const submodelo = data.submodelo || extractSubmodelo(data.modelo);
+                
+                // Converter valor_fipe do formato brasileiro para numérico
+                let valorFipeConvertido = null;
+                if (data.valor_fipe) {
+                  valorFipeConvertido = convertFipeValueToNumeric(data.valor_fipe);
+                  console.log('Valor FIPE original:', data.valor_fipe);
+                  console.log('Valor FIPE convertido:', valorFipeConvertido);
+                }
+                
                 updateStep1Data({
                   submodelo: submodelo,
-                  valor_fipe: data.valor_fipe || null,
+                  valor_fipe: valorFipeConvertido || undefined,
                 });
               }
             }
