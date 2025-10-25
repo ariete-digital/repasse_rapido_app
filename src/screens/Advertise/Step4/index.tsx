@@ -29,11 +29,13 @@ const Step4 = () => {
   useEffect(() => {
     if (advertiseData.id_anuncio && advertiseData.imagens) {
       console.log('Step4 - Loading images for edit:', advertiseData.imagens.length);
+      console.log('Step4 - Images data:', advertiseData.imagens);
       const loadedPhotos = advertiseData.imagens.map((img: any, idx: number) => ({
         uri: img.uri || img.url, // Pode vir como uri ou url da API
         base64: img.base64 || '', // Imagens da API não terão base64 inicialmente
         index: idx,
       }));
+      console.log('Step4 - Loaded photos:', loadedPhotos);
       setPhotos(loadedPhotos);
     }
   }, [advertiseData.id_anuncio]);
@@ -128,7 +130,9 @@ const Step4 = () => {
   };
 
   const getPhotoByIndex = (index: number) => {
-    return photos.find(p => p.index === index);
+    const photo = photos.find(p => p.index === index);
+    console.log(`Step4 - Getting photo for index ${index}:`, photo);
+    return photo;
   };
 
   const renderPhotoSlot = (index: number, style: any) => {

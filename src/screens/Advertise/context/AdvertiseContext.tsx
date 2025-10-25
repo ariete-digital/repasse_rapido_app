@@ -55,6 +55,7 @@ interface AdvertiseData {
   // Step 5 - Valor e Descrição
   descricao?: string;
   valor?: string;
+  valor_fipe?: string;
   aceite_termos?: string;
 }
 
@@ -174,6 +175,7 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
         const convertBoolToString = (value: any) => value === 1 || value === true ? '1' : '0';
         
         // Preencher todos os dados do anúncio
+        console.log('Setting advertise data with id_anuncio:', ad.id);
         setAdvertiseData({
           id_anuncio: ad.id,
           
@@ -220,13 +222,26 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
           passou_leilao: convertBoolToString(ad.passou_leilao),
           
           // Step 4 - Imagens (converter para formato esperado)
-          imagens: ad.imagens ? ad.imagens.map((img: any, index: number) => ({
-            uri: img.link || img.arquivo || '',
-            name: `image_${index}.jpg`,
-            type: 'image/jpeg',
-            principal: img.principal === 1,
-            index: index
-          })) : [],
+          imagens: ad.imagens ? ad.imagens.map((img: any, index: number) => {
+            // Se img é uma string (URL), usar diretamente
+            if (typeof img === 'string') {
+              return {
+                uri: img,
+                name: `image_${index}.jpg`,
+                type: 'image/jpeg',
+                principal: index === 0, // Primeira imagem é principal
+                index: index
+              };
+            }
+            // Se img é um objeto, usar link ou arquivo
+            return {
+              uri: img.link || img.arquivo || '',
+              name: `image_${index}.jpg`,
+              type: 'image/jpeg',
+              principal: img.principal === 1,
+              index: index
+            };
+          }) : [],
           
           // Step 5
           descricao: ad.descricao || '',

@@ -29,6 +29,7 @@ const AdvertiseHome = () => {
           setIsLoadingAd(true);
           console.log('Loading ad for edit with codigo:', editCodigo);
           await loadAdDataForEdit(editCodigo);
+          console.log('Ad data loaded, navigating to Step1');
           // Navegar automaticamente para Step1 após carregar
           navigation.navigate('advertiseStep1');
         } catch (error) {

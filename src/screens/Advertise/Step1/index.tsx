@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TextInput as RNTextInput } from 'react-native';
+import { View, ScrollView, TextInput as RNTextInput, Alert } from 'react-native';
 import { Text, TextInput, ProgressSteps, Select } from '@components/index';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AdvertiseStackParamList } from '../types';
 import PageScaffold from '@components/PageScaffold';
@@ -21,7 +21,6 @@ interface VehicleFormProps {
   placa: string;
   marca: string;
   modelo: string;
-  submodelo: string;
   ano_fabricacao: string;
   ano_modelo: string;
   quilometragem: string;
@@ -35,7 +34,6 @@ const vehicleSchema = yup.object({
   placa: yup.string().required('Informe a placa!'),
   marca: yup.string().required('Informe a marca!'),
   modelo: yup.string().required('Informe o modelo!'),
-  submodelo: yup.string().required('Informe o submodelo!'),
   ano_fabricacao: yup.string().required('Selecione o ano de fabricação!'),
   ano_modelo: yup.string().required('Selecione o ano do modelo!'),
   quilometragem: yup.string().required('Informe a quilometragem!'),
@@ -47,7 +45,12 @@ const vehicleSchema = yup.object({
 
 const Step1 = () => {
   const navigation = useNavigation<Step1NavigationProp>();
-  const { updateStep1Data, parameters, advertiseData } = useAdvertise();
+  const route = useRoute();
+  const { updateStep1Data, parameters, advertiseData, loadAdDataForEdit } = useAdvertise();
+  
+  // Verificar se está editando via parâmetro
+  const editCodigo = (route.params as any)?.editCodigo;
+  const [isLoadingEditData, setIsLoadingEditData] = useState(false);
 
   const {
     control,
@@ -59,14 +62,43 @@ const Step1 = () => {
     resolver: yupResolver(vehicleSchema),
   });
 
+  // Carregar dados para edição se editCodigo estiver presente
+  useEffect(() => {
+    const loadDataForEdit = async () => {
+      if (editCodigo) {
+        try {
+          setIsLoadingEditData(true);
+          console.log('Step1 - Loading data for edit with codigo:', editCodigo);
+          await loadAdDataForEdit(editCodigo);
+          console.log('Step1 - Data loaded successfully');
+        } catch (error) {
+          console.error('Step1 - Error loading data for edit:', error);
+          Alert.alert(
+            'Erro',
+            'Não foi possível carregar os dados do anúncio. Tente novamente.',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.goBack()
+              }
+            ]
+          );
+        } finally {
+          setIsLoadingEditData(false);
+        }
+      }
+    };
+
+    loadDataForEdit();
+  }, [editCodigo]);
+
   // Preencher campos se estiver editando
   useEffect(() => {
     if (advertiseData.id_anuncio) {
-      console.log('Step1 - Loading data for edit');
+      console.log('Step1 - Loading data for edit, advertiseData:', advertiseData);
       if (advertiseData.placa) setValue('placa', advertiseData.placa);
       if (advertiseData.marca_veiculo) setValue('marca', advertiseData.marca_veiculo);
       if (advertiseData.modelo_veiculo) setValue('modelo', advertiseData.modelo_veiculo);
-      if (advertiseData.submodelo) setValue('submodelo', advertiseData.submodelo);
       if (advertiseData.ano_fabricacao) setValue('ano_fabricacao', advertiseData.ano_fabricacao);
       if (advertiseData.ano_modelo) setValue('ano_modelo', advertiseData.ano_modelo);
       if (advertiseData.quilometragem) setValue('quilometragem', advertiseData.quilometragem);
@@ -85,7 +117,6 @@ const Step1 = () => {
     formValues.placa &&
     formValues.marca &&
     formValues.modelo &&
-    formValues.submodelo &&
     formValues.ano_fabricacao &&
     formValues.ano_modelo &&
     formValues.quilometragem &&
@@ -101,7 +132,6 @@ const Step1 = () => {
     placa: !!formValues.placa,
     marca: !!formValues.marca,
     modelo: !!formValues.modelo,
-    submodelo: !!formValues.submodelo,
     ano_fabricacao: !!formValues.ano_fabricacao,
     ano_modelo: !!formValues.ano_modelo,
     quilometragem: !!formValues.quilometragem,
@@ -191,18 +221,18 @@ const Step1 = () => {
               
               // Preencher campos automaticamente
               if (data.marca) setValue('marca', data.marca);
-              if (data.modelo) {
-                setValue('modelo', data.modelo);
-                // Se veio submodelo da API, usar ele, senão extrair do modelo
-                if (data.submodelo) {
-                  setValue('submodelo', data.submodelo);
-                } else {
-                  const submodelo = extractSubmodelo(data.modelo);
-                  setValue('submodelo', submodelo);
-                }
-              }
+              if (data.modelo) setValue('modelo', data.modelo);
               if (data.ano_fabricacao) setValue('ano_fabricacao', data.ano_fabricacao.toString());
               if (data.ano_modelo) setValue('ano_modelo', data.ano_modelo.toString());
+              
+              // Armazenar submodelo e valor_fipe no contexto (não são campos do formulário)
+              if (data.submodelo || data.modelo) {
+                const submodelo = data.submodelo || extractSubmodelo(data.modelo);
+                updateStep1Data({
+                  submodelo: submodelo,
+                  valor_fipe: data.valor_fipe || null,
+                });
+              }
             }
           } catch (error) {
             console.error('Erro ao buscar informações do veículo:', error);
@@ -218,16 +248,18 @@ const Step1 = () => {
     return () => clearTimeout(timeoutId);
   }, [placa, setValue]);
 
-  // Atualizar submodelo automaticamente quando o modelo mudar (se submodelo estiver vazio)
+  // Atualizar submodelo automaticamente quando o modelo mudar
   useEffect(() => {
     const subscription = watch((value, { name }) => {
-      if (name === 'modelo' && value.modelo && !value.submodelo) {
+      if (name === 'modelo' && value.modelo) {
         const submodelo = extractSubmodelo(value.modelo);
-        setValue('submodelo', submodelo);
+        updateStep1Data({
+          submodelo: submodelo,
+        });
       }
     });
     return () => subscription.unsubscribe();
-  }, [watch, setValue, extractSubmodelo]);
+  }, [watch, updateStep1Data, extractSubmodelo]);
 
   const handleContinue = (data: VehicleFormProps) => {
     console.log('Step1 - Submitting data:', data);
@@ -237,7 +269,6 @@ const Step1 = () => {
       placa: data.placa,
       marca_veiculo: data.marca,
       modelo_veiculo: data.modelo,
-      submodelo: data.submodelo,
       ano_fabricacao: data.ano_fabricacao,
       ano_modelo: data.ano_modelo,
       quilometragem: data.quilometragem,
@@ -252,6 +283,22 @@ const Step1 = () => {
 
 
   const isEditing = !!advertiseData.id_anuncio;
+
+  // Mostrar loading se estiver carregando dados para edição
+  if (isLoadingEditData) {
+    return (
+      <PageScaffold
+        titleText={'Carregando anúncio'}
+        titleIcon={<SvgXml xml={CarIcon()} width={20} height={20} />}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
+          <Text fontStyle="p-14-regular" color="gray-500" style={{ marginTop: 16 }}>
+            Carregando dados do anúncio...
+          </Text>
+        </View>
+      </PageScaffold>
+    );
+  }
 
   return (
     <PageScaffold
@@ -375,19 +422,6 @@ const Step1 = () => {
             )}
           />
 
-          <Controller
-            control={control}
-            name="submodelo"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                label="Submodelo"
-                value={value}
-                onChangeText={onChange}
-                errorMessage={errors.submodelo?.message}
-                placeholder="Ex: ETIOS, COROLLA, etc."
-              />
-            )}
-          />
 
           <Controller
             control={control}

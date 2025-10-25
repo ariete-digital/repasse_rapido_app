@@ -31,42 +31,16 @@ const Step6 = () => {
     ? selectedPlan !== null  // Para A/PJ: precisa selecionar plano
     : agreeTerms;            // Para PF: precisa aceitar termos
 
-  // Função auxiliar para converter string '1'/'0' para boolean
-  const stringToBoolean = (value: string | undefined): boolean => {
-    return value === '1' || value === 'true';
-  };
-
-  // Função auxiliar para converter string para number
+  // Função auxiliar para converter string '1'/'0' para number (1 ou 0)
   const stringToNumber = (value: string | undefined): number | undefined => {
     if (!value) return undefined;
     const num = parseInt(value, 10);
     return isNaN(num) ? undefined : num;
   };
 
-  // Função auxiliar para converter imagem para base64 usando fetch
-  const convertImageToBase64 = async (uri: string): Promise<string> => {
-    try {
-      // Buscar a imagem como blob
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      
-      // Converter blob para base64
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (typeof reader.result === 'string') {
-            resolve(reader.result); // Já vem com o prefixo data:image/jpeg;base64,
-          } else {
-            reject(new Error('Failed to convert image to base64'));
-          }
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Error converting image to base64:', error);
-      throw error;
-    }
+  // Função auxiliar para converter string para boolean (1 ou 0)
+  const stringToFormBoolean = (value: string | undefined): number => {
+    return (value === '1' || value === 'true') ? 1 : 0;
   };
 
   const handleSaveAd = async () => {
@@ -113,141 +87,127 @@ const Step6 = () => {
       console.log('=== STARTING AD SUBMISSION ===');
       console.log('Consolidating all advertise data:', JSON.stringify(advertiseData, null, 2));
 
-      // Preparar payload JSON
-      const payload: any = {
-        id_anuncio: advertiseData.id_anuncio || null, // Se tiver ID, está editando
-        tipo_veiculo: 'C', // C = Carro
-      };
+      // Preparar FormData para multipart/form-data
+      const formData = new FormData();
 
-      // Tipo de plano baseado no tipo de usuário
-      if (user.tipo === 'A') {
-        payload.tipo_plano = 'A';
-      } else if (user.tipo === 'PJ') {
-        payload.tipo_plano = 'B';
-      } else {
-        payload.tipo_plano = 'C'; // PF - Pessoa Física
+      // Se estiver editando, usar 'id' em vez de 'id_anuncio'
+      if (advertiseData.id_anuncio) {
+        formData.append('id', advertiseData.id_anuncio.toString());
       }
+
+      formData.append('tipo_veiculo', 'C'); // C = Carro
 
       // Status do veículo (N = Novo, U = Usado)
       if (advertiseData.status_veiculo) {
-        payload.status_veiculo = advertiseData.status_veiculo;
+        formData.append('status_veiculo', advertiseData.status_veiculo);
       }
 
-      // Step 1 - Dados do Veículo (com conversões de tipo)
+      // Step 1 - Dados do Veículo
       if (advertiseData.placa) {
-        payload.placa = advertiseData.placa.replace(/-/g, ''); // Placa sem hífen
+        formData.append('placa', advertiseData.placa.replace(/-/g, '')); // Placa sem hífen
       }
-      if (advertiseData.marca_veiculo) payload.marca_veiculo = advertiseData.marca_veiculo;
-      if (advertiseData.modelo_veiculo) payload.modelo_veiculo = advertiseData.modelo_veiculo;
-      if (advertiseData.submodelo) payload.submodelo = advertiseData.submodelo;
+      if (advertiseData.marca_veiculo) formData.append('marca_veiculo', advertiseData.marca_veiculo);
+      if (advertiseData.modelo_veiculo) formData.append('modelo_veiculo', advertiseData.modelo_veiculo);
+      if (advertiseData.submodelo) formData.append('submodelo', advertiseData.submodelo);
       
       // Converter strings para numbers
-      if (advertiseData.ano_fabricacao) payload.ano_fabricacao = stringToNumber(advertiseData.ano_fabricacao);
-      if (advertiseData.ano_modelo) payload.ano_modelo = stringToNumber(advertiseData.ano_modelo);
-      if (advertiseData.quilometragem) payload.quilometragem = stringToNumber(advertiseData.quilometragem);
-      if (advertiseData.id_cor) payload.id_cor = stringToNumber(advertiseData.id_cor);
-      if (advertiseData.id_tipo_cambio) payload.id_tipo_cambio = stringToNumber(advertiseData.id_tipo_cambio);
-      if (advertiseData.id_tipo_combustivel) payload.id_tipo_combustivel = stringToNumber(advertiseData.id_tipo_combustivel);
-      if (advertiseData.num_portas) payload.num_portas = stringToNumber(advertiseData.num_portas);
+      if (advertiseData.ano_fabricacao) formData.append('ano_fabricacao', stringToNumber(advertiseData.ano_fabricacao)!.toString());
+      if (advertiseData.ano_modelo) formData.append('ano_modelo', stringToNumber(advertiseData.ano_modelo)!.toString());
+      if (advertiseData.quilometragem) formData.append('quilometragem', stringToNumber(advertiseData.quilometragem)!.toString());
+      if (advertiseData.id_cor) formData.append('id_cor', stringToNumber(advertiseData.id_cor)!.toString());
+      if (advertiseData.id_tipo_cambio) formData.append('id_tipo_cambio', stringToNumber(advertiseData.id_tipo_cambio)!.toString());
+      if (advertiseData.id_tipo_combustivel) formData.append('id_tipo_combustivel', stringToNumber(advertiseData.id_tipo_combustivel)!.toString());
+      if (advertiseData.num_portas) formData.append('num_portas', stringToNumber(advertiseData.num_portas)!.toString());
 
-      // Step 2 - Opcionais (já são números)
+      // Step 2 - Opcionais (adicionar como array)
       if (advertiseData.opcionais && advertiseData.opcionais.length > 0) {
-        payload.opcionais = advertiseData.opcionais;
+        advertiseData.opcionais.forEach(opcional => {
+          formData.append('opcionais[]', opcional.toString());
+        });
         console.log('Adding opcionais:', advertiseData.opcionais);
       }
 
-      // Step 3 - Dados Detalhados do Veículo (converter strings para booleans)
-      payload.unico_dono = stringToBoolean(advertiseData.unico_dono);
-      payload.ipva_pago = stringToBoolean(advertiseData.ipva_pago);
-      payload.veiculo_nome_anunciante = stringToBoolean(advertiseData.veiculo_nome_anunciante);
-      payload.financiado = stringToBoolean(advertiseData.financiado);
-      payload.parcelas_em_dia = stringToBoolean(advertiseData.parcelas_em_dia);
-      payload.todas_revisoes_concessionaria = stringToBoolean(advertiseData.todas_revisoes_concessionaria);
-      payload.possui_manual = stringToBoolean(advertiseData.possui_manual);
-      payload.possui_chave_reserva = stringToBoolean(advertiseData.possui_chave_reserva);
-      payload.possui_ar = stringToBoolean(advertiseData.possui_ar);
-      payload.ar_funcionando = stringToBoolean(advertiseData.ar_funcionando);
-      payload.escapamento_solta_fumaca = stringToBoolean(advertiseData.escapamento_solta_fumaca);
-      payload.garantia_fabrica = stringToBoolean(advertiseData.garantia_fabrica);
-      payload.motor_bate = stringToBoolean(advertiseData.motor_bate);
-      payload.cambio_faz_barulho = stringToBoolean(advertiseData.cambio_faz_barulho);
-      payload.cambio_escapa_marcha = stringToBoolean(advertiseData.cambio_escapa_marcha);
-      payload.furtado_roubado = stringToBoolean(advertiseData.furtado_roubado);
-      payload.passou_leilao = stringToBoolean(advertiseData.passou_leilao);
+      // Step 3 - Dados Detalhados do Veículo (converter para 1 ou 0)
+      formData.append('unico_dono', stringToFormBoolean(advertiseData.unico_dono).toString());
+      formData.append('ipva_pago', stringToFormBoolean(advertiseData.ipva_pago).toString());
+      formData.append('veiculo_nome_anunciante', stringToFormBoolean(advertiseData.veiculo_nome_anunciante).toString());
+      formData.append('financiado', stringToFormBoolean(advertiseData.financiado).toString());
+      formData.append('parcelas_em_dia', stringToFormBoolean(advertiseData.parcelas_em_dia).toString());
+      formData.append('todas_revisoes_concessionaria', stringToFormBoolean(advertiseData.todas_revisoes_concessionaria).toString());
+      formData.append('possui_manual', stringToFormBoolean(advertiseData.possui_manual).toString());
+      formData.append('possui_chave_reserva', stringToFormBoolean(advertiseData.possui_chave_reserva).toString());
+      formData.append('possui_ar', stringToFormBoolean(advertiseData.possui_ar).toString());
+      formData.append('ar_funcionando', stringToFormBoolean(advertiseData.ar_funcionando).toString());
+      formData.append('escapamento_solta_fumaca', stringToFormBoolean(advertiseData.escapamento_solta_fumaca).toString());
+      formData.append('garantia_fabrica', stringToFormBoolean(advertiseData.garantia_fabrica).toString());
+      formData.append('motor_bate', stringToFormBoolean(advertiseData.motor_bate).toString());
+      formData.append('cambio_faz_barulho', stringToFormBoolean(advertiseData.cambio_faz_barulho).toString());
+      formData.append('cambio_escapa_marcha', stringToFormBoolean(advertiseData.cambio_escapa_marcha).toString());
+      formData.append('furtado_roubado', stringToFormBoolean(advertiseData.furtado_roubado).toString());
+      formData.append('passou_leilao', stringToFormBoolean(advertiseData.passou_leilao).toString());
       
       // Campos numéricos do Step 3
-      if (advertiseData.id_tipo_pneu) payload.id_tipo_pneu = stringToNumber(advertiseData.id_tipo_pneu);
-      if (advertiseData.id_tipo_parabrisa) payload.id_tipo_parabrisa = stringToNumber(advertiseData.id_tipo_parabrisa);
+      if (advertiseData.id_tipo_pneu) formData.append('id_tipo_pneu', stringToNumber(advertiseData.id_tipo_pneu)!.toString());
+      if (advertiseData.id_tipo_parabrisa) formData.append('id_tipo_parabrisa', stringToNumber(advertiseData.id_tipo_parabrisa)!.toString());
       
-      // Tipo de monta - converter string para apropriado
-      // '0' = Não colidiu, '1' = Leve, '2' = Moderada, '3' = Forte
-      // Pode precisar ser ajustado dependendo de como a API espera
-      if (advertiseData.tipo_monta) payload.tipo_monta = advertiseData.tipo_monta;
+      // Tipo de monta - manter campo original
+      if (advertiseData.tipo_monta) {
+        formData.append('tipo_monta', advertiseData.tipo_monta);
+      }
 
-      // Luzes separadas - se a API espera luz_injecao_airbag único, ajustar aqui
-      payload.luz_injecao = stringToBoolean(advertiseData.luz_injecao);
-      payload.luz_airbag = stringToBoolean(advertiseData.luz_airbag);
-      payload.luz_abs = stringToBoolean(advertiseData.luz_abs);
+      // Luzes - manter campos separados
+      formData.append('luz_injecao', stringToFormBoolean(advertiseData.luz_injecao).toString());
+      formData.append('luz_airbag', stringToFormBoolean(advertiseData.luz_airbag).toString());
+      formData.append('luz_abs', stringToFormBoolean(advertiseData.luz_abs).toString());
 
-      // Step 4 - Imagens (converter para base64)
+      // Step 4 - Imagens (enviar como arquivos)
       if (advertiseData.imagens && advertiseData.imagens.length > 0) {
         console.log('Processing images:', advertiseData.imagens.length);
         
-        try {
-          // Converter todas as imagens para base64
-          const base64Images = await Promise.all(
-            advertiseData.imagens.map(async (img) => {
-              try {
-                return await convertImageToBase64(img.uri);
-              } catch (error) {
-                console.error(`Error converting image ${img.uri}:`, error);
-                return null;
-              }
-            })
-          );
-          
-          // Filtrar imagens que falharam na conversão
-          payload.imagens = base64Images.filter(img => img !== null);
-          console.log(`Successfully converted ${payload.imagens.length} images to base64`);
-        } catch (error) {
-          console.error('Error processing images:', error);
-          Alert.alert(
-            'Erro ao processar imagens',
-            'Ocorreu um erro ao processar as imagens. Tente novamente.',
-            [{ text: 'OK' }]
-          );
-          setIsSubmitting(false);
-          return;
-        }
+        advertiseData.imagens.forEach((img, index) => {
+          formData.append('imagens[]', {
+            uri: img.uri,
+            type: 'image/jpeg',
+            name: `image_${index}.jpg`,
+          } as any);
+        });
+        console.log(`Added ${advertiseData.imagens.length} images to FormData`);
       } else {
-        payload.imagens = [];
         console.log('No images to upload');
       }
 
       // Step 5 - Valor e Descrição
-      if (advertiseData.descricao) payload.descricao = advertiseData.descricao;
+      if (advertiseData.descricao) formData.append('descricao', advertiseData.descricao);
       
-      // Valor - converter string para number
+      // Valor
       if (advertiseData.valor) {
-        payload.valor = parseFloat(advertiseData.valor);
+        formData.append('valor', parseFloat(advertiseData.valor).toString());
       }
       
-      // Aceite termos - converter para boolean
-      payload.aceite_termos = stringToBoolean(advertiseData.aceite_termos);
+      // Valor FIPE (se disponível)
+      if (advertiseData.valor_fipe) {
+        formData.append('valor_fipe', advertiseData.valor_fipe);
+      }
+      
+      // Aceite termos
+      formData.append('aceite_termos', stringToFormBoolean(advertiseData.aceite_termos) ? 'true' : 'false');
 
-      // Step 6 - Plano selecionado (apenas para usuários A e PJ)
+      // Tipo de plano baseado na seleção do usuário
       if (needsPlanSelection && selectedPlan) {
-        payload.plano_selecionado = selectedPlan;
+        formData.append('tipo_plano', selectedPlan === 'oficial' ? 'O' : 'G');
+      } else {
+        // Para usuários PF, usar plano padrão
+        formData.append('tipo_plano', 'G');
       }
 
       // Log de debug
-      console.log('=== JSON PAYLOAD ===');
-      console.log('Sending JSON to API:', JSON.stringify(payload, null, 2));
+      console.log('=== FORM DATA ===');
+      console.log('Sending FormData to API');
 
-      // Enviar para a API com Content-Type: application/json
-      const response = await api.post('/cliente/meus_anuncios/salvar', payload, {
+      // Enviar para a API com Content-Type: multipart/form-data
+      const response = await api.post('/cliente/meus_anuncios/salvar', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
         timeout: 60000, // 60 segundos de timeout
       });

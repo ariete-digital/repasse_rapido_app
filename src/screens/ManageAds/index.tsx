@@ -115,12 +115,12 @@ const ManageAds = () => {
       return;
     }
 
-    // Navegar para a tab "sell" e depois para advertiseHome
+    // Navegar diretamente para Step1 com editCodigo
     // @ts-ignore
     navigation.navigate('AppTabs', { 
       screen: 'sell',
       params: {
-        screen: 'advertiseHome',
+        screen: 'advertiseStep1',
         params: { editCodigo: anuncio.codigo }
       }
     });
