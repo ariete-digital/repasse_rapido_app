@@ -1,6 +1,6 @@
 import Checkbox from 'expo-checkbox';
-import { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { TouchableOpacity, View, ScrollView } from 'react-native';
 
 import Text from '@components/Text';
 import { useFilters } from '@hooks/useFilters';
@@ -20,12 +20,56 @@ const GearFilter = ({
   handleCancel,
   handleConfirm,
 }: GearFilterProps) => {
-  const { searchResults, filterParams, setFilterParams, isLoading } =
+  const { searchResults, filterParams, setFilterParams, isLoading, filterValues } =
     useFilters();
   const [selectedGear, setSelectedGear] = useState<number[]>([]);
-  const [options, setOptions] = useState<GenericItem[]>(
-    searchResults?.listaTiposCambio || []
-  );
+  const [options, setOptions] = useState<GenericItem[]>([]);
+
+  // Atualizar options quando os dados estiverem disponíveis
+  useEffect(() => {
+    console.log('=== DEBUG CÂMBIO ===');
+    console.log('filterValues.tiposCambio:', filterValues.tiposCambio);
+    console.log('searchResults?.listaTiposCambio:', searchResults?.listaTiposCambio);
+    console.log('searchResults:', searchResults);
+    
+    // Tentar diferentes fontes de dados
+    let tiposCambio = [];
+    
+    if (filterValues.tiposCambio && Array.isArray(filterValues.tiposCambio)) {
+      tiposCambio = filterValues.tiposCambio;
+      console.log('Usando filterValues.tiposCambio');
+    } else if (searchResults?.listaTiposCambio && Array.isArray(searchResults.listaTiposCambio)) {
+      tiposCambio = searchResults.listaTiposCambio;
+      console.log('Usando searchResults.listaTiposCambio');
+    } else {
+      // Dados de fallback para teste
+      tiposCambio = [
+        { id: 1, descricao: 'Manual' },
+        { id: 2, descricao: 'Automático' },
+        { id: 3, descricao: 'CVT' },
+        { id: 4, descricao: 'Semi-automático' }
+      ];
+      console.log('Usando dados de fallback');
+    }
+    
+    console.log('tiposCambio final:', tiposCambio);
+    console.log('Array.isArray(tiposCambio):', Array.isArray(tiposCambio));
+    console.log('tiposCambio.length:', tiposCambio.length);
+    
+    if (Array.isArray(tiposCambio) && tiposCambio.length > 0) {
+      setOptions(tiposCambio);
+      console.log('Options atualizadas:', tiposCambio);
+    } else {
+      console.log('Nenhum dado de câmbio encontrado');
+    }
+  }, [filterValues.tiposCambio, searchResults?.listaTiposCambio]);
+
+  // Carregar seleções existentes
+  useEffect(() => {
+    if (filterParams.tipos_cambio) {
+      setSelectedGear(filterParams.tipos_cambio);
+    }
+  }, [filterParams.tipos_cambio]);
 
   const handleToggle = (value: number) => {
     setSelectedGear((prevSelectedGear) => {
@@ -36,6 +80,7 @@ const GearFilter = ({
       }
     });
   };
+
 
   const handleSubmit = () => {
     setFilterParams({ ...filterParams, tipos_cambio: selectedGear });
@@ -51,30 +96,39 @@ const GearFilter = ({
       onCancel={handleCancel}
       render={() => {
         return (
-          <Col style={{ marginVertical: 16 }}>
-            {options.map(({ id, descricao }) => (
-              <TouchableOpacity
-                key={id}
-                onPress={() => handleToggle(id)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 5,
-                }}
-              >
-                <Checkbox
-                  disabled={false}
-                  value={
-                    selectedGear.includes(id) ||
-                    filterParams.tipos_cambio?.includes(id)
-                  }
-                  onValueChange={() => handleToggle(id)}
-                  color={theme.colors['brand-blue']}
-                />
-                <Text color="black-700">{descricao}</Text>
-              </TouchableOpacity>
-            ))}
-          </Col>
+          <ScrollView style={{ maxHeight: 400 }}>
+            {/* Lista de opções */}
+            <Col style={{ marginVertical: 16 }}>
+              {Array.isArray(options) && options.length > 0 ? (
+                options.map(({ id, descricao }) => (
+                  <TouchableOpacity
+                    key={id}
+                    onPress={() => handleToggle(id)}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 5,
+                      paddingVertical: 8,
+                    }}
+                  >
+                    <Checkbox
+                      disabled={false}
+                      value={selectedGear.includes(id)}
+                      onValueChange={() => handleToggle(id)}
+                      color={theme.colors['brand-blue']}
+                    />
+                    <Text color="black-700">{descricao}</Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <Text color="black-500" fontStyle="p-16-regular">
+                    Carregando opções...
+                  </Text>
+                </View>
+              )}
+            </Col>
+          </ScrollView>
         );
       }}
     />

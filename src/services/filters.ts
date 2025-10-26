@@ -40,14 +40,106 @@ export const getCity = async (keyword: string) => {
   return content;
 };
 
+// Novas rotas para filtros - verificando se existem na API
+export const getTiposCambio = async () => {
+  try {
+    const {
+      data: { content },
+    } = await api.get('/cliente/listagem/tipos_cambio');
+    return content;
+  } catch (error) {
+    console.warn('Rota tipos_cambio não encontrada:', error);
+    return [];
+  }
+};
+
+export const getTiposCombustivel = async () => {
+  try {
+    const {
+      data: { content },
+    } = await api.get('/cliente/listagem/tipos_combustivel');
+    return content;
+  } catch (error) {
+    console.warn('Rota tipos_combustivel não encontrada:', error);
+    return [];
+  }
+};
+
+export const getOpcionais = async () => {
+  const {
+    data: { content },
+  } = await api.get('/cliente/listagem/opcionais');
+  return content;
+};
+
+// Removidas rotas que não existem na API
+// export const getTiposVendedor = async () => {
+//   const {
+//     data: { content },
+//   } = await api.get('/cliente/listagem/tipos_vendedor');
+//   return content;
+// };
+
+// export const getTiposVenda = async () => {
+//   const {
+//     data: { content },
+//   } = await api.get('/cliente/listagem/tipos_venda');
+//   return content;
+// };
+
 export const getFilteredData = async (
   properties: FilterOptions
 ): Promise<FilteredApiResponse> => {
-  // console.log('properties =', properties);
+  console.log('getFilteredData - properties:', properties);
   const {
     data: { content },
   } = await api.post('/cliente/anuncios/filtrar', properties);
+  console.log('getFilteredData - response:', content);
   return content as FilteredApiResponse;
+};
+
+// Nova função para buscar dados de filtros com contagem
+export const getFilterDataWithCount = async (
+  properties: FilterOptions
+): Promise<{
+  anuncios: Offer[];
+  total: number;
+  filterCounts: {
+    marcas: { id: number; descricao: string; count: number }[];
+    modelos: { id: number; descricao: string; count: number }[];
+    cores: { id: number; descricao: string; count: number }[];
+    tiposCambio: { id: number; descricao: string; count: number }[];
+    tiposCombustivel: { id: number; descricao: string; count: number }[];
+    opcionais: { id: number; descricao: string; count: number }[];
+  };
+}> => {
+  console.log('getFilterDataWithCount - properties:', properties);
+  
+  // Buscar dados filtrados
+  const filteredData = await getFilteredData(properties);
+  
+  // Buscar contagens para cada filtro
+  const [marcas, modelos, cores, tiposCambio, tiposCombustivel, opcionais] = await Promise.all([
+    getBrands(''),
+    getModels(''),
+    getColors(),
+    getTiposCambio(),
+    getTiposCombustivel(),
+    getOpcionais(),
+  ]);
+  
+  return {
+    anuncios: filteredData.anuncios,
+    total: filteredData.total,
+    filterCounts: {
+      marcas: marcas || [],
+      modelos: modelos || [],
+      cores: cores || [],
+      tiposCambio: tiposCambio || [],
+      tiposCombustivel: tiposCombustivel || [],
+      opcionais: opcionais || [],
+    }
+  };
 };
 
 export interface RootObject {
@@ -87,6 +179,7 @@ export interface FilterOptions {
   marca?: string;
   id_cidade?: number;
   id_estado?: number;
+  cidade_nome?: string;
   id_marca?: number;
   id_loja?: number;
   modelo?: string;

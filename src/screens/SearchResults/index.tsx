@@ -24,7 +24,7 @@ type NavigationProps = CompositeNavigationProp<
 
 const SearchResults = () => {
   const [orderingOpen, setOrderingOpen] = useState(false);
-  const { searchResults, isSearchResultsLoading, isRefetching } = useFilters();
+  const { searchResults, filterDataWithCount, isSearchResultsLoading, isRefetching } = useFilters();
 
   const handleConfirm = () => {
     toggleOrderingModal();
@@ -76,7 +76,9 @@ const SearchResults = () => {
       );
     }
 
-    if (!searchResults?.anuncios || searchResults.anuncios.length === 0) {
+    const anuncios = filterDataWithCount?.anuncios || searchResults?.anuncios || [];
+    
+    if (!anuncios || anuncios.length === 0) {
       return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
           <Text color="black-500" fontStyle="p-18-regular">
@@ -86,7 +88,7 @@ const SearchResults = () => {
       );
     }
 
-    return searchResults.anuncios.map((ad) => (
+    return anuncios.map((ad) => (
       <ItemCard
         key={ad.codigo}
         itemID={ad.id}
@@ -122,7 +124,7 @@ const SearchResults = () => {
       />
       <View style={{ paddingLeft: 30, paddingTop: 20 }}>
         <Text color="black" fontStyle="t-24" style={{ fontWeight: 'bold' }}>
-          Ofertas ({searchResults?.total || 0})
+          Ofertas ({filterDataWithCount?.total || searchResults?.total || 0})
         </Text>
       </View>
       <S.HeaderButtonsRow>

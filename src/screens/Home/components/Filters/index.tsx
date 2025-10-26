@@ -94,12 +94,12 @@ export default function Filters() {
   const getBrandData = async (estadoParam?: string) => {
     try {
       const estadoToUse = estadoParam || estado;
-      // console.log('buscando marcas para estado:', estadoToUse);
+      console.log('buscando marcas para estado:', estadoToUse);
       const response: AxiosResponse<DataFetchProps> =
         await api.get<DataFetchProps>(
           `cliente/listagem/marcas?estado=${estadoToUse}`
         );
-      // console.log('marcas =', response.data.content);
+      console.log('marcas =', response.data.content);
 
       if (response.data.content) {
         setListaMarcas(response.data.content);
@@ -117,13 +117,13 @@ export default function Filters() {
         return;
       }
       
-      // console.log('buscando modelos para marca:', id_marca);
+      console.log('buscando modelos para marca:', id_marca);
       const response: AxiosResponse<DataFetchProps> =
         await api.get<DataFetchProps>(
           `cliente/listagem/modelos?id_marca=${id_marca}`
         );
 
-      // console.log('modelos =', response.data.content);
+      console.log('modelos =', response.data.content);
 
       if (response.data.content) {
         setListaModelos(response.data.content);

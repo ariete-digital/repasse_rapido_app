@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 
 import AutocompleteDropdown from '@components/Autocomplete';
+import Text from '@components/Text';
 import { useFilters } from '@hooks/useFilters';
 import BaseFilterModal from '../../BaseFilter';
 import { Row } from '../styles';
@@ -17,13 +18,20 @@ const BrandFilter = ({
   handleCancel,
   handleConfirm,
 }: BrandFilterProps) => {
-  const { filterParams, setFilterParams, isLoading } = useFilters();
+  const { filterParams, setFilterParams, isLoading, filterValues } = useFilters();
   const [selectedBrand, setSelectedBrand] = useState<string>('');
+
+  // Carregar seleção existente
+  useEffect(() => {
+    if (filterParams.marca) {
+      setSelectedBrand(filterParams.marca);
+    }
+  }, [filterParams.marca]);
 
   const handleSubmit = () => {
     setFilterParams({
       ...filterParams,
-      marca: selectedBrand,
+      marca: selectedBrand || undefined,
     });
     handleConfirm();
   };
@@ -37,16 +45,18 @@ const BrandFilter = ({
       onCancel={handleCancel}
       render={() => {
         return (
-          <Row>
-            <View style={{ padding: 10 }}>
-              <AutocompleteDropdown
-                placeholder="Digite para pesquisar"
-                label=""
-                filter="marcas"
-                onChangeValue={(v) => setSelectedBrand(v as string)}
-              />
-            </View>
-          </Row>
+          <ScrollView style={{ maxHeight: 400 }}>
+            <Row>
+              <View style={{ padding: 10 }}>
+                <AutocompleteDropdown
+                  placeholder="Digite para pesquisar"
+                  label="Marca"
+                  filter="marcas"
+                  onChangeValue={(v) => setSelectedBrand(v as string)}
+                />
+              </View>
+            </Row>
+          </ScrollView>
         );
       }}
     />

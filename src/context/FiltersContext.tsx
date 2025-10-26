@@ -5,8 +5,12 @@ import {
   getCity,
   getColors,
   getFilteredData,
+  getFilterDataWithCount,
   getModels,
+  getOpcionais,
   getState,
+  getTiposCambio,
+  getTiposCombustivel,
 } from '@services/filters';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -52,6 +56,8 @@ type FiltersState = {
     cities: DefaultValue[] | undefined;
     brands: DefaultValue[] | undefined;
     models: DefaultValue[] | undefined;
+    tiposCambio: DefaultFilterValues[] | undefined;
+    tiposCombustivel: DefaultFilterValues[] | undefined;
     ordering: string;
   };
   setFilterValues: Dispatch<SetStateAction<FiltersState['filterValues']>>;
@@ -74,6 +80,18 @@ type FiltersState = {
   >;
   searchResults?: FilteredApiResponse;
   transferSearchResults?: FilteredApiResponse;
+  filterDataWithCount?: {
+    anuncios: any[];
+    total: number;
+    filterCounts: {
+      marcas: { id: number; descricao: string; count: number }[];
+      modelos: { id: number; descricao: string; count: number }[];
+      cores: { id: number; descricao: string; count: number }[];
+      tiposCambio: { id: number; descricao: string; count: number }[];
+      tiposCombustivel: { id: number; descricao: string; count: number }[];
+      opcionais: { id: number; descricao: string; count: number }[];
+    };
+  };
   isSearchResultsLoading: boolean;
   isTransferSearchResultsLoading: boolean;
   isRefetching: boolean;
@@ -135,6 +153,8 @@ export const FiltersContextProvider = ({
     cities: [],
     brands: [],
     models: [],
+    tiposCambio: [],
+    tiposCombustivel: [],
     ordering: '',
   });
 
@@ -183,6 +203,36 @@ export const FiltersContextProvider = ({
     queryFn: () => getModels(search.model),
   });
 
+  // Novas queries para filtros
+  const {
+    data: tiposCambioData,
+    isLoading: isTiposCambioLoading,
+    error: tiposCambioError,
+  } = useQuery({
+    queryKey: ['tipos-cambio'],
+    queryFn: () => getTiposCambio(),
+  });
+
+  const {
+    data: tiposCombustivelData,
+    isLoading: isTiposCombustivelLoading,
+    error: tiposCombustivelError,
+  } = useQuery({
+    queryKey: ['tipos-combustivel'],
+    queryFn: () => getTiposCombustivel(),
+  });
+
+  const {
+    data: opcionaisData,
+    isLoading: isOpcionaisLoading,
+    error: opcionaisError,
+  } = useQuery({
+    queryKey: ['opcionais'],
+    queryFn: () => getOpcionais(),
+  });
+
+  // Removidas queries para rotas que não existem na API
+
   const filterKey = useMemo(() => JSON.stringify(filterParams), [filterParams]);
   const {
     data: searchResults,
@@ -198,6 +248,23 @@ export const FiltersContextProvider = ({
       return getFilteredData(parsedParams);
     },
     enabled: true, // Mudado para true para executar automaticamente
+  });
+
+  // Nova query para buscar dados de filtros com contagem
+  const {
+    data: filterDataWithCount,
+    isLoading: isFilterDataLoading,
+    error: filterDataErrors,
+    refetch: refetchFilterData,
+    isRefetching: isFilterDataRefetching,
+  } = useQuery({
+    queryKey: ['filter-data-with-count', filterKey],
+    queryFn: ({ queryKey }) => {
+      const parsedParams = JSON.parse(queryKey[1]);
+      console.log('Buscando dados de filtros com contagem:', parsedParams);
+      return getFilterDataWithCount(parsedParams);
+    },
+    enabled: true,
   });
 
   // Carrega todos os anúncios ao iniciar
@@ -225,7 +292,13 @@ export const FiltersContextProvider = ({
       setFilterValues((prev) => ({ ...prev, brands: brandsData }));
     if (modelsData)
       setFilterValues((prev) => ({ ...prev, models: modelsData }));
-  }, [colorsData, stateData, cityData, brandsData, modelsData]);
+    if (tiposCambioData)
+      setFilterValues((prev) => ({ ...prev, tiposCambio: tiposCambioData }));
+    if (tiposCombustivelData)
+      setFilterValues((prev) => ({ ...prev, tiposCombustivel: tiposCombustivelData }));
+    if (opcionaisData)
+      setFilterValues((prev) => ({ ...prev, opcionais: opcionaisData }));
+  }, [colorsData, stateData, cityData, brandsData, modelsData, tiposCambioData, tiposCombustivelData, opcionaisData]);
 
   const isDataLoaded = () =>
     !isColorsLoading &&
@@ -233,7 +306,10 @@ export const FiltersContextProvider = ({
     !isCitiesLoading &&
     !isSearchResultsLoading &&
     !isBrandsLoading &&
-    !isModelsLoading;
+    !isModelsLoading &&
+    !isTiposCambioLoading &&
+    !isTiposCombustivelLoading &&
+    !isOpcionaisLoading;
 
   useEffect(() => {
     const errors = {
@@ -243,6 +319,9 @@ export const FiltersContextProvider = ({
       searchResultsErrors,
       brandsError,
       modelsError,
+      tiposCambioError,
+      tiposCombustivelError,
+      opcionaisError,
     };
 
     if (Object.values(errors).some((value) => value !== null)) {
@@ -255,6 +334,9 @@ export const FiltersContextProvider = ({
     searchResultsErrors,
     brandsError,
     modelsError,
+    tiposCambioError,
+    tiposCombustivelError,
+    opcionaisError,
   ]);
 
   const resetFilters = (tipoVenda: 'R' | 'C' | undefined) => {
@@ -301,6 +383,7 @@ export const FiltersContextProvider = ({
         refetchTransferSearchResults,
         isTransferSearchResultsRefetching,
         transferSearchResults,
+        filterDataWithCount,
       }}
     >
       {children}
