@@ -21,7 +21,6 @@ const DebugScreen = () => {
         const res = await axios.get(`${apiUrl}/cliente/home`); // Substitua por um endpoint leve se necessário
         setStatus('✅ Conexão bem-sucedida');
         setResponse(res.data);
-        console.log('✅ API OK:', res.data);
       } catch (error: any) {
         setStatus('❌ Erro ao conectar');
         setErrorInfo({
@@ -30,7 +29,6 @@ const DebugScreen = () => {
           data: error?.response?.data,
           url: apiUrl,
         });
-        console.error('❌ Erro API:', error);
       }
     };
 

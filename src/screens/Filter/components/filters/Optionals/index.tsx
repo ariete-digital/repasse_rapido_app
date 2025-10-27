@@ -48,11 +48,9 @@ const OptionalsFilter = ({
   };
 
   const getOptionalsData = async () => {
-    console.log('buscando opcionais');
     const response: AxiosResponse<DataFetchProps> =
       await api.get<DataFetchProps>(`cliente/listagem/opcionais`);
 
-    // console.log('opcionais =', response.data.content);
 
     if (response.data.content) {
       setOptions(response.data.content);
@@ -75,7 +73,6 @@ const OptionalsFilter = ({
     for (let i = 0; i < options.length; i += 2) {
       optInTwoColumns.push(options.slice(i, i + 2));
     }
-    // console.log('optInTwoColumns =', optInTwoColumns);
     setOptionsInTwoColumns(optInTwoColumns);
   }, [options]);
 

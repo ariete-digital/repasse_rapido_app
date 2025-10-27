@@ -26,32 +26,14 @@ const Step4 = () => {
   const { updateStep4Data, advertiseData } = useAdvertise();
   const [photos, setPhotos] = useState<Photo[]>([]);
 
-  // Log para debug
-  console.log('Step4 - Current advertiseData:', advertiseData);
-  console.log('Step4 - Current photos state:', photos);
-
-  // Preencher fotos se estiver editando
   useEffect(() => {
-    console.log('Step4 - useEffect triggered');
-    console.log('Step4 - advertiseData.id_anuncio:', advertiseData.id_anuncio);
-    console.log('Step4 - advertiseData.imagens:', advertiseData.imagens);
-    console.log('Step4 - advertiseData.imagens length:', advertiseData.imagens?.length);
-    
     if ((advertiseData.id_anuncio || advertiseData.imagens) && advertiseData.imagens && advertiseData.imagens.length > 0) {
-      console.log('Step4 - Loading images for edit:', advertiseData.imagens.length);
-      console.log('Step4 - Images data:', advertiseData.imagens);
       const loadedPhotos = advertiseData.imagens.map((img: any, idx: number) => ({
-        uri: img.uri || img.url, // Pode vir como uri ou url da API
-        base64: img.base64 || '', // Imagens da API não terão base64 inicialmente
+        uri: img.uri || img.url,
+        base64: img.base64 || '',
         index: idx,
       }));
-      console.log('Step4 - Loaded photos:', loadedPhotos);
       setPhotos(loadedPhotos);
-    } else {
-      console.log('Step4 - Condition not met for loading images');
-      console.log('Step4 - id_anuncio exists:', !!advertiseData.id_anuncio);
-      console.log('Step4 - imagens exists:', !!advertiseData.imagens);
-      console.log('Step4 - imagens length > 0:', (advertiseData.imagens?.length || 0) > 0);
     }
   }, [advertiseData.id_anuncio, advertiseData.imagens]);
 
@@ -146,7 +128,6 @@ const Step4 = () => {
             }));
             
             setPhotos(reorganizedPhotos);
-            console.log('Photo removed, reorganized photos:', reorganizedPhotos);
             
             // Atualizar o contexto imediatamente com as imagens reorganizadas
             const imageData = reorganizedPhotos.map((photo, arrayIndex) => ({
@@ -158,8 +139,6 @@ const Step4 = () => {
               index: photo.index
             }));
             
-            console.log('Step4 - Image removed, updating context with:', imageData.length, 'images');
-            console.log('Step4 - Image data being sent to context:', imageData);
             
             updateStep4Data({
               imagens: imageData,
@@ -175,7 +154,6 @@ const Step4 = () => {
   const handleContinue = () => {
     // Preparar dados das imagens para a API
     const imageData = prepareImagesForAPI();
-    console.log('Step4 - Submitting images:', imageData);
     
     // Salvar dados no contexto
     updateStep4Data({
@@ -207,7 +185,6 @@ const Step4 = () => {
 
   const getPhotoByIndex = (index: number) => {
     const photo = photos.find(p => p.index === index);
-    console.log(`Step4 - Getting photo for index ${index}:`, photo);
     return photo;
   };
 
@@ -280,7 +257,6 @@ const Step4 = () => {
     );
   };
 
-  console.log(photos);
 
   const renderPhotoGrid = () => {    
     return (

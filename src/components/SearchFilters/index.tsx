@@ -6,11 +6,13 @@ import Text from '@components/Text';
 export interface SearchFiltersProps {
   onAdNumberChange?: (value: string) => void;
   onLocationChange?: (value: string) => void;
+  placeholder?: string;
 }
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
   onAdNumberChange,
   onLocationChange,
+  placeholder = "Buscar por marca, modelo ou código",
 }) => {
   const [adNumber, setAdNumber] = useState('');
   const [location, setLocation] = useState('São Paulo');
@@ -33,7 +35,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             <SearchIcon size={20} color="#1E3A8A" />
           </View>
           <TextInput
-            placeholder="Número do Anúncio"
+            placeholder={placeholder}
             placeholderTextColor="#9CA3AF"
             value={adNumber}
             onChangeText={handleAdNumberChange}

@@ -20,6 +20,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface ItemCardProps {
   itemID: number;
+  codigo?: string; // Adicionar código do anúncio
   imageUrl?: string;
   brand: string;
   model: string;
@@ -38,6 +39,7 @@ const ItemCard = ({
   price,
   fipePrice,
   itemID,
+  codigo,
   description,
   storeName,
   itemPerRow = 1,
@@ -45,7 +47,9 @@ const ItemCard = ({
 }: ItemCardProps) => {
   const navigation = useNavigation<NavigationProp>();
   const seeOffer = () => {
-    navigation.navigate('adDetails', { code: itemID.toString() });
+    // Usar código se disponível, senão usar itemID como fallback
+    const codeToUse = codigo || itemID.toString();
+    navigation.navigate('adDetails', { code: codeToUse });
   };
 
   return (

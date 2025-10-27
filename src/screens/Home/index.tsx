@@ -61,6 +61,7 @@ const Home = () => {
         <H.RowContainer key={`row-${i}`}>
           <ItemCard
             itemID={firstAd.id}
+            codigo={firstAd.codigo}
             key={firstAd.codigo}
             brand={firstAd.marca_veiculo}
             model={firstAd.modelo_veiculo}
@@ -75,6 +76,7 @@ const Home = () => {
           {secondAd && (
             <ItemCard
               itemID={secondAd.id}
+              codigo={secondAd.codigo}
               key={secondAd.codigo}
               brand={secondAd.marca_veiculo}
               model={secondAd.modelo_veiculo}

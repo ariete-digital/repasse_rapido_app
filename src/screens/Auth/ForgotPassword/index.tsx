@@ -40,7 +40,6 @@ const ForgotPassword = () => {
         navigation.navigate('forgotPasswordSuccess');
       }
     } catch (error: any) {
-      console.error('Forgot password error:', error.response?.data || error.message);
       
       const errorMessage = error.response?.data?.message || 
                           'Erro ao enviar e-mail de recuperação. Verifique o e-mail e tente novamente!';

@@ -121,7 +121,6 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
         setCitiesOptions(cities);
       }
     } catch (error) {
-      console.warn('Erro ao carregar cidades:', error);
     } finally {
       setLoadingCities(false);
     }
@@ -156,7 +155,6 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
             }
           }
         } catch (error) {
-          console.warn('Erro ao buscar cidade:', error);
         }
         
         toast.show('Endereço encontrado!', { type: 'success' });
@@ -164,7 +162,6 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
         toast.show('CEP não encontrado', { type: 'warning' });
       }
     } catch (error) {
-      console.warn('Erro ao buscar CEP:', error);
       toast.show('Erro ao buscar CEP', { type: 'danger' });
     }
   };
@@ -186,11 +183,9 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
         id_cidade: data.id_cidade, // Apenas id_cidade
       };
 
-      console.log('handleUpdateProfile updateData:', updateData);
 
       const response = await api.post('/cliente/minha_conta/salvar', updateData);
       
-      console.log('handleUpdateProfile response:', response.data);
 
       if (response.data && response.data.status === 'success') {
         const updatedUser = { ...userData, ...updateData };
@@ -199,7 +194,6 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
         onUpdate();
       }
     } catch (error: any) {
-      console.error('Erro ao atualizar perfil:', error);
       const errorMessage = error.response?.data?.message || 'Erro ao atualizar perfil. Tente novamente.';
       toast.show(errorMessage, { type: 'danger' });
     } finally {
@@ -225,9 +219,7 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
         nova_senha: data.senha,
       };
 
-      console.log('handleUpdatePassword updateData:', updateData);
       const response = await api.post('/cliente/minha_conta/salvar', updateData);
-      console.log('handleUpdatePassword response:', response.data);
       
       if (response.data && response.data.status === 'success') {
         toast.show('Senha alterada com sucesso!', { type: 'success' });
@@ -237,7 +229,6 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
         setValue('confirmacao', '');
       }
     } catch (error: any) {
-      console.error('Erro ao alterar senha:', error);
       const errorMessage = error.response?.data?.message || 'Erro ao alterar senha. Tente novamente.';
       toast.show(errorMessage, { type: 'danger' });
     } finally {

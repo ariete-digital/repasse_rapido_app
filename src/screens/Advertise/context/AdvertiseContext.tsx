@@ -6,6 +6,9 @@ interface AdvertiseData {
   // ID do anúncio (para edição)
   id_anuncio?: number | null;
   
+  // Flag para publicar automaticamente após edição
+  shouldPublish?: boolean;
+  
   // Step 1 - Dados do Veículo
   tipo_veiculo?: string;
   marca_veiculo?: string;
@@ -124,7 +127,6 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
           });
         }
       } catch (error) {
-        console.error('Erro ao carregar parâmetros:', error);
       } finally {
         setIsLoadingParameters(false);
       }
@@ -134,42 +136,30 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
   }, []);
 
   const updateStep1Data = (data: Partial<AdvertiseData>) => {
-    console.log('Updating Step1 data:', data);
     setAdvertiseData(prev => ({ ...prev, ...data }));
   };
 
   const updateStep2Data = (data: Partial<AdvertiseData>) => {
-    console.log('Updating Step2 data:', data);
     setAdvertiseData(prev => ({ ...prev, ...data }));
   };
 
   const updateStep3Data = (data: Partial<AdvertiseData>) => {
-    console.log('Updating Step3 data:', data);
-    console.log('Current advertiseData before Step3 update:', advertiseData);
-    setAdvertiseData(prev => {
-      const newData = { ...prev, ...data };
-      console.log('New advertiseData after Step3 update:', newData);
-      return newData;
-    });
+    setAdvertiseData(prev => ({ ...prev, ...data }));
   };
 
   const updateStep4Data = (data: Partial<AdvertiseData>) => {
-    console.log('Updating Step4 data:', data);
     setAdvertiseData(prev => ({ ...prev, ...data }));
   };
 
   const updateStep5Data = (data: Partial<AdvertiseData>) => {
-    console.log('Updating Step5 data:', data);
     setAdvertiseData(prev => ({ ...prev, ...data }));
   };
 
   const clearAdvertiseData = () => {
-    console.log('Clearing advertise data');
     setAdvertiseData({});
   };
 
   const clearEditCache = () => {
-    console.log('Clearing edit cache - removing id_anuncio and edit-related data');
     setAdvertiseData(prev => {
       const { id_anuncio, ...rest } = prev;
       return rest;
@@ -178,22 +168,17 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
 
   const loadAdDataForEdit = async (codigo: string) => {
     try {
-      console.log('Loading ad data for edit, codigo:', codigo);
       const response = await api.get(`/cliente/anuncios/detalhe?codigo=${codigo}`);
       
       if (response.data.status === 'success' && response.data.content.anuncio) {
-        console.log('Response data:', response.data);
         const ad = response.data.content.anuncio;
         
-        console.log('Ad data - imagens field:', ad.imagens);
-        console.log('Ad data - imagemPrincipal field:', ad.imagemPrincipal);
         
         // Converter campos numéricos para string (para compatibilidade com os forms)
         const convertToString = (value: any) => value != null ? value.toString() : '';
         const convertBoolToString = (value: any) => value === 1 || value === true ? '1' : '0';
         
         // Preencher todos os dados do anúncio
-        console.log('Setting advertise data with id_anuncio:', ad.id);
         setAdvertiseData({
           id_anuncio: ad.id,
           
@@ -241,12 +226,9 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
           
           // Step 4 - Imagens (converter para formato esperado)
           imagens: (() => {
-            console.log('Processing images - ad.imagens:', ad.imagens);
-            console.log('Processing images - ad.imagemPrincipal:', ad.imagemPrincipal);
             
             // Se há array de imagens, processar normalmente
             if (ad.imagens && Array.isArray(ad.imagens) && ad.imagens.length > 0) {
-              console.log('Processing images array:', ad.imagens);
               return ad.imagens.map((img: any, index: number) => {
                 // Se img é uma string (URL), usar diretamente
                 if (typeof img === 'string') {
@@ -271,7 +253,6 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
             
             // Se não há array mas há imagemPrincipal, criar array com ela
             if (ad.imagemPrincipal) {
-              console.log('Using imagemPrincipal as single image:', ad.imagemPrincipal);
               return [{
                 uri: ad.imagemPrincipal,
                 name: 'image_0.jpg',
@@ -281,7 +262,6 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
               }];
             }
             
-            console.log('No images found, returning empty array');
             return [];
           })(),
           
@@ -291,10 +271,8 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
           aceite_termos: convertBoolToString(ad.aceite_termos),
         });
         
-        console.log('Ad data loaded for edit successfully');
       }
     } catch (error) {
-      console.error('Error loading ad data for edit:', error);
       throw error;
     }
   };

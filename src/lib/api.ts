@@ -10,7 +10,6 @@ const { apiUrl } = Constants.expoConfig?.extra as AppConfig;
 // Use API_URL_PROD from environment or fallback to the configured apiUrl
 const baseURL = process.env.API_URL_PROD || apiUrl || 'https://api-repasses.arietedigital.com.br/api';
 
-console.log("baseURL", baseURL);
 
 export const api = axios.create({
   baseURL,
@@ -38,7 +37,6 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Handle unauthorized access
-      console.log('Unauthorized access - token may be expired');
     }
     return Promise.reject(error);
   }

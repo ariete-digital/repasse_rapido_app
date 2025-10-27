@@ -61,10 +61,8 @@ export function useCarouselImages(type: string): UseCarouselImagesResult {
             }, {} as { [key: string]: boolean })
           );
         } else {
-          console.error('Formato inválido: imagens não recebidas como array');
         }
       } catch (error) {
-        console.error('Erro ao buscar imagens:', error);
       } finally {
         setLoading(false);
       }

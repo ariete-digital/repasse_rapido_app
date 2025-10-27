@@ -84,8 +84,6 @@ const Step6 = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('=== STARTING AD SUBMISSION ===');
-      console.log('Consolidating all advertise data:', JSON.stringify(advertiseData, null, 2));
 
       // Preparar FormData para multipart/form-data
       const formData = new FormData();
@@ -124,7 +122,6 @@ const Step6 = () => {
         advertiseData.opcionais.forEach(opcional => {
           formData.append('opcionais[]', opcional.toString());
         });
-        console.log('Adding opcionais:', advertiseData.opcionais);
       }
 
       // Step 3 - Dados Detalhados do Veículo (converter para 1 ou 0)
@@ -162,16 +159,8 @@ const Step6 = () => {
 
       // Step 4 - Imagens (enviar como arquivos)
       if (advertiseData.imagens && advertiseData.imagens.length > 0) {
-        console.log('=== IMAGE PROCESSING ===');
-        console.log('Processing images:', advertiseData.imagens.length);
-        console.log('Images data:', advertiseData.imagens);
         
         advertiseData.imagens.forEach((img, index) => {
-          console.log(`Adding image ${index}:`, {
-            uri: img.uri,
-            type: 'image/jpeg',
-            name: `image_${index}.jpg`,
-          });
           
           formData.append('imagens[]', {
             uri: img.uri,
@@ -179,10 +168,6 @@ const Step6 = () => {
             name: `image_${index}.jpg`,
           } as any);
         });
-        console.log(`Added ${advertiseData.imagens.length} images to FormData`);
-      } else {
-        console.log('=== NO IMAGES ===');
-        console.log('No images to upload - advertiseData.imagens:', advertiseData.imagens);
       }
 
       // Step 5 - Valor e Descrição
@@ -210,8 +195,6 @@ const Step6 = () => {
       }
 
       // Log de debug
-      console.log('=== FORM DATA ===');
-      console.log('Sending FormData to API');
 
       // Enviar para a API com Content-Type: multipart/form-data
       const response = await api.post('/cliente/meus_anuncios/salvar', formData, {
@@ -221,15 +204,26 @@ const Step6 = () => {
         timeout: 60000, // 60 segundos de timeout
       });
 
-      console.log('API Response:', response.data);
-      console.log('API Response Status:', response.status);
 
       if (response.data.status === 'success') {
         // A API retorna id_anuncio (não id_anuncio_rascunho)
         const adNumber = response.data.content?.id_anuncio || response.data.content?.id_anuncio_rascunho || advertiseData.id_anuncio || 'N/A';
         
         const isEditing = !!advertiseData.id_anuncio;
-        console.log(isEditing ? 'Ad updated successfully' : 'Ad created successfully', 'with ID:', adNumber);
+        
+        // Verificar se deve publicar automaticamente
+        if (advertiseData.shouldPublish && isEditing) {
+          try {
+            const publishResponse = await api.post('/cliente/anuncios/publicar_anuncio', {
+              id_anuncio: parseInt(adNumber.toString())
+            });
+            
+            if (publishResponse.data.status === 'success') {
+            }
+          } catch (publishError) {
+            // Não bloquear o fluxo se a publicação falhar
+          }
+        }
         
         // Limpar dados do contexto
         if (isEditing) {
@@ -249,10 +243,6 @@ const Step6 = () => {
         throw new Error(response.data.message || 'Erro ao salvar anúncio');
       }
     } catch (error: any) {
-      console.error('Error saving ad:', error);
-      console.error('Error response:', error.response);
-      console.error('Error response data:', error.response?.data);
-      console.error('Error response status:', error.response?.status);
       setIsSubmitting(false);
 
       // Tratar erros específicos

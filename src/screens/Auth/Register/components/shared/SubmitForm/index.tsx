@@ -14,8 +14,6 @@ export const SubmitForm = ({ handleRegister, disabled }: SubmitFormProps) => {
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
   
   const handlePress = () => {
-    console.log("SubmitForm button clicked!");
-    console.log("Disabled:", disabled);
     handleRegister();
   };
   

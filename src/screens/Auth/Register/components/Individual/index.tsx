@@ -56,16 +56,12 @@ const Individual = () => {
     setIsLoading(true);
 
     try {
-      console.log("RegisteIndividual userData", userData);
       const response = await api.post('/cadastrar', userData);
-      console.log("RegisterIndividual response", response);
-      console.log("RegisterIndividual response.data", response.data);
       if (response.data) {
         toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
         navigation.navigate('registerSuccess');
       }
     } catch (error: any) {
-      console.error('Registration error:', error.response?.data || error.message);
       
       const errorMessage = error.response?.data?.message || 
                           'Erro ao cadastrar usuário. Verifique os dados e tente novamente!';

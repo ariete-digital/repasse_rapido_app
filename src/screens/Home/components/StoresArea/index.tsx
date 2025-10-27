@@ -15,7 +15,6 @@ export const StoresArea = () => {
   const getStores = async () => {
     const response: AxiosResponse<DataFetchProps> =
       await api.get<DataFetchProps>('/cliente/get_logos_lojas');
-    // console.log('response.data.content.lojas =', response.data.content.lojas);
     if (Array.isArray(response.data.content.lojas)) {
       setStores(response.data.content.lojas);
       return;
@@ -35,7 +34,6 @@ export const StoresArea = () => {
         Alert.alert(`Não foi possível abrir a URL: ${url}`);
       }
     } catch (error) {
-      console.error('Erro ao abrir URL:', error);
       Alert.alert('Erro ao tentar abrir o link.');
     }
   };

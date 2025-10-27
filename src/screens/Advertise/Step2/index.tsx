@@ -27,12 +27,8 @@ const Step2 = () => {
 
   // Preencher opcionais se estiver editando
   useEffect(() => {
-    console.log('Step2 - advertiseData:', advertiseData);
-    console.log('Step2 - id_anuncio:', advertiseData.id_anuncio);
-    console.log('Step2 - opcionais:', advertiseData.opcionais);
     
     if ((advertiseData.id_anuncio || advertiseData.opcionais) && advertiseData.opcionais && advertiseData.opcionais.length > 0) {
-      console.log('Step2 - Loading opcionais for edit:', advertiseData.opcionais);
       setSelectedOptionalIds(advertiseData.opcionais);
     }
   }, [advertiseData.id_anuncio, advertiseData.opcionais]);
@@ -59,12 +55,10 @@ const Step2 = () => {
     });
   };
 
-  console.log('selectedOptionalIds =', selectedOptionalIds);
 
   const isEditing = !!advertiseData.id_anuncio;
 
   const handleContinue = () => {
-    console.log('Step2 - Submitting opcionais:', selectedOptionalIds);
     
     // Salvar dados no contexto
     updateStep2Data({

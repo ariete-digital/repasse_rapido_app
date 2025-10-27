@@ -27,20 +27,14 @@ const GearFilter = ({
 
   // Atualizar options quando os dados estiverem disponíveis
   useEffect(() => {
-    console.log('=== DEBUG CÂMBIO ===');
-    console.log('filterValues.tiposCambio:', filterValues.tiposCambio);
-    console.log('searchResults?.listaTiposCambio:', searchResults?.listaTiposCambio);
-    console.log('searchResults:', searchResults);
     
     // Tentar diferentes fontes de dados
     let tiposCambio = [];
     
     if (filterValues.tiposCambio && Array.isArray(filterValues.tiposCambio)) {
       tiposCambio = filterValues.tiposCambio;
-      console.log('Usando filterValues.tiposCambio');
     } else if (searchResults?.listaTiposCambio && Array.isArray(searchResults.listaTiposCambio)) {
       tiposCambio = searchResults.listaTiposCambio;
-      console.log('Usando searchResults.listaTiposCambio');
     } else {
       // Dados de fallback para teste
       tiposCambio = [
@@ -49,18 +43,12 @@ const GearFilter = ({
         { id: 3, descricao: 'CVT' },
         { id: 4, descricao: 'Semi-automático' }
       ];
-      console.log('Usando dados de fallback');
     }
     
-    console.log('tiposCambio final:', tiposCambio);
-    console.log('Array.isArray(tiposCambio):', Array.isArray(tiposCambio));
-    console.log('tiposCambio.length:', tiposCambio.length);
     
     if (Array.isArray(tiposCambio) && tiposCambio.length > 0) {
       setOptions(tiposCambio);
-      console.log('Options atualizadas:', tiposCambio);
     } else {
-      console.log('Nenhum dado de câmbio encontrado');
     }
   }, [filterValues.tiposCambio, searchResults?.listaTiposCambio]);
 

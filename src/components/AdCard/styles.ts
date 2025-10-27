@@ -44,6 +44,15 @@ export const editIcon = {
   padding: 8,
 };
 
+export const viewIcon = {
+  position: 'absolute' as const,
+  bottom: 8,
+  left: 8,
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  borderRadius: 16,
+  padding: 8,
+};
+
 export const ContentContainer = styled.View`
   padding: 5px;
 `;

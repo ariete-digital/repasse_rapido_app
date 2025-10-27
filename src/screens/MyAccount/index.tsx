@@ -19,8 +19,6 @@ const MyAccount = () => {
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
 
-  console.log("MyAccount authUser", authUser);
-  console.log("MyAccount userData", userData);
 
   useEffect(() => {
     loadUserData();
@@ -31,7 +29,6 @@ const MyAccount = () => {
       setIsLoading(true);
       const response = await api.get('/cliente/minha_conta/obter');
 
-      console.log("MyAccount response", response.data);
       
       if (response.data && response.data.content) {
         // A API retorna { content: { cliente: { ... } } }
@@ -41,7 +38,6 @@ const MyAccount = () => {
         }
       }
     } catch (error: any) {
-      console.error('Erro ao carregar dados do usuário:', error);
       toast.show('Erro ao carregar dados do usuário', { type: 'danger' });
     } finally {
       setIsLoading(false);

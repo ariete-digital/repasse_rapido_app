@@ -146,7 +146,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
         setCitiesOptions(cities);
       }
     } catch (error) {
-      console.warn('Erro ao carregar cidades:', error);
     } finally {
       setLoadingCities(false);
     }
@@ -184,7 +183,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
         onUpdate();
       }
     } catch (error: any) {
-      console.error('Erro ao atualizar perfil:', error);
       const errorMessage = error.response?.data?.message || 'Erro ao atualizar perfil. Tente novamente.';
       toast.show(errorMessage, { type: 'danger' });
     } finally {
@@ -210,9 +208,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
         nova_senha: data.senha,
       };
 
-      console.log('handleUpdatePassword updateData:', updateData);
       const response = await api.post('/cliente/minha_conta/salvar', updateData);
-      console.log('handleUpdatePassword response:', response.data);
       
       if (response.data && response.data.status === 'success') {
         toast.show('Senha alterada com sucesso!', { type: 'success' });
@@ -222,7 +218,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
         setValue('confirmacao', '');
       }
     } catch (error: any) {
-      console.error('Erro ao alterar senha:', error);
       const errorMessage = error.response?.data?.message || 'Erro ao alterar senha. Tente novamente.';
       toast.show(errorMessage, { type: 'danger' });
     } finally {
@@ -261,7 +256,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
             }
           }
         } catch (error) {
-          console.warn('Erro ao buscar cidade:', error);
         }
         
         toast.show('Endereço encontrado!', { type: 'success' });
@@ -269,7 +263,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
         toast.show('CEP não encontrado', { type: 'warning' });
       }
     } catch (error) {
-      console.warn('Erro ao buscar CEP:', error);
       toast.show('Erro ao buscar CEP', { type: 'danger' });
     }
   };

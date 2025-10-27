@@ -112,6 +112,7 @@ type FiltersState = {
     cancelRefetch: boolean;
   }) => any;
   resetFilters: (tipo_venda?: 'R' | 'C') => void;
+  clearSpecificFilters: (filtersToClear: (keyof FilterOptions)[]) => void;
 };
 
 type FiltersContextProviderProps = {
@@ -244,7 +245,6 @@ export const FiltersContextProvider = ({
     queryKey: ['search-results', filterKey],
     queryFn: ({ queryKey }) => {
       const parsedParams = JSON.parse(queryKey[1]);
-      console.log('Buscando com filtros:', parsedParams);
       return getFilteredData(parsedParams);
     },
     enabled: true, // Mudado para true para executar automaticamente
@@ -261,7 +261,6 @@ export const FiltersContextProvider = ({
     queryKey: ['filter-data-with-count', filterKey],
     queryFn: ({ queryKey }) => {
       const parsedParams = JSON.parse(queryKey[1]);
-      console.log('Buscando dados de filtros com contagem:', parsedParams);
       return getFilterDataWithCount(parsedParams);
     },
     enabled: true,
@@ -269,7 +268,6 @@ export const FiltersContextProvider = ({
 
   // Carrega todos os anúncios ao iniciar
   useEffect(() => {
-    console.log('FiltersContext inicializado - carregando anúncios iniciais');
   }, []);
 
   const {
@@ -325,7 +323,6 @@ export const FiltersContextProvider = ({
     };
 
     if (Object.values(errors).some((value) => value !== null)) {
-      console.warn('Errors detected: ', errors);
     }
   }, [
     colorsErrors,
@@ -362,10 +359,26 @@ export const FiltersContextProvider = ({
     });
   };
 
+  // Função para limpar filtros específicos
+  const clearSpecificFilters = (filtersToClear: (keyof FilterOptions)[]) => {
+    const newParams = { ...filterParams };
+    filtersToClear.forEach(filter => {
+      if (filter === 'ano') {
+        newParams.ano = { min: undefined, max: undefined };
+      } else if (filter === 'valor') {
+        newParams.valor = { min: undefined, max: undefined };
+      } else {
+        (newParams as any)[filter] = undefined;
+      }
+    });
+    setFilterParams(newParams);
+  };
+
   return (
     <FiltersContext.Provider
       value={{
         resetFilters,
+        clearSpecificFilters,
         filterParams,
         error,
         isLoading,

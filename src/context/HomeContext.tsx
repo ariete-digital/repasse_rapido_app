@@ -52,12 +52,9 @@ export const HomeContextProvider: React.FC<HomeContextProviderProps> = ({
   const loadHomePageData = async () => {
     try {
       setIsLoading(true);
-      console.log("LoadHomePageData - Fetching home data");
       
       const res: AxiosResponse<DataFetchProps> = await api.get('/cliente/home');
       
-      console.log("LoadHomePageData response", res);
-      console.log("LoadHomePageData response.data", res.data);
       
       if (res && res.data && res.data.status === 'success' && res.data.content) {
         setHomePageData({
@@ -72,7 +69,6 @@ export const HomeContextProvider: React.FC<HomeContextProviderProps> = ({
         return Promise.reject(new Error('Invalid response structure'));
       }
     } catch (error) {
-      console.error('Error loading home page data:', error);
       toast.show('Bip Bop! Um erro ocorreu, \n tente novamente mais tarde...', {
         type: 'danger',
       });

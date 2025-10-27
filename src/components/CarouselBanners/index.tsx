@@ -113,7 +113,6 @@ export const CarouselBanners: React.FC<CarouselProps> = ({ type }) => {
           <Animated.Image
             source={{ uri: item.url }}
             onError={(e) =>
-              console.log('Erro carregando imagem:', e.nativeEvent)
             }
             resizeMode="contain"
             style={{
@@ -141,7 +140,6 @@ export const CarouselBanners: React.FC<CarouselProps> = ({ type }) => {
               cachePolicy="memory-disk"
               onLoadEnd={() => onImageLoadEnd(item.id)}
               onError={(e: any) =>
-                console.log('Erro carregando imagem:', e.nativeEvent)
               }
             />
           </Animated.View>

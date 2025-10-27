@@ -23,7 +23,7 @@ interface Offer {
   modelo_veiculo: string;
   submodelo: string;
   valor_fipe?: any;
-  renavam: string;
+  renavam: string | null;
   placa: string;
   status_veiculo: string;
   ano_fabricacao: string;

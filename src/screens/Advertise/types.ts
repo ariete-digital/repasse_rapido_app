@@ -15,7 +15,7 @@ export interface Step5Data {
 
 export type AdvertiseStackParamList = {
   advertiseHome: { editCodigo?: string } | undefined;
-  advertiseStep1: undefined;
+  advertiseStep1: { editCodigo?: string; shouldPublish?: boolean } | undefined;
   advertiseStep2: undefined;
   advertiseStep3: undefined;
   advertiseStep4: undefined;

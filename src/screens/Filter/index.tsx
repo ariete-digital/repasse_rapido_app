@@ -44,6 +44,7 @@ const Item = ({ label, icon, onPress, filterName, filterValue, onRemoveFilter }:
   const getFilterDescription = () => {
     if (!filterValue) return null;
     
+    
     switch (filterName) {
       case 'brands':
         return filterValue.marca ? `Marca: ${filterValue.marca}` : null;
@@ -144,7 +145,6 @@ const Filter = () => {
   const navigation = useNavigation<FilterScreenNavigationProp>();
   const route = useRoute<FilterScreenRouteProp>();
   const queryClient = useQueryClient();
-  // console.log('route.params =', route.params);
   const { filters } = route.params;
   const [shouldTriggerSearch, setShouldTriggerSearch] = useState(false);
 
@@ -184,18 +184,11 @@ const Filter = () => {
   const getCambiosSelecionados = () => {
     if (!filterParams.tipos_cambio?.length) return [];
     
-    console.log('=== DEBUG CÂMBIOS SELECIONADOS ===');
-    console.log('filterParams.tipos_cambio:', filterParams.tipos_cambio);
-    console.log('filterValues.tiposCambio:', filterValues.tiposCambio);
-    console.log('searchResults?.listaTiposCambio:', searchResults?.listaTiposCambio);
     
     const tiposCambio = filterValues.tiposCambio || searchResults?.listaTiposCambio || [];
-    console.log('tiposCambio final:', tiposCambio);
-    console.log('Array.isArray(tiposCambio):', Array.isArray(tiposCambio));
     
     // Verificar se tiposCambio é um array válido
     if (!Array.isArray(tiposCambio) || tiposCambio.length === 0) {
-      console.log('tiposCambio não é um array válido, usando fallback');
       // Dados de fallback mais realistas
       const fallbackCambios = {
         1: 'Manual',
@@ -229,7 +222,7 @@ const Filter = () => {
 
   // Função para verificar se há filtros ativos
   const hasActiveFilters = () => {
-    return !!(
+    const hasFilters = !!(
       filterParams.marca ||
       filterParams.modelo ||
       filterParams.id_marca ||
@@ -247,6 +240,9 @@ const Filter = () => {
       filterParams.id_cidade ||
       filterParams.id_estado
     );
+    
+    
+    return hasFilters;
   };
 
   // Função para obter descrição dos filtros aplicados
@@ -323,6 +319,7 @@ const Filter = () => {
 
   // Função para remover filtro específico
   const removeFilter = (filterType: string) => {
+    
     const newParams = { ...filterParams };
     
     switch (filterType) {
@@ -332,6 +329,7 @@ const Filter = () => {
         break;
       case 'models':
         delete newParams.modelo;
+        delete (newParams as any).id_modelo; // Remover id_modelo se existir
         break;
       case 'year':
         delete newParams.ano;
@@ -361,7 +359,38 @@ const Filter = () => {
         break;
     }
     
+    
+    // Verificar se há filtros ativos com os novos parâmetros
+    const hasFilters = !!(
+      newParams.marca ||
+      newParams.modelo ||
+      newParams.id_marca ||
+      (newParams as any).id_modelo || // Verificar id_modelo também
+      newParams.ano?.min ||
+      newParams.ano?.max ||
+      newParams.valor?.min ||
+      newParams.valor?.max ||
+      newParams.quilometragem?.min ||
+      newParams.quilometragem?.max ||
+      newParams.tipos_cambio?.length ||
+      newParams.tipos_combustivel?.length ||
+      newParams.num_portas?.length ||
+      newParams.cor ||
+      newParams.opcionais?.length ||
+      newParams.id_cidade ||
+      newParams.id_estado
+    );
+    
+    
     setFilterParams(newParams);
+    
+    // Chamar preFilterSearch diretamente se há filtros, senão limpar
+    if (hasFilters) {
+      preFilterSearchWithParams(newParams);
+    } else {
+      setPreFilteredCount(null);
+    }
+    
     toast.show('Filtro removido!', { type: 'success' });
   };
 
@@ -369,18 +398,46 @@ const Filter = () => {
   // Função para fazer pré-filtragem (separada da filtragem inicial)
   const preFilterSearch = async () => {
     try {
+      
       // Fazer uma busca separada apenas para contar resultados filtrados
       const result = await getFilteredData(filterParams);
+      
       setPreFilteredCount(result.total);
-      console.log('Pré-filtragem concluída:', result.total, 'anúncios');
     } catch (error) {
-      console.error('Erro na pré-filtragem:', error);
+      setPreFilteredCount(null);
+    }
+  };
+
+  // Função para fazer pré-filtragem com parâmetros específicos
+  const preFilterSearchWithParams = async (params: any) => {
+    try {
+      
+      // Log detalhado de cada campo
+      
+      // Verificar se há campos undefined ou null
+      const undefinedFields = Object.keys(params).filter(key => params[key] === undefined);
+      const nullFields = Object.keys(params).filter(key => params[key] === null);
+      
+      // Criar uma cópia limpa dos params para enviar à API
+      const cleanParams = { ...params };
+      // Remover campos undefined
+      Object.keys(cleanParams).forEach(key => {
+        if (cleanParams[key] === undefined) {
+          delete cleanParams[key];
+        }
+      });
+      
+      
+      // Fazer uma busca separada apenas para contar resultados filtrados
+      const result = await getFilteredData(cleanParams);
+      
+      setPreFilteredCount(result.total);
+    } catch (error) {
       setPreFilteredCount(null);
     }
   };
 
   const fetchSearch = async () => {
-    console.log('Iniciando filtragem real...');
     const key = ['search-results', JSON.stringify(filterParams)];
 
     try {
@@ -390,7 +447,6 @@ const Filter = () => {
         queryFn: () => getFilteredData(filterParams),
       });
       
-      console.log('Filtragem real concluída:', result.total, 'anúncios');
       
       // Atualizar o contador do botão com o resultado real
       setPreFilteredCount(result.total);
@@ -399,26 +455,47 @@ const Filter = () => {
         navigation.navigate('searchScreen');
       }
     } catch (error) {
-      console.error('Erro na filtragem real:', error);
     }
   };
 
   useEffect(() => {
-    // console.log('filters =', filters);
     if (filters && filters.startSearch) {
-      const newFilter = {
+      const newFilter: any = {
         tipo_veiculo: filters.tipo,
-        id_marca: filters.marca,
-        id_modelo: filters.modelo,
-        ano: {
-          max: filters.anoMax,
-          min: filters.anoMin,
-        },
-        status_veiculo: 'U' as 'U',
-        id_loja: filters.loja,
-        id_cidade: filters.cidade,
       };
-      // console.log('newFilter =', newFilter);
+      
+      // Adicionar apenas os filtros que foram realmente selecionados
+      if (filters.marca) {
+        newFilter.id_marca = parseInt(filters.marca);
+        newFilter.marca = filters.marca_nome || filters.marca;
+      }
+      
+      if (filters.modelo) {
+        newFilter.id_modelo = parseInt(filters.modelo);
+        newFilter.modelo = filters.modelo_nome || filters.modelo;
+      }
+      
+      if (filters.anoMin || filters.anoMax) {
+        newFilter.ano = {
+          max: filters.anoMax ? parseInt(filters.anoMax) : undefined,
+          min: filters.anoMin ? parseInt(filters.anoMin) : undefined,
+        };
+        // Remover campos undefined do objeto ano
+        if (newFilter.ano.max === undefined) delete newFilter.ano.max;
+        if (newFilter.ano.min === undefined) delete newFilter.ano.min;
+        // Se o objeto ano ficou vazio, removê-lo
+        if (Object.keys(newFilter.ano).length === 0) delete newFilter.ano;
+      }
+      
+      if (filters.cidade) {
+        newFilter.id_cidade = parseInt(filters.cidade);
+        newFilter.cidade_nome = filters.cidade_nome;
+      }
+      
+      if (filters.loja) {
+        newFilter.id_loja = filters.loja;
+      }
+      
       setFilterParams(newFilter);
       setShouldTriggerSearch(true);
     }
@@ -436,12 +513,12 @@ const Filter = () => {
     if (!totalInicialAnuncios && (filterDataWithCount?.total || searchResults?.total)) {
       const totalInicial = filterDataWithCount?.total || searchResults?.total || 0;
       setTotalInicialAnuncios(totalInicial);
-      console.log('Total inicial de anúncios capturado:', totalInicial);
     }
   }, [filterDataWithCount?.total, searchResults?.total, totalInicialAnuncios]);
 
   // useEffect para fazer pré-filtragem quando os filtros mudarem
   useEffect(() => {
+    
     if (hasActiveFilters()) {
       preFilterSearch();
     } else {

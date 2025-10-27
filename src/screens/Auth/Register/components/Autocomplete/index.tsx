@@ -43,7 +43,7 @@ const AutocompleteDropdown = ({
               setData(content)
             }
           })
-          .catch((error) => console.error('Error fetching data:', error))
+          .catch((error) => {})
       } else {
         setData([])
       }

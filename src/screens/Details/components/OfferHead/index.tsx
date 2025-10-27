@@ -6,18 +6,28 @@ import { View } from "react-native"
 import { SvgXml } from "react-native-svg"
 import { StarGoldIcon } from "@icons/StarGoldIcon"
 
-const OfferHead = (anuncio: Offer) => {
+interface OfferHeadProps {
+  anuncio: Offer;
+  anunciante?: {
+    nome: string;
+    cidade: {
+      nome: string;
+    };
+  };
+}
+
+const OfferHead = ({ anuncio, anunciante }: OfferHeadProps) => {
   return (
     <O.Container>
       <Text color="black-700" fontStyle='t-24' style={{ fontWeight: 'bold' }}>{anuncio.marca_veiculo + ' ' + anuncio.modelo_veiculo}</Text>
-      <Text 
+      {/* <Text 
         color="black-700" 
         fontStyle="p-18-regular"
         spacingY={6}
       >
         {anuncio?.descricao || ""}
-      </Text>
-        <Text color="brand-red" style={{ fontWeight: 'bold' }} spacingX={4} spacingY={7} fontStyle='t-32'>{currencyFormat(anuncio.valor)}</Text>
+      </Text> */}
+      <Text color="brand-red" style={{ fontWeight: 'bold' }} spacingX={4} spacingY={7} fontStyle='t-32'>{currencyFormat(anuncio.valor)}</Text>
       <View 
         style={{ display: 'flex', flexDirection: 'row', gap: 4 }}
       >
@@ -80,7 +90,7 @@ const OfferHead = (anuncio: Offer) => {
             spacingY={6}
             style={{ width: 178 }}
           >
-            Loja Teste Repasses
+            {anunciante?.nome || 'Anunciante'}
           </Text>
           <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
             <Text 
@@ -96,7 +106,7 @@ const OfferHead = (anuncio: Offer) => {
                 fontStyle="p-14-regular"
                 spacingY={6}
               >
-                Rua Antônio Fernandes, 2255 | Centro | Belo Horizonte/MG
+                {anunciante?.cidade?.nome || 'Cidade não informada'}
               </Text>
             </View>
           </View>

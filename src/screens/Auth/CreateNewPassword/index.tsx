@@ -66,7 +66,6 @@ const CreateNewPassword = () => {
         navigation.navigate('login');
       }
     } catch (error: any) {
-      console.error('Create new password error:', error.response?.data || error.message);
       
       const errorMessage = error.response?.data?.message || 
                           'Erro ao alterar senha. Verifique o token e tente novamente!';

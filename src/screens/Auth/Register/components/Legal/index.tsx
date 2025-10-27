@@ -109,15 +109,12 @@ const Legal = () => {
         setCitiesOptions(cities);
       }
     } catch (error) {
-      console.warn('Erro ao carregar cidades:', error);
     } finally {
       setLoadingCities(false);
     }
   };
 
   const handleRegister = async (data: LegalFormProps) => {
-    console.log("handleRegister CALLED!");
-    console.log("handleRegister data:", data);
     
     const legalPersonData = {
       tipo: 'PJ',
@@ -127,16 +124,12 @@ const Legal = () => {
     setIsLoading(true);
 
     try {
-      console.log("RegisterLegal legalPersonData", legalPersonData);
       const response = await api.post('/cadastrar', legalPersonData);
-      console.log("RegisterLegal response", response);
-      console.log("RegisterLegal response.data", response.data);
       if (response.data) {
         toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
         navigation.navigate('registerSuccess');
       }
     } catch (error: any) {
-      console.error('Registration error:', error.response?.data || error.message);
       
       const errorMessage = error.response?.data?.message || 
                           'Erro ao cadastrar usuário. Verifique os dados e tente novamente!';
@@ -148,8 +141,6 @@ const Legal = () => {
   };
   
   const handleSubmitWithValidation = (data: LegalFormProps) => {
-    console.log("handleSubmitWithValidation CALLED!");
-    console.log("Form errors:", errors);
     handleRegister(data);
   };
 
@@ -183,7 +174,6 @@ const Legal = () => {
             }
           }
         } catch (error) {
-          console.warn('Erro ao buscar cidade:', error);
         }
         
         toast.show('Endereço encontrado!', { type: 'success' });
@@ -191,7 +181,6 @@ const Legal = () => {
         toast.show('CEP não encontrado', { type: 'warning' });
       }
     } catch (error) {
-      console.warn('Erro ao buscar CEP:', error);
       toast.show('Erro ao buscar CEP', { type: 'danger' });
     }
   };
@@ -561,7 +550,6 @@ const Legal = () => {
 
       <SubmitForm
         handleRegister={handleSubmit(handleSubmitWithValidation, (errors) => {
-          console.log("Validation errors:", errors);
           toast.show('Preencha todos os campos obrigatórios', { type: 'danger' });
         })}
         disabled={isLoading}

@@ -50,7 +50,6 @@ const FuelTypeFilter = ({
     for (let i = 0; i < options.length; i += 2) {
       optInTwoColumns.push(options.slice(i, i + 2));
     }
-    // console.log('optInTwoColumns =', optInTwoColumns);
     setOptionsInTwoColumns(optInTwoColumns);
   }, [options]);
 

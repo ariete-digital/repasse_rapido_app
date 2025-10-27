@@ -85,7 +85,6 @@ const SelectOptions = () => {
           ]);
         }
       } catch (error) {
-        console.error('Erro ao carregar opcionais:', error);
         // Fallback em caso de erro na requisição
         setAllOptions([
           { id: 1, descricao: 'Alarme' },

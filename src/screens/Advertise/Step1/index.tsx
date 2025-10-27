@@ -63,9 +63,8 @@ const Step1 = () => {
   const route = useRoute();
   const { updateStep1Data, parameters, advertiseData, loadAdDataForEdit, clearEditCache } = useAdvertise();
   
-  // Verificar se está editando via parâmetro
   const editCodigo = (route.params as any)?.editCodigo;
-  console.log('step 1::: editCodigo:::', editCodigo);
+  const shouldPublish = (route.params as any)?.shouldPublish;
   const [isLoadingEditData, setIsLoadingEditData] = useState(false);
 
   const {
@@ -78,23 +77,18 @@ const Step1 = () => {
     resolver: yupResolver(vehicleSchema),
   });
 
-  // Carregar dados para edição se editCodigo estiver presente
   useEffect(() => {
-    console.log('step 1::: editCodigo::: useEffect::: ', editCodigo);
     const loadDataForEdit = async () => {
       if (editCodigo) {
         try {
           setIsLoadingEditData(true);
-          console.log('Step1 - Loading data for edit with codigo:', editCodigo);
-          
-          // Limpar cache de edição anterior antes de carregar novos dados
           clearEditCache();
-          console.log('Step1 - Cleared previous edit cache');
-          
           await loadAdDataForEdit(editCodigo);
-          console.log('Step1 - Data loaded successfully');
+          
+          if (shouldPublish) {
+            updateStep1Data({ shouldPublish: true });
+          }
         } catch (error) {
-          console.error('Step1 - Error loading data for edit:', error);
           Alert.alert(
             'Erro',
             'Não foi possível carregar os dados do anúncio. Tente novamente.',
@@ -112,15 +106,10 @@ const Step1 = () => {
     };
 
     loadDataForEdit();
-  }, [editCodigo]);
+  }, [editCodigo, shouldPublish]);
 
-  // Preencher campos se estiver editando
   useEffect(() => {
     if (advertiseData.id_anuncio || (editCodigo && advertiseData.placa)) {
-      console.log('Step1 - Loading data for edit, advertiseData:', advertiseData);
-      console.log('Step1 - editCodigo:', editCodigo);
-      console.log('Step1 - id_anuncio:', advertiseData.id_anuncio);
-      
       if (advertiseData.placa) setValue('placa', advertiseData.placa);
       if (advertiseData.marca_veiculo) setValue('marca', advertiseData.marca_veiculo);
       if (advertiseData.modelo_veiculo) setValue('modelo', advertiseData.modelo_veiculo);
@@ -137,7 +126,6 @@ const Step1 = () => {
   // Monitorar todos os campos
   const formValues = watch();
   
-  // Validação customizada: verifica se todos os campos obrigatórios estão preenchidos
   const isFormValid = !!(
     formValues.placa &&
     formValues.marca &&
@@ -150,21 +138,6 @@ const Step1 = () => {
     formValues.combustivel &&
     formValues.portas
   );
-
-  // Debug log
-  console.log('Step1 - Form Valid:', isFormValid);
-  console.log('Step1 - Form Values:', {
-    placa: !!formValues.placa,
-    marca: !!formValues.marca,
-    modelo: !!formValues.modelo,
-    ano_fabricacao: !!formValues.ano_fabricacao,
-    ano_modelo: !!formValues.ano_modelo,
-    quilometragem: !!formValues.quilometragem,
-    cor: !!formValues.cor,
-    cambio: !!formValues.cambio,
-    combustivel: !!formValues.combustivel,
-    portas: !!formValues.portas,
-  });
 
   // Estados para os selects
   const [anoFabricacaoOptions, setAnoFabricacaoOptions] = useState<Array<{label: string, value: string}>>([]);
@@ -232,14 +205,12 @@ const Step1 = () => {
 
     const timeoutId = setTimeout(() => {
       const fetchVehicleInfo = async () => {
-        console.log("placa:::", placa);
         if (placa && placa.length === 8 && !isLoadingVehicleInfo) { // Placa formatada tem 8 caracteres
           setIsLoadingVehicleInfo(true);
           try {
             const response = await api.post('/cliente/meus_anuncios/obter_info_veiculo', {
               placa: placa.replace(/-/g, ''), // Remove traço da placa
             });
-           console.log("response.data:::", response.data);
 
             if (response.data.status === 'success') {
               const data = response.data.content;
@@ -258,8 +229,6 @@ const Step1 = () => {
                 let valorFipeConvertido = null;
                 if (data.valor_fipe) {
                   valorFipeConvertido = convertFipeValueToNumeric(data.valor_fipe);
-                  console.log('Valor FIPE original:', data.valor_fipe);
-                  console.log('Valor FIPE convertido:', valorFipeConvertido);
                 }
                 
                 updateStep1Data({
@@ -269,7 +238,6 @@ const Step1 = () => {
               }
             }
           } catch (error) {
-            console.error('Erro ao buscar informações do veículo:', error);
           } finally {
             setIsLoadingVehicleInfo(false);
           }
@@ -296,7 +264,6 @@ const Step1 = () => {
   }, [watch, updateStep1Data, extractSubmodelo]);
 
   const handleContinue = (data: VehicleFormProps) => {
-    console.log('Step1 - Submitting data:', data);
     
     // Salvar dados no contexto
     updateStep1Data({

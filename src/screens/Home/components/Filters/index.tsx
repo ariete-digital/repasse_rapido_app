@@ -27,24 +27,12 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useFilters } from '@hooks/useFilters';
 
 type OptionsList = {
   label: string;
   value: string;
 };
-
-const optionsEstado = [
-  { label: 'São Paulo', value: 'SP' },
-  { label: 'Rio de Janeiro', value: 'RJ' },
-  { label: 'Minas Gerais', value: 'MG' },
-  { label: 'Paraná', value: 'PR' },
-  { label: 'Rio Grande do Sul', value: 'RS' },
-  { label: 'Santa Catarina', value: 'SC' },
-  { label: 'Bahia', value: 'BA' },
-  { label: 'Goiás', value: 'GO' },
-  { label: 'Ceará', value: 'CE' },
-  { label: 'Pernambuco', value: 'PE' },
-];
 
 const currentYear = new Date().getFullYear();
 
@@ -63,27 +51,27 @@ type NavigationProps = CompositeNavigationProp<
 
 export default function Filters() {
   const navigation = useNavigation<NavigationProps>();
+  const { setFilterParams } = useFilters();
   const [listaMarcas, setListaMarcas] = useState<OptionsList[]>([]);
   const [listaModelos, setListaModelos] = useState<OptionsList[]>([]);
-  const [estado, setEstado] = useState<string>();
+  const [listaCidades, setListaCidades] = useState<OptionsList[]>([]);
+  const [cidade, setCidade] = useState<string>();
   const [marca, setMarca] = useState<string>();
   const [modelo, setModelo] = useState<string>();
   const [anoMin, setAnoMin] = useState<string>();
   const [anoMax, setAnoMax] = useState<string>();
 
-  const handleSelectEstado = (option: { label: string; value: string }) => {
-    // console.log('Selecionado:', option);
-    setEstado(option.value);
-    // Limpar seleções dependentes quando mudar o estado
+  const handleSelectCidade = (option: { label: string; value: string }) => {
+    setCidade(option.value);
+    // Limpar seleções dependentes quando mudar a cidade
     setMarca(undefined);
     setModelo(undefined);
     setListaModelos([]);
-    // Recarregar marcas para o novo estado
+    // Recarregar marcas para a nova cidade
     getBrandData(option.value);
   };
 
   const handleSelectMarca = (option: { label: string; value: string }) => {
-    // console.log('Selecionado:', option);
     setMarca(option.value);
     // Limpar modelo selecionado quando mudar marca
     setModelo(undefined);
@@ -91,22 +79,74 @@ export default function Filters() {
   };
 
 
-  const getBrandData = async (estadoParam?: string) => {
+  const getBrandData = async (cidadeParam?: string) => {
     try {
-      const estadoToUse = estadoParam || estado;
-      console.log('buscando marcas para estado:', estadoToUse);
-      const response: AxiosResponse<DataFetchProps> =
-        await api.get<DataFetchProps>(
-          `cliente/listagem/marcas?estado=${estadoToUse}`
-        );
-      console.log('marcas =', response.data.content);
+      const cidadeToUse = cidadeParam || cidade;
+      
+      // Tentar diferentes endpoints
+      let endpoints = [];
+      
+      if (cidadeToUse) {
+        endpoints.push(`cliente/listagem/marcas?cidade=${cidadeToUse}`);
+      }
+      endpoints.push('cliente/listagem/marcas?filtro=');
+      endpoints.push('cliente/listagem/marcas');
+      
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response: AxiosResponse<DataFetchProps> =
+            await api.get<DataFetchProps>(endpoint);
+          
 
-      if (response.data.content) {
-        setListaMarcas(response.data.content);
+          if (response.data.content && Array.isArray(response.data.content)) {
+            
+            // Verificar se as marcas têm a estrutura correta
+            const marcasValidas = response.data.content.filter(marca => 
+              marca && typeof marca === 'object' && 
+              marca.value && marca.label
+            );
+            
+            
+            if (marcasValidas.length > 0) {
+              setListaMarcas(marcasValidas);
+              return; // Sucesso, sair do loop
+            }
+          }
+        } catch (endpointError) {
+          continue; // Tentar próximo endpoint
+        }
+      }
+      
+      setListaMarcas([]);
+    } catch (error) {
+      setListaMarcas([]);
+    }
+  };
+
+
+  const getCityData = async (query: string) => {
+    try {
+      if (query.length < 3) {
+        setListaCidades([]);
+        return;
+      }
+      
+      const response: AxiosResponse<DataFetchProps> =
+        await api.get<DataFetchProps>(`cliente/listagem/cidades?filtro=${query}`);
+
+      if (response.data.content && Array.isArray(response.data.content)) {
+        // Converter para o formato esperado pelo SearchableSelect
+        const cidadesFormatadas = response.data.content.map(cidade => ({
+          label: cidade.label,
+          value: cidade.value.toString()
+        }));
+        setListaCidades(cidadesFormatadas);
+      } else {
+        setListaCidades([]);
       }
     } catch (error) {
-      console.error('Erro ao buscar marcas:', error);
-      setListaMarcas([]);
+      setListaCidades([]);
     }
   };
 
@@ -117,44 +157,86 @@ export default function Filters() {
         return;
       }
       
-      console.log('buscando modelos para marca:', id_marca);
       const response: AxiosResponse<DataFetchProps> =
         await api.get<DataFetchProps>(
           `cliente/listagem/modelos?id_marca=${id_marca}`
         );
 
-      console.log('modelos =', response.data.content);
 
       if (response.data.content) {
         setListaModelos(response.data.content);
       }
     } catch (error) {
-      console.error('Erro ao buscar modelos:', error);
       setListaModelos([]);
     }
   };
 
-
+  // Carregar marcas iniciais quando o componente monta
   useEffect(() => {
-    // Carregar marcas iniciais
     getBrandData();
   }, []);
 
 
+
+
   const handleClickBuscar = () => {
-    const filters = {
-      estado,
-      marca,
-      modelo,
-      anoMin,
-      anoMax,
+    
+    // Aplicar filtros selecionados no contexto
+    const filterParams: any = {};
+    
+    if (cidade) {
+      filterParams.id_cidade = parseInt(cidade);
+      // Buscar o nome da cidade selecionada
+      const cidadeSelecionada = listaCidades.find(c => c.value === cidade);
+      if (cidadeSelecionada) {
+        filterParams.cidade_nome = cidadeSelecionada.label;
+      }
+    }
+    if (marca) {
+      filterParams.id_marca = parseInt(marca);
+    }
+    if (modelo) {
+      filterParams.modelo = modelo;
+    }
+    if (anoMin) {
+      filterParams.ano = { ...filterParams.ano, min: parseInt(anoMin) };
+    }
+    if (anoMax) {
+      filterParams.ano = { ...filterParams.ano, max: parseInt(anoMax) };
+    }
+    
+    // Se há filtros selecionados, aplicá-los
+    if (Object.keys(filterParams).length > 0) {
+      setFilterParams(filterParams);
+    }
+    
+    // Buscar nomes das marcas e modelos para enviar junto
+    const marcaSelecionada = listaMarcas.find(m => m.value === marca);
+    const modeloSelecionado = listaModelos.find(m => m.value === modelo);
+    
+    const filtersToSend = {
       startSearch: true,
+      tipo: 'C', // Carro por padrão
+      marca: marca,
+      modelo: modelo,
+      marca_nome: marcaSelecionada?.label,
+      modelo_nome: modeloSelecionado?.label,
+      anoMin: anoMin,
+      anoMax: anoMax,
+      cidade: cidade,
+      cidade_nome: filterParams.cidade_nome,
     };
+    
+    
+    // Navegar para a tela de filtros para aplicar os filtros
     navigation.navigate('search', {
       screen: 'filter',
-      params: { filters },
+      params: { 
+        filters: filtersToSend
+      }
     });
   };
+
 
   return (
     <Container>
@@ -162,10 +244,11 @@ export default function Filters() {
         <Label>Encontre seu veículo</Label>
         
         <SearchableSelect
-          placeholder="ESTADO"
-          options={optionsEstado}
-          onSelect={handleSelectEstado}
-          selectedValue={estado}
+          placeholder="CIDADE"
+          options={listaCidades}
+          onSelect={handleSelectCidade}
+          selectedValue={cidade}
+          {...({ onInputChange: getCityData } as any)}
         />
 
         <RowContainer>

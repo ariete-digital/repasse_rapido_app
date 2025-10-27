@@ -61,11 +61,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
   async function signIn(email: string, password: string) {
     try {
-      console.log("SignIn email", email);
-      console.log("SignIn password", password);
       const response = await api.post('/login', { email, password })
-      console.log("SignIn response", response);
-      console.log("SignIn response.data", response.data);
       if (response.data) {
         const { content } = response.data
         
@@ -82,7 +78,6 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         }
       }
     } catch (error: any) {
-      console.error('Login error:', error.response?.data || error.message)
       
       const errorMessage = error.response?.data?.message || 
                           'Erro ao autenticar, verifique seus dados e tente novamente!'
@@ -109,7 +104,6 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
           })
         } catch (error) {
           // Continue with logout even if API call fails
-          console.warn('Logout API call failed:', error)
         }
       }
       
@@ -123,7 +117,6 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
       
       toast.show('Usuário desconectado com sucesso!', { type: 'success' })
     } catch (error) {
-      console.error('Logout error:', error)
       toast.show('Erro ao fazer logout', { type: 'danger' })
       throw error
     } finally {
@@ -162,11 +155,9 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
       const { token } = await storageAuthTokenGet()
       
       if (!token) {
-        console.log('No token available for refresh')
         return null
       }
 
-      console.log('Attempting to refresh token...')
       
       const response = await api.post('/refresh', {}, {
         headers: {
@@ -189,15 +180,12 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
             await storageUserSave(updatedUser)
           }
           
-          console.log('Token refreshed successfully')
           return newToken
         }
       }
       
-      console.log('Failed to refresh token - invalid response')
       return null
     } catch (error: any) {
-      console.error('Refresh token error:', error.response?.data || error.message)
       return null
     }
   }

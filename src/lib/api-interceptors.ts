@@ -23,7 +23,6 @@ export const setupApiInterceptors = (refreshTokenFn: () => Promise<string | null
     (response) => {
       // Check if response has status "expired"
       if (response.data && response.data.status === 'expired') {
-        console.log('Token expired detected in response');
         
         const originalRequest = response.config as any;
 
@@ -54,7 +53,6 @@ export const setupApiInterceptors = (refreshTokenFn: () => Promise<string | null
                 resolve(api(originalRequest));
               } else {
                 // Refresh failed, logout user
-                console.log('Refresh failed, logging out...');
                 processQueue(new Error('Token refresh failed'), null);
                 signOutFn().then(() => {
                   // Redirect to login will be handled by navigation
@@ -63,7 +61,6 @@ export const setupApiInterceptors = (refreshTokenFn: () => Promise<string | null
               }
             })
             .catch((err) => {
-              console.error('Error during token refresh:', err);
               processQueue(err, null);
               signOutFn().then(() => {
                 reject(err);
@@ -82,7 +79,6 @@ export const setupApiInterceptors = (refreshTokenFn: () => Promise<string | null
 
       // Check if error response has status "expired"
       if (error.response?.data?.status === 'expired' && !originalRequest._retry) {
-        console.log('Token expired detected in error response');
 
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
@@ -108,7 +104,6 @@ export const setupApiInterceptors = (refreshTokenFn: () => Promise<string | null
                 processQueue(null, newToken);
                 resolve(api(originalRequest));
               } else {
-                console.log('Refresh failed, logging out...');
                 processQueue(new Error('Token refresh failed'), null);
                 signOutFn().then(() => {
                   reject(new Error('Session expired, please login again'));
@@ -116,7 +111,6 @@ export const setupApiInterceptors = (refreshTokenFn: () => Promise<string | null
               }
             })
             .catch((err) => {
-              console.error('Error during token refresh:', err);
               processQueue(err, null);
               signOutFn().then(() => {
                 reject(err);
@@ -130,7 +124,6 @@ export const setupApiInterceptors = (refreshTokenFn: () => Promise<string | null
 
       // Handle 401 unauthorized
       if (error.response?.status === 401) {
-        console.log('Unauthorized access - 401');
         // Could also trigger refresh here if needed
       }
 

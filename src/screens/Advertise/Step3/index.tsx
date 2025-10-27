@@ -125,7 +125,6 @@ const Step3 = () => {
   // Preencher campos se estiver editando
   useEffect(() => {
     if (advertiseData.id_anuncio || advertiseData.status_veiculo || advertiseData.unico_dono) {
-      console.log('Step3 - Loading data for edit');
       if (advertiseData.status_veiculo) setValue('status_veiculo', advertiseData.status_veiculo);
       if (advertiseData.unico_dono) setValue('unico_dono', advertiseData.unico_dono);
       if (advertiseData.ipva_pago) setValue('ipva_pago', advertiseData.ipva_pago);
@@ -187,7 +186,6 @@ const Step3 = () => {
   const isEditing = !!advertiseData.id_anuncio;
 
   const handleContinue = (data: VehicleFormProps) => {
-    console.log('Step3 - Submitting data:', data);
     
     // Salvar dados no contexto
     updateStep3Data({

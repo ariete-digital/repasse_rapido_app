@@ -36,7 +36,6 @@ const Step5 = () => {
   // Preencher campos se estiver editando
   useEffect(() => {
     if (advertiseData.id_anuncio || advertiseData.descricao || advertiseData.valor) {
-      console.log('Step5 - Loading data for edit');
       if (advertiseData.descricao) setDescription(advertiseData.descricao);
       if (advertiseData.valor) setPrice(formatPriceForDisplay(advertiseData.valor));
       if (advertiseData.aceite_termos === '1' || advertiseData.aceite_termos === 'true') setAgreeTerms(true);
@@ -92,7 +91,6 @@ const Step5 = () => {
       aceite_termos: "true" // Backend espera string "true"
     };
 
-    console.log('Step5 - Submitting data:', step5Data);
     
     // Salvar dados no contexto
     updateStep5Data(step5Data);

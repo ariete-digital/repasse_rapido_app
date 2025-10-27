@@ -108,11 +108,9 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
   }, [userData]);
 
   const loadCities = async (filtro: string = '') => {
-    console.log('loadCities filtro::', filtro);
     try {
       setLoadingCities(true);
       const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
-      console.log('loadCities response::', response.data.content.length);
       if (response.data?.content) {
         // Converter value de number para string
         const cities = response.data.content.map((city: any) => ({
@@ -122,7 +120,6 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
         setCitiesOptions(cities);
       }
     } catch (error) {
-      console.warn('Erro ao carregar cidades:', error);
     } finally {
       setLoadingCities(false);
     }
@@ -157,7 +154,6 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
             }
           }
         } catch (error) {
-          console.warn('Erro ao buscar cidade:', error);
         }
         
         toast.show('Endereço encontrado!', { type: 'success' });
@@ -165,7 +161,6 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
         toast.show('CEP não encontrado', { type: 'warning' });
       }
     } catch (error) {
-      console.warn('Erro ao buscar CEP:', error);
       toast.show('Erro ao buscar CEP', { type: 'danger' });
     }
   };
@@ -196,7 +191,6 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
         onUpdate();
       }
     } catch (error: any) {
-      console.error('Erro ao atualizar perfil:', error);
       const errorMessage = error.response?.data?.message || 'Erro ao atualizar perfil. Tente novamente.';
       toast.show(errorMessage, { type: 'danger' });
     } finally {
@@ -222,9 +216,7 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
         nova_senha: data.senha,
       };
 
-      console.log('handleUpdatePassword updateData:', updateData);
       const response = await api.post('/cliente/minha_conta/salvar', updateData);
-      console.log('handleUpdatePassword response:', response.data);
       
       if (response.data && response.data.status === 'success') {
         toast.show('Senha alterada com sucesso!', { type: 'success' });
@@ -234,7 +226,6 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
         setValue('confirmacao', '');
       }
     } catch (error: any) {
-      console.error('Erro ao alterar senha:', error);
       const errorMessage = error.response?.data?.message || 'Erro ao alterar senha. Tente novamente.';
       toast.show(errorMessage, { type: 'danger' });
     } finally {

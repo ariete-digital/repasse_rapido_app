@@ -88,7 +88,6 @@ const Autonomo = () => {
         setCitiesOptions(cities);
       }
     } catch (error) {
-      console.warn('Erro ao carregar cidades:', error);
     } finally {
       setLoadingCities(false);
     }
@@ -101,13 +100,10 @@ const Autonomo = () => {
 
     try {
       const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
-      console.log('ViaCEP response:', response.data);
 
       if (response.data && !response.data.erro) {
         const { logradouro, bairro, localidade } = response.data;
         
-        console.log('Setting endereço:', logradouro);
-        console.log('Setting bairro:', bairro);
         
         setValue('endereço', logradouro);
         setValue('bairro', bairro);
@@ -115,11 +111,9 @@ const Autonomo = () => {
         // Buscar id_cidade
         try {
           const cityData = await api.get(`/cliente/listagem/todas_cidades?filtro=${localidade}`);
-          console.log('City search result:', cityData.data);
           
           if (cityData.data?.content?.[0]) {
             const cityId = cityData.data.content[0].value;
-            console.log('Setting id_cidade:', cityId);
             setValue('id_cidade', cityId);
             // Atualizar a lista de cidades para incluir a cidade encontrada
             const cityOption = {
@@ -131,7 +125,6 @@ const Autonomo = () => {
             }
           }
         } catch (error) {
-          console.warn('Erro ao buscar cidade:', error);
         }
         
         toast.show('Endereço encontrado!', { type: 'success' });
@@ -139,7 +132,6 @@ const Autonomo = () => {
         toast.show('CEP não encontrado', { type: 'warning' });
       }
     } catch (error) {
-      console.warn('Erro ao buscar CEP:', error);
       toast.show('Erro ao buscar CEP', { type: 'danger' });
     }
   };
@@ -177,17 +169,13 @@ const Autonomo = () => {
     setIsLoading(true);
 
     try {
-      console.log("RegisterAutonomo userData", userData);
       const response = await api.post('/cadastrar', userData);
-      console.log("RegisterAutonomo response", response);
-      console.log("RegisterAutonomo response.data", response.data);
       
       if (response.data) {
         toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
         navigation.navigate('registerSuccess');
       }
     } catch (error: any) {
-      console.error('Registration error:', error.response?.data || error.message);
       
       const errorMessage = error.response?.data?.message || 
                           'Erro ao cadastrar usuário. Verifique os dados e tente novamente!';

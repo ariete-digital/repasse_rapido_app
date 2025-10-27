@@ -26,6 +26,7 @@ interface SearchableSelectProps {
   placeholder?: string;
   onSelect: (option: Option) => void;
   selectedValue?: string;
+  onInputChange?: (query: string) => void;
 }
 
 const InputContainer = styled.View`
@@ -80,6 +81,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   placeholder,
   onSelect,
   selectedValue,
+  onInputChange,
 }) => {
   const inputRef = useRef<TouchableOpacity>(null);
   const [query, setQuery] = useState('');
@@ -98,6 +100,20 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
       }
     }
   }, [selectedValue, options]);
+
+  // Atualizar filteredOptions quando options mudar
+  useEffect(() => {
+    if (!onInputChange) {
+      // Só fazer filtro local se não houver onInputChange
+      const filtered = options.filter((option) =>
+        option.label.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredOptions(filtered);
+    } else {
+      // Se houver onInputChange, usar options diretamente
+      setFilteredOptions(options);
+    }
+  }, [options, query, onInputChange]);
 
   const measureInput = () => {
     const handle = findNodeHandle(inputRef.current);
@@ -126,11 +142,19 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
   const handleInputChange = (text: string) => {
     setQuery(text);
-    const filtered = options.filter((option) =>
-      option.label.toLowerCase().includes(text.toLowerCase())
-    );
-    setFilteredOptions(filtered);
-    if (filtered.length > 0 && !dropdownVisible) {
+    
+    // Chamar onInputChange se fornecido (para busca dinâmica)
+    if (onInputChange) {
+      onInputChange(text);
+    } else {
+      // Filtro local padrão
+      const filtered = options.filter((option) =>
+        option.label.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredOptions(filtered);
+    }
+    
+    if (options.length > 0 && !dropdownVisible) {
       measureInput();
       setDropdownVisible(true);
       Animated.timing(dropdownAnimation, {

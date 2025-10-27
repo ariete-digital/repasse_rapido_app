@@ -23,6 +23,30 @@ const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
       ).toFixed(1)
     : '0.0';
 
+  // Função para renderizar estrelas baseado na avaliação
+  const renderStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        {/* Estrelas cheias */}
+        {Array.from({ length: fullStars }, (_, i) => (
+          <Text key={`full-${i}`} color='yellow' fontStyle='c-12-bold'>★</Text>
+        ))}
+        {/* Meia estrela */}
+        {hasHalfStar && (
+          <Text color='yellow' fontStyle='c-12-bold'>☆</Text>
+        )}
+        {/* Estrelas vazias */}
+        {Array.from({ length: emptyStars }, (_, i) => (
+          <Text key={`empty-${i}`} color='gray-300' fontStyle='c-12-bold'>☆</Text>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text color="black-700" fontStyle="t-24">Depoimentos</Text>
@@ -30,20 +54,22 @@ const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
         <View style={styles.ratingBox}>
           <Text color='white' fontStyle='c-12-regular'>{testimonials.length} avaliações</Text>
           <View style={styles.rating}>
-            <Text color='yellow' fontStyle='c-12-bold'>★ ★ ★ ★ ★</Text>
+            {renderStars(parseFloat(avgRating))}
             <Text color='white' fontStyle='c-12-bold'>{avgRating}</Text>
           </View>
         </View>
-        <View style={styles.recommendBox}>
-          <Text color='white' fontStyle='p-14-bold'>{100}%</Text>
-          <Text style={{width: 250}} color='white' fontStyle='c-12-regular'>dos compradores recomendam esta loja</Text>
-        </View>
+        {testimonials.length > 0 && (
+          <View style={styles.recommendBox}>
+            <Text color='white' fontStyle='p-14-bold'>{100}%</Text>
+            <Text style={{width: 250}} color='white' fontStyle='c-12-regular'>dos compradores recomendam esta loja</Text>
+          </View>
+        )}
       </View>
       <View style={{ marginTop: 8 }}>
         {testimonials.map((item) => (
           <View style={styles.testimonial} key={item.id}>
             <View style={styles.count}>
-              <Text color='yellow' fontStyle='p-14-bold'>★ ★ ★ ★ ★</Text>
+              {renderStars(item.rating)}
               <Text color='black-500' fontStyle='p-14-bold'>{item.rating.toFixed(1)}</Text>
             </View>
             <Text color='black-500' fontStyle='c-12-medium'>{item.text}</Text>

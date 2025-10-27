@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, TouchableOpacity } from 'react-native';
-import { NoPhotoIcon, DeleteIcon, CameraIcon } from '@components/CustomIcons';
+import { NoPhotoIcon, FullscreenIcon } from '@components/CustomIcons';
 import Text from '@components/Text';
 import BasicButton from '@components/BasicButton';
 import * as S from './styles';
@@ -11,10 +11,11 @@ export interface AdCardProps {
   model: string;
   description: string;
   imageUrl?: string;
+  images?: string[];
   createdAt: string;
   adNumber: string;
   isVendido?: boolean;
-  onDelete?: () => void;
+  onViewImages?: () => void;
   onEdit?: () => void;
   onResume?: () => void;
   onMarkSold?: () => void;
@@ -26,10 +27,11 @@ const AdCard: React.FC<AdCardProps> = ({
   model,
   description,
   imageUrl,
+  images,
   createdAt,
   adNumber,
   isVendido = false,
-  onDelete,
+  onViewImages,
   onEdit,
   onResume,
   onMarkSold,
@@ -97,15 +99,12 @@ const AdCard: React.FC<AdCardProps> = ({
           </View>
         )}
         
-        {/* Ícone de deletar */}
-        <TouchableOpacity style={S.deleteIcon} onPress={onDelete}>
-          <DeleteIcon size={20} color="#666" />
-        </TouchableOpacity>
-        
-        {/* Ícone de editar foto */}
-        <TouchableOpacity style={S.editIcon} onPress={onEdit}>
-          <CameraIcon size={16} color="#666" />
-        </TouchableOpacity>
+        {/* Ícone de visualizar imagens */}
+        {images && images.length > 0 && (
+          <TouchableOpacity style={S.viewIcon} onPress={onViewImages}>
+            <FullscreenIcon size={16} color="#666" />
+          </TouchableOpacity>
+        )}
       </S.ImageContainer>
 
       <S.ContentContainer>

@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import PageScaffold from '@components/PageScaffold';
 import AdCard from '@components/AdCard';
 import Text from '@components/Text';
+import ImageViewer from '@screens/Details/components/ImageViewer';
 import { api } from '@lib/api';
 import * as S from './styles';
 
@@ -47,6 +48,8 @@ const ManageAds = () => {
   const navigation = useNavigation<ManageAdsNavigationProp>();
   const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  const [currentImages, setCurrentImages] = useState<string[]>([]);
 
   // Carregar anúncios ao montar o componente
   useEffect(() => {
@@ -58,13 +61,11 @@ const ManageAds = () => {
       setIsLoading(true);
       const response = await api.get<MeusAnunciosResponse>('/cliente/meus_anuncios');
       
-      console.log('Meus anúncios response:', response.data);
       
       if (response.data.status === 'success' && response.data.content.anuncios) {
         setAnuncios(response.data.content.anuncios);
       }
     } catch (error) {
-      console.error('Erro ao carregar anúncios:', error);
       Alert.alert(
         'Erro',
         'Não foi possível carregar seus anúncios. Tente novamente mais tarde.',
@@ -75,43 +76,50 @@ const ManageAds = () => {
     }
   };
 
-  const handleDelete = (adId: string) => {
-    console.log('Deletar anúncio:', adId);
-    Alert.alert(
-      'Confirmar exclusão',
-      'Tem certeza que deseja excluir este anúncio?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Excluir', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // TODO: Implementar chamada da API para deletar
-              // await api.delete(`/cliente/meus_anuncios/${adId}`);
-              await loadAnuncios(); // Recarregar lista
-            } catch (error) {
-              console.error('Erro ao deletar anúncio:', error);
-              Alert.alert('Erro', 'Não foi possível excluir o anúncio.');
-            }
-          }
+  const handleViewImages = (adId: string) => {
+    const anuncio = anuncios.find(ad => ad.id.toString() === adId);
+    
+    if (!anuncio) {
+      Alert.alert('Erro', 'Anúncio não encontrado');
+      return;
+    }
+
+    // Preparar array de imagens para o visualizador
+    const images: string[] = [];
+    
+    // Adicionar imagem principal se existir
+    if (anuncio.imagemPrincipal) {
+      images.push(anuncio.imagemPrincipal);
+    }
+    
+    // Adicionar outras imagens se existirem
+    if (anuncio.imagens && anuncio.imagens.length > 0) {
+      anuncio.imagens.forEach(img => {
+        const imageUrl = img.link || img.arquivo;
+        if (imageUrl && !images.includes(imageUrl)) {
+          images.push(imageUrl);
         }
-      ]
-    );
+      });
+    }
+
+    if (images.length === 0) {
+      Alert.alert('Aviso', 'Este anúncio não possui imagens para visualizar.');
+      return;
+    }
+
+    setCurrentImages(images);
+    setImageViewerVisible(true);
   };
 
   const handleEdit = (adId: string) => {
-    console.log('Editar anúncio:', adId);
     Alert.alert('Em desenvolvimento', 'Funcionalidade de edição em breve!');
   };
 
   const handleResume = (adId: string) => {
-    console.log('Retomar anúncio:', adId);
     
     // Buscar o código do anúncio
     const anuncio = anuncios.find(ad => ad.id.toString() === adId);
 
-    console.log('Anúncio encontrado:', anuncio);
     if (!anuncio) {
       Alert.alert('Erro', 'Anúncio não encontrado');
       return;
@@ -129,7 +137,6 @@ const ManageAds = () => {
   };
 
   const handleMarkSold = (adId: string) => {
-    console.log('Marcar como vendido:', adId);
     Alert.alert(
       'Marcar como vendido',
       'Tem certeza que deseja marcar este veículo como vendido?',
@@ -150,7 +157,6 @@ const ManageAds = () => {
                 throw new Error(response.data.message || 'Erro ao marcar como vendido');
               }
             } catch (error: any) {
-              console.error('Erro ao marcar como vendido:', error);
               const errorMessage = error.response?.data?.message || 'Não foi possível marcar o veículo como vendido.';
               Alert.alert('Erro', errorMessage);
             }
@@ -176,23 +182,40 @@ const ManageAds = () => {
         ) : (
           <ScrollView showsVerticalScrollIndicator={false}>
             {anuncios.length > 0 ? (
-              anuncios.map((ad) => (
-                <AdCard
-                  key={ad.id}
-                  id={ad.id.toString()}
-                  brand={ad.marca_veiculo}
-                  model={ad.modelo_veiculo}
-                  description={`${ad.submodelo} ${ad.ano_fabricacao}/${ad.ano_modelo}`}
-                  imageUrl={ad.imagemPrincipal}
-                  createdAt={ad.created_at}
-                  adNumber={ad.id.toString()}
-                  isVendido={!!ad.vendido_em}
-                  onDelete={() => handleDelete(ad.id.toString())}
-                  onEdit={() => handleEdit(ad.id.toString())}
-                  onResume={() => handleResume(ad.id.toString())}
-                  onMarkSold={() => handleMarkSold(ad.id.toString())}
-                />
-              ))
+              anuncios.map((ad) => {
+                // Preparar array de imagens para o AdCard
+                const images: string[] = [];
+                if (ad.imagemPrincipal) {
+                  images.push(ad.imagemPrincipal);
+                }
+                if (ad.imagens && ad.imagens.length > 0) {
+                  ad.imagens.forEach(img => {
+                    const imageUrl = img.link || img.arquivo;
+                    if (imageUrl && !images.includes(imageUrl)) {
+                      images.push(imageUrl);
+                    }
+                  });
+                }
+
+                return (
+                  <AdCard
+                    key={ad.id}
+                    id={ad.id.toString()}
+                    brand={ad.marca_veiculo}
+                    model={ad.modelo_veiculo}
+                    description={`${ad.submodelo} ${ad.ano_fabricacao}/${ad.ano_modelo}`}
+                    imageUrl={ad.imagemPrincipal}
+                    images={images}
+                    createdAt={ad.created_at}
+                    adNumber={ad.id.toString()}
+                    isVendido={!!ad.vendido_em}
+                    onViewImages={() => handleViewImages(ad.id.toString())}
+                    onEdit={() => handleEdit(ad.id.toString())}
+                    onResume={() => handleResume(ad.id.toString())}
+                    onMarkSold={() => handleMarkSold(ad.id.toString())}
+                  />
+                );
+              })
             ) : (
               <S.EmptyState>
                 <S.EmptyStateText>
@@ -203,6 +226,13 @@ const ManageAds = () => {
           </ScrollView>
         )}
       </S.ContentContainer>
+
+      <ImageViewer
+        visible={imageViewerVisible}
+        onClose={() => setImageViewerVisible(false)}
+        images={currentImages}
+        initialIndex={0}
+      />
     </PageScaffold>
   );
 };

@@ -48,7 +48,6 @@ export const getTiposCambio = async () => {
     } = await api.get('/cliente/listagem/tipos_cambio');
     return content;
   } catch (error) {
-    console.warn('Rota tipos_cambio não encontrada:', error);
     return [];
   }
 };
@@ -60,7 +59,6 @@ export const getTiposCombustivel = async () => {
     } = await api.get('/cliente/listagem/tipos_combustivel');
     return content;
   } catch (error) {
-    console.warn('Rota tipos_combustivel não encontrada:', error);
     return [];
   }
 };
@@ -90,11 +88,13 @@ export const getOpcionais = async () => {
 export const getFilteredData = async (
   properties: FilterOptions
 ): Promise<FilteredApiResponse> => {
-  console.log('getFilteredData - properties:', properties);
+  
+  
   const {
     data: { content },
   } = await api.post('/cliente/anuncios/filtrar', properties);
-  console.log('getFilteredData - response:', content);
+  
+  
   return content as FilteredApiResponse;
 };
 
@@ -113,7 +113,6 @@ export const getFilterDataWithCount = async (
     opcionais: { id: number; descricao: string; count: number }[];
   };
 }> => {
-  console.log('getFilterDataWithCount - properties:', properties);
   
   // Buscar dados filtrados
   const filteredData = await getFilteredData(properties);
