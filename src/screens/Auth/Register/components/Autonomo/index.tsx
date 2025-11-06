@@ -59,6 +59,15 @@ const Autonomo = () => {
   const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false)
   const [citiesOptions, setCitiesOptions] = useState<Array<{label: string, value: string}>>([]);
   const [loadingCities, setLoadingCities] = useState(false);
+  const [cnhImage, setCnhImage] = useState<string | null>(null);
+  const [cnhFileName, setCnhFileName] = useState<string | null>(null);
+  const [cnhMimeType, setCnhMimeType] = useState<string>('image/jpeg');
+  const [comprovanteEnderecoImage, setComprovanteEnderecoImage] = useState<string | null>(null);
+  const [comprovanteFileName, setComprovanteFileName] = useState<string | null>(null);
+  const [comprovanteMimeType, setComprovanteMimeType] = useState<string>('image/jpeg');
+  const [declaracaoImage, setDeclaracaoImage] = useState<string | null>(null);
+  const [declaracaoFileName, setDeclaracaoFileName] = useState<string | null>(null);
+  const [declaracaoMimeType, setDeclaracaoMimeType] = useState<string>('image/jpeg');
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
   const toast = useToast();
 
@@ -151,25 +160,58 @@ const Autonomo = () => {
       senha
     } = data;
     
-    const userData = {
-      nome,
-      email,
-      senha,
-      num_documento: cpf,
-      telefone,
-      cep,
-      logradouro: endereço,
-      numero,
-      complemento,
-      bairro,
-      id_cidade,
-      tipo: 'A', // Anônimo type as per API documentation
-    };
+    // Criar FormData para multipart/form-data
+    const formData = new FormData();
+
+    // Adicionar campos de texto
+    formData.append('nome', nome);
+    formData.append('email', email);
+    formData.append('senha', senha);
+    formData.append('tipo', 'A'); // Anônimo type as per API documentation
+    formData.append('num_documento', cpf.replace(/\D/g, '')); // Remove máscara
+    formData.append('telefone', telefone.replace(/\D/g, '')); // Remove máscara
+    formData.append('cep', cep.replace(/\D/g, '')); // Remove máscara
+    formData.append('logradouro', endereço);
+    formData.append('numero', numero);
+    if (complemento) {
+      formData.append('complemento', complemento);
+    }
+    formData.append('bairro', bairro);
+    formData.append('id_cidade', id_cidade.toString());
+
+    // Adicionar arquivos se existirem
+    if (cnhImage) {
+      formData.append('cnh', {
+        uri: cnhImage,
+        type: cnhMimeType,
+        name: cnhFileName || 'cnh',
+      } as any);
+    }
+
+    if (comprovanteEnderecoImage) {
+      formData.append('comprovante_endereco', {
+        uri: comprovanteEnderecoImage,
+        type: comprovanteMimeType,
+        name: comprovanteFileName || 'comprovante_endereco',
+      } as any);
+    }
+
+    if (declaracaoImage) {
+      formData.append('declaracao', {
+        uri: declaracaoImage,
+        type: declaracaoMimeType,
+        name: declaracaoFileName || 'declaracao',
+      } as any);
+    }
 
     setIsLoading(true);
 
     try {
-      const response = await api.post('/cadastrar', userData);
+      const response = await api.post('/cadastrar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       
       if (response.data) {
         toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
@@ -369,21 +411,42 @@ const Autonomo = () => {
         <Text color="black" fontStyle="p-14-bold" spacingY={12}>
           Envie sua CNH abaixo.
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setCnhImage(uri);
+            setCnhFileName(fileName || null);
+            setCnhMimeType(mimeType || 'image/jpeg');
+          }}
+          label="Selecionar"
+        />
         <Text color="black" spacingY={12} style={{marginTop: 30}}>
           <Text color="black-700" fontStyle="p-14-bold">
             Envie uma foto de um comprovante de endereço recente.
           </Text>{' '}
           O comprovante deverá ser recente (últimos 3 meses) em seu nome, podendo também estar no nome dos seus pais ou cônjuge, neste caso sendo necessário o envio de certidão de casamento também.
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setComprovanteEnderecoImage(uri);
+            setComprovanteFileName(fileName || null);
+            setComprovanteMimeType(mimeType || 'image/jpeg');
+          }}
+          label="Selecionar"
+        />
         <Text color="black" spacingY={12} style={{marginTop: 30}}>
           <Text color="black-700" fontStyle="p-14-bold">
             Declaração autenticada em cartório
           </Text>{' '}
           afirmando que o cadastro trata-se de Vendedor de Veículos AUTÔNOMO.
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setDeclaracaoImage(uri);
+            setDeclaracaoFileName(fileName || null);
+            setDeclaracaoMimeType(mimeType || 'image/jpeg');
+          }}
+          label="Selecionar"
+        />
         <View>
           <Text color="black-700" fontStyle="p-14-bold" spacingY={32}>
             Ao se cadastrar como vendedor (loja ou repassador), você autoriza que seus dados sejam armazenados no banco de dados do aplicativo e compreende que, após cada venda, o comprador será convidado a avaliar seu atendimento e confiabilidade. Essas avaliações influenciam diretamente sua reputação dentro da plataforma. Em caso de inconformidades nas negociações ou reclamações recorrentes, seus anúncios poderão ser bloqueados temporariamente ou removidos, a critério da moderação. Mantenha sempre uma conduta profissional e transparente para garantir boas avaliações e maior visibilidade.

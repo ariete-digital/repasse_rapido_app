@@ -5,6 +5,7 @@ export interface ImageData {
   type: string;
   principal: boolean;
   index: number;
+  id?: number; // ID da imagem no servidor (quando carregada de um anúncio existente)
 }
 
 export interface Step5Data {

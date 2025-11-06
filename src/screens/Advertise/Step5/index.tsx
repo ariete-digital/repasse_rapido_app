@@ -35,12 +35,12 @@ const Step5 = () => {
 
   // Preencher campos se estiver editando
   useEffect(() => {
-    if (advertiseData.id_anuncio || advertiseData.descricao || advertiseData.valor) {
+    if (advertiseData.id || advertiseData.descricao || advertiseData.valor) {
       if (advertiseData.descricao) setDescription(advertiseData.descricao);
       if (advertiseData.valor) setPrice(formatPriceForDisplay(advertiseData.valor));
       if (advertiseData.aceite_termos === '1' || advertiseData.aceite_termos === 'true') setAgreeTerms(true);
     }
-  }, [advertiseData.id_anuncio, advertiseData.descricao, advertiseData.valor]);
+  }, [advertiseData.id, advertiseData.descricao, advertiseData.valor]);
 
   // Função para formatar o preço com máscara (exibição)
   const formatPrice = (text: string) => {
@@ -77,7 +77,7 @@ const Step5 = () => {
   // Validar se todos os campos obrigatórios estão preenchidos
   const isFormValid = description.trim() !== '' && price !== '' && agreeTerms;
 
-  const isEditing = !!advertiseData.id_anuncio;
+  const isEditing = !!advertiseData.id;
 
   const handleContinue = () => {
     if (!agreeTerms) {

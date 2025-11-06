@@ -4,7 +4,7 @@ import { api } from '@lib/api';
 
 interface AdvertiseData {
   // ID do anúncio (para edição)
-  id_anuncio?: number | null;
+  id?: number | null;
   
   // Flag para publicar automaticamente após edição
   shouldPublish?: boolean;
@@ -54,6 +54,7 @@ interface AdvertiseData {
 
   // Step 4 - Imagens
   imagens?: ImageData[];
+  imagensOriginais?: ImageData[]; // Armazenar imagens originais ao carregar para edição
 
   // Step 5 - Valor e Descrição
   descricao?: string;
@@ -89,6 +90,7 @@ interface AdvertiseContextData {
   clearAdvertiseData: () => void;
   clearEditCache: () => void;
   loadAdDataForEdit: (codigo: string) => Promise<void>;
+  isEditing: boolean; // Helper para verificar se está em modo edição
 }
 
 const AdvertiseContext = createContext<AdvertiseContextData>({} as AdvertiseContextData);
@@ -135,24 +137,57 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
     loadParameters();
   }, []);
 
+  // Função auxiliar para preservar campos críticos ao atualizar
+  const preserveCriticalFields = (prev: AdvertiseData, data: Partial<AdvertiseData>): AdvertiseData => {
+    // Campos críticos que NUNCA devem ser perdidos durante atualizações
+    // Estes campos identificam que é uma edição e não uma criação
+    const criticalFields: Partial<AdvertiseData> = {};
+    
+    // Preservar id se existir (nunca perder durante updates)
+    // Este é o campo mais crítico - sem ele, a API cria um novo anúncio ao invés de atualizar
+    if (prev.id !== undefined && prev.id !== null) {
+      criticalFields.id = prev.id;
+    }
+    
+    // Preservar imagensOriginais se existir (para comparação de imagens removidas)
+    // Importante para detectar quais imagens foram removidas durante edição
+    // Preservar mesmo se estiver vazio (undefined vs array vazio é diferente)
+    if (prev.imagensOriginais !== undefined) {
+      criticalFields.imagensOriginais = prev.imagensOriginais;
+    }
+    
+    // Preservar shouldPublish se existir (flag para publicar após edição)
+    if (prev.shouldPublish !== undefined) {
+      criticalFields.shouldPublish = prev.shouldPublish;
+    }
+    
+    // IMPORTANTE: Remover explicitamente campos críticos do data se alguém tentar sobrescrevê-los
+    // Isso garante que mesmo que alguém passe id: undefined, ele será preservado
+    const { id: _, imagensOriginais: __, shouldPublish: ___, ...safeData } = data;
+    
+    // Fazer merge: primeiro prev, depois safeData (sem campos críticos), depois criticalFields (garante preservação)
+    // A ordem é crítica: criticalFields por último garante que os campos críticos sempre prevalecem
+    return { ...prev, ...safeData, ...criticalFields };
+  };
+
   const updateStep1Data = (data: Partial<AdvertiseData>) => {
-    setAdvertiseData(prev => ({ ...prev, ...data }));
+    setAdvertiseData(prev => preserveCriticalFields(prev, data));
   };
 
   const updateStep2Data = (data: Partial<AdvertiseData>) => {
-    setAdvertiseData(prev => ({ ...prev, ...data }));
+    setAdvertiseData(prev => preserveCriticalFields(prev, data));
   };
 
   const updateStep3Data = (data: Partial<AdvertiseData>) => {
-    setAdvertiseData(prev => ({ ...prev, ...data }));
+    setAdvertiseData(prev => preserveCriticalFields(prev, data));
   };
 
   const updateStep4Data = (data: Partial<AdvertiseData>) => {
-    setAdvertiseData(prev => ({ ...prev, ...data }));
+    setAdvertiseData(prev => preserveCriticalFields(prev, data));
   };
 
   const updateStep5Data = (data: Partial<AdvertiseData>) => {
-    setAdvertiseData(prev => ({ ...prev, ...data }));
+    setAdvertiseData(prev => preserveCriticalFields(prev, data));
   };
 
   const clearAdvertiseData = () => {
@@ -160,18 +195,21 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
   };
 
   const clearEditCache = () => {
+    // Limpar apenas dados de edição, mas preservar se for necessário manter alguma referência
+    // Esta função é chamada antes de carregar novos dados para edição, então está OK limpar tudo
     setAdvertiseData(prev => {
-      const { id_anuncio, ...rest } = prev;
+      const { id, imagensOriginais, ...rest } = prev;
       return rest;
     });
   };
 
   const loadAdDataForEdit = async (codigo: string) => {
     try {
-      const response = await api.get(`/cliente/anuncios/detalhe?codigo=${codigo}`);
+      const response = await api.get(`/cliente/meus_anuncios/detalhes?codigo=${codigo}`);
       
       if (response.data.status === 'success' && response.data.content.anuncio) {
         const ad = response.data.content.anuncio;
+        const imagensResponse = response.data.content.imagens || [];
         
         
         // Converter campos numéricos para string (para compatibilidade com os forms)
@@ -180,7 +218,7 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
         
         // Preencher todos os dados do anúncio
         setAdvertiseData({
-          id_anuncio: ad.id,
+          id: ad.id,
           
           // Step 1
           placa: ad.placa || '',
@@ -224,50 +262,78 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
           tipo_monta: ad.tipo_monta || '',
           passou_leilao: convertBoolToString(ad.passou_leilao),
           
-          // Step 4 - Imagens (converter para formato esperado)
+          // Step 4 - Imagens (processar array separado de imagens da resposta)
           imagens: (() => {
+            // Processar imagens vindas do array content.imagens
+            if (imagensResponse && Array.isArray(imagensResponse) && imagensResponse.length > 0) {
+              const processedImages = imagensResponse.map((img: any, index: number) => {
+                // Usar str_base64 como URI (URL da imagem)
+                const imageUri = img.str_base64 || img.arquivo || '';
+                return {
+                  uri: imageUri,
+                  base64: '', // Não temos base64, apenas URL
+                  name: img.arquivo || `image_${index}.jpg`,
+                  type: 'image/jpeg',
+                  principal: img.principal === true || img.principal === 1,
+                  index: index,
+                  id: img.id // Armazenar ID da imagem original
+                };
+              });
+              // Armazenar também como imagens originais para comparação posterior
+              return processedImages;
+            }
             
-            // Se há array de imagens, processar normalmente
+            // Fallback: se não há imagens no array separado, verificar se há no anúncio
             if (ad.imagens && Array.isArray(ad.imagens) && ad.imagens.length > 0) {
-              return ad.imagens.map((img: any, index: number) => {
-                // Se img é uma string (URL), usar diretamente
+              const processedImages = ad.imagens.map((img: any, index: number) => {
                 if (typeof img === 'string') {
                   return {
                     uri: img,
+                    base64: '',
                     name: `image_${index}.jpg`,
                     type: 'image/jpeg',
-                    principal: index === 0, // Primeira imagem é principal
+                    principal: index === 0,
                     index: index
                   };
                 }
-                // Se img é um objeto, usar link ou arquivo
                 return {
-                  uri: img.link || img.arquivo || '',
-                  name: `image_${index}.jpg`,
+                  uri: img.link || img.arquivo || img.str_base64 || '',
+                  base64: '',
+                  name: img.arquivo || `image_${index}.jpg`,
                   type: 'image/jpeg',
-                  principal: img.principal === 1,
-                  index: index
+                  principal: img.principal === true || img.principal === 1,
+                  index: index,
+                  id: img.id // Armazenar ID se disponível
+                };
+              });
+              return processedImages;
+            }
+            
+            return [];
+          })(),
+          // Armazenar cópia das imagens originais para comparação ao salvar
+          imagensOriginais: (() => {
+            if (imagensResponse && Array.isArray(imagensResponse) && imagensResponse.length > 0) {
+              return imagensResponse.map((img: any, index: number) => {
+                const imageUri = img.str_base64 || img.arquivo || '';
+                return {
+                  uri: imageUri,
+                  base64: '',
+                  name: img.arquivo || `image_${index}.jpg`,
+                  type: 'image/jpeg',
+                  principal: img.principal === true || img.principal === 1,
+                  index: index,
+                  id: img.id
                 };
               });
             }
-            
-            // Se não há array mas há imagemPrincipal, criar array com ela
-            if (ad.imagemPrincipal) {
-              return [{
-                uri: ad.imagemPrincipal,
-                name: 'image_0.jpg',
-                type: 'image/jpeg',
-                principal: true,
-                index: 0
-              }];
-            }
-            
             return [];
           })(),
           
           // Step 5
           descricao: ad.descricao || '',
           valor: ad.valor || '',
+          valor_fipe: ad.valor_fipe || '',
           aceite_termos: convertBoolToString(ad.aceite_termos),
         });
         
@@ -276,6 +342,9 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
       throw error;
     }
   };
+
+  // Helper para verificar se está em modo edição
+  const isEditing = !!advertiseData.id;
 
   return (
     <AdvertiseContext.Provider
@@ -291,6 +360,7 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
         clearAdvertiseData,
         clearEditCache,
         loadAdDataForEdit,
+        isEditing,
       }}
     >
       {children}

@@ -23,5 +23,9 @@ export const ImagePathContainer = styled.View`
   border-radius: 4px;
   flex: 1;
   background-color: ${(props) => props.theme.colors['gray-100']};
+  justify-content: center;
+  align-items: flex-start;
 `
-export const ImagePathLabel = styled(Text)``
+export const ImagePathLabel = styled(Text)`
+  flex: 1;
+`

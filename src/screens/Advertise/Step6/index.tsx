@@ -17,7 +17,7 @@ type Step6NavigationProp = NativeStackNavigationProp<AdvertiseStackParamList, 'a
 
 const Step6 = () => {
   const navigation = useNavigation<Step6NavigationProp>();
-  const { advertiseData, clearAdvertiseData, clearEditCache } = useAdvertise();
+  const { advertiseData, clearAdvertiseData, clearEditCache, isEditing: isEditingFromContext } = useAdvertise();
   const { user } = useAuth();
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,13 +84,36 @@ const Step6 = () => {
     setIsSubmitting(true);
 
     try {
-
+      // Verificar se está editando antes de preparar os dados
+      const isEditing = isEditingFromContext || !!advertiseData.id;
+      
       // Preparar FormData para multipart/form-data
       const formData = new FormData();
 
-      // Se estiver editando, usar 'id' em vez de 'id_anuncio'
-      if (advertiseData.id_anuncio) {
-        formData.append('id', advertiseData.id_anuncio.toString());
+      // CRÍTICO: Sempre enviar o ID quando existir, caso contrário a API criará um novo anúncio
+      // Este é o campo que diferencia criação de edição na API
+      // IMPORTANTE: O id deve estar sempre preservado no contexto, mesmo ao navegar entre steps
+      if (advertiseData.id !== undefined && advertiseData.id !== null) {
+        formData.append('id', advertiseData.id.toString());
+      } else if (isEditing) {
+        // Se deveria estar editando mas não tem ID, há um problema crítico
+        // Isso não deveria acontecer se preserveCriticalFields estiver funcionando corretamente
+        Alert.alert(
+          'Erro Crítico',
+          'ID do anúncio não encontrado. O anúncio não pode ser atualizado.\n\nPor favor, retorne à tela inicial e inicie a edição novamente.',
+          [
+            { 
+              text: 'OK',
+              onPress: () => {
+                // Limpar dados e voltar para a tela inicial
+                clearEditCache();
+                navigation.navigate('advertiseHome' as any);
+              }
+            }
+          ]
+        );
+        setIsSubmitting(false);
+        return;
       }
 
       formData.append('tipo_veiculo', 'C'); // C = Carro
@@ -157,17 +180,68 @@ const Step6 = () => {
       formData.append('luz_airbag', stringToFormBoolean(advertiseData.luz_airbag).toString());
       formData.append('luz_abs', stringToFormBoolean(advertiseData.luz_abs).toString());
 
-      // Step 4 - Imagens (enviar como arquivos)
-      if (advertiseData.imagens && advertiseData.imagens.length > 0) {
+      // Step 4 - Imagens
+      if (isEditing && advertiseData.imagensOriginais && advertiseData.imagensOriginais.length > 0) {
+        // Modo edição: detectar imagens removidas e novas
         
-        advertiseData.imagens.forEach((img, index) => {
+        // IDs das imagens originais
+        const originalImageIds = advertiseData.imagensOriginais
+          .map(img => img.id)
+          .filter((id): id is number => id !== undefined);
+        
+        // Obter IDs das imagens atuais que são mantidas (têm ID e não foram substituídas)
+        const currentMaintainedIds = (advertiseData.imagens || [])
+          .filter(img => {
+            // Imagem mantida se tem ID E não tem base64 novo (não foi substituída)
+            return img.id !== undefined && (!img.base64 || img.base64.length === 0);
+          })
+          .map(img => img.id)
+          .filter((id): id is number => id !== undefined);
+        
+        // Identificar IDs removidos (estavam nas originais mas não estão mais nas mantidas)
+        const removedIds = originalImageIds.filter(id => !currentMaintainedIds.includes(id));
+        
+        // Enviar IDs removidos se houver
+        if (removedIds.length > 0) {
+          formData.append('idsRemovidos', removedIds.join(','));
+        }
+        
+        // Enviar apenas novas imagens:
+        // - Imagens sem ID (totalmente novas)
+        // - Imagens com base64 (substituídas, mesmo que originalmente tinham ID)
+        const newImages = (advertiseData.imagens || []).filter(img => {
+          // Nova imagem se não tem ID (totalmente nova) OU tem base64 (foi selecionada/substituída)
+          const isNewImage = !img.id || (img.base64 && img.base64.length > 0);
           
+          // Não enviar imagens mantidas (têm ID, não têm base64, e URI é URL remota)
+          if (img.id && (!img.base64 || img.base64.length === 0) && img.uri && !img.uri.startsWith('file://') && !img.uri.startsWith('content://')) {
+            return false;
+          }
+          
+          // Enviar apenas se for nova imagem e tiver URI válida
+          return isNewImage && img.uri && (img.uri.startsWith('file://') || img.uri.startsWith('content://') || (img.base64 && img.base64.length > 0));
+        });
+        
+        newImages.forEach((img) => {
           formData.append('imagens[]', {
             uri: img.uri,
             type: 'image/jpeg',
-            name: `image_${index}.jpg`,
+            name: img.name || `image_${Date.now()}.jpg`,
           } as any);
         });
+      } else {
+        // Modo criação: enviar todas as imagens
+        if (advertiseData.imagens && advertiseData.imagens.length > 0) {
+          advertiseData.imagens.forEach((img, index) => {
+            if (img.uri) {
+              formData.append('imagens[]', {
+                uri: img.uri,
+                type: 'image/jpeg',
+                name: img.name || `image_${index}.jpg`,
+              } as any);
+            }
+          });
+        }
       }
 
       // Step 5 - Valor e Descrição
@@ -206,10 +280,10 @@ const Step6 = () => {
 
 
       if (response.data.status === 'success') {
-        // A API retorna id_anuncio (não id_anuncio_rascunho)
-        const adNumber = response.data.content?.id_anuncio || response.data.content?.id_anuncio_rascunho || advertiseData.id_anuncio || 'N/A';
+        // A API retorna id (não id_anuncio_rascunho)
+        const adNumber = response.data.content?.id || response.data.content?.id_anuncio_rascunho || advertiseData.id || 'N/A';
         
-        const isEditing = !!advertiseData.id_anuncio;
+        const isEditing = !!advertiseData.id;
         
         // Verificar se deve publicar automaticamente
         if (advertiseData.shouldPublish && isEditing) {
@@ -283,7 +357,7 @@ const Step6 = () => {
     }
   };
 
-  const isEditing = !!advertiseData.id_anuncio;
+  const isEditing = !!advertiseData.id;
 
   const redirectToStepWithError = (fieldName: string) => {
     // Mapear campos para suas respectivas etapas

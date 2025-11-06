@@ -82,9 +82,19 @@ const Step1 = () => {
       if (editCodigo) {
         try {
           setIsLoadingEditData(true);
-          clearEditCache();
-          await loadAdDataForEdit(editCodigo);
           
+          // IMPORTANTE: Só limpar cache e recarregar se não estamos já editando
+          // Se já temos id no contexto, significa que estamos navegando entre steps
+          // de uma edição existente, então não devemos limpar o cache e perder a referência
+          const isAlreadyEditing = advertiseData.id !== undefined && advertiseData.id !== null;
+          
+          if (!isAlreadyEditing) {
+            // Só limpar e recarregar se realmente estamos iniciando uma nova edição
+            clearEditCache();
+            await loadAdDataForEdit(editCodigo);
+          }
+          
+          // Sempre atualizar shouldPublish se necessário (mesmo se já estamos editando)
           if (shouldPublish) {
             updateStep1Data({ shouldPublish: true });
           }
@@ -109,7 +119,7 @@ const Step1 = () => {
   }, [editCodigo, shouldPublish]);
 
   useEffect(() => {
-    if (advertiseData.id_anuncio || (editCodigo && advertiseData.placa)) {
+    if (advertiseData.id || (editCodigo && advertiseData.placa)) {
       if (advertiseData.placa) setValue('placa', advertiseData.placa);
       if (advertiseData.marca_veiculo) setValue('marca', advertiseData.marca_veiculo);
       if (advertiseData.modelo_veiculo) setValue('modelo', advertiseData.modelo_veiculo);
@@ -121,7 +131,7 @@ const Step1 = () => {
       if (advertiseData.id_tipo_combustivel) setValue('combustivel', advertiseData.id_tipo_combustivel);
       if (advertiseData.num_portas) setValue('portas', advertiseData.num_portas);
     }
-  }, [advertiseData.id_anuncio, advertiseData.placa, advertiseData.marca_veiculo, advertiseData.modelo_veiculo, editCodigo, setValue]);
+  }, [advertiseData.id, advertiseData.placa, advertiseData.marca_veiculo, advertiseData.modelo_veiculo, editCodigo, setValue]);
 
   // Monitorar todos os campos
   const formValues = watch();
@@ -283,7 +293,7 @@ const Step1 = () => {
   };
 
 
-  const isEditing = !!advertiseData.id_anuncio;
+  const isEditing = !!advertiseData.id;
 
   // Mostrar loading se estiver carregando dados para edição
   if (isLoadingEditData) {

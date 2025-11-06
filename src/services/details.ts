@@ -122,6 +122,13 @@ export interface Anunciante {
   nome: string;
   telefone: string;
   celular: string | null;
+  cep?: string;
+  logradouro?: string;
+  numero?: string;
+  bairro?: string;
+  complemento?: string | null;
+  selo?: string;
+  qtd_vendas?: number;
   cidade: {
     id: number;
     nome: string;

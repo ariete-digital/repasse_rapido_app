@@ -61,6 +61,17 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
   const [loadingCities, setLoadingCities] = useState(false);
   const toast = useToast();
   const { updateUserProfile } = useAuth();
+  
+  // Estados para os arquivos
+  const [cnhImage, setCnhImage] = useState<string | null>(null);
+  const [cnhFileName, setCnhFileName] = useState<string | null>(null);
+  const [cnhMimeType, setCnhMimeType] = useState<string>('image/jpeg');
+  const [comprovanteImage, setComprovanteImage] = useState<string | null>(null);
+  const [comprovanteFileName, setComprovanteFileName] = useState<string | null>(null);
+  const [comprovanteMimeType, setComprovanteMimeType] = useState<string>('image/jpeg');
+  const [declaracaoImage, setDeclaracaoImage] = useState<string | null>(null);
+  const [declaracaoFileName, setDeclaracaoFileName] = useState<string | null>(null);
+  const [declaracaoMimeType, setDeclaracaoMimeType] = useState<string>('image/jpeg');
 
   const {
     control,
@@ -170,25 +181,50 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
     setIsLoading(true);
 
     try {
-      const updateData: any = {
-        nome: data.nome,
-        email: data.email,
-        num_documento: data.num_documento,
-        telefone: data.telefone,
-        cep: data.cep,
-        logradouro: data.logradouro,
-        numero: data.numero,
-        complemento: data.complemento,
-        bairro: data.bairro,
-        id_cidade: data.id_cidade, // Apenas id_cidade
-      };
+      const formData = new FormData();
+      
+      // Adicionar campos de texto
+      formData.append('nome', data.nome);
+      formData.append('email', data.email);
+      formData.append('num_documento', data.num_documento);
+      formData.append('telefone', data.telefone);
+      formData.append('cep', data.cep);
+      formData.append('logradouro', data.logradouro);
+      formData.append('numero', data.numero);
+      if (data.complemento) formData.append('complemento', data.complemento);
+      formData.append('bairro', data.bairro);
+      if (data.id_cidade) formData.append('id_cidade', data.id_cidade.toString());
 
+      // Adicionar arquivos se existirem
+      if (cnhImage) {
+        formData.append('cnh', {
+          uri: cnhImage,
+          type: cnhMimeType,
+          name: cnhFileName || 'cnh',
+        } as any);
+      }
 
-      const response = await api.post('/cliente/minha_conta/salvar', updateData);
+      if (comprovanteImage) {
+        formData.append('comprovante_endereco', {
+          uri: comprovanteImage,
+          type: comprovanteMimeType,
+          name: comprovanteFileName || 'comprovante_endereco',
+        } as any);
+      }
+
+      if (declaracaoImage) {
+        formData.append('declaracao', {
+          uri: declaracaoImage,
+          type: declaracaoMimeType,
+          name: declaracaoFileName || 'declaracao',
+        } as any);
+      }
+
+      const response = await api.post('/cliente/minha_conta/salvar', formData);
       
 
       if (response.data && response.data.status === 'success') {
-        const updatedUser = { ...userData, ...updateData };
+        const updatedUser = { ...userData, ...data };
         await updateUserProfile(updatedUser);
         toast.show('Perfil atualizado com sucesso!', { type: 'success' });
         onUpdate();
@@ -400,21 +436,39 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
         <Text color="black" fontStyle="p-14-bold" spacingY={12}>
           CNH
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setCnhImage(uri);
+            setCnhFileName(fileName || null);
+            setCnhMimeType(mimeType || 'image/jpeg');
+          }}
+        />
         <Text color="black" spacingY={12} style={{marginTop: 30}}>
           <Text color="black-700" fontStyle="p-14-bold">
             Comprovante de endereço recente.
           </Text>{' '}
           O comprovante deverá ser recente (últimos 3 meses) em seu nome, podendo também estar no nome dos seus pais ou cônjuge, neste caso sendo necessário o envio de certidão de casamento também.
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setComprovanteImage(uri);
+            setComprovanteFileName(fileName || null);
+            setComprovanteMimeType(mimeType || 'image/jpeg');
+          }}
+        />
         <Text color="black" spacingY={12} style={{marginTop: 30}}>
           <Text color="black-700" fontStyle="p-14-bold">
             Declaração autenticada em cartório
           </Text>{' '}
           afirmando que o cadastro trata-se de Vendedor de Veículos AUTÔNOMO.
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setDeclaracaoImage(uri);
+            setDeclaracaoFileName(fileName || null);
+            setDeclaracaoMimeType(mimeType || 'image/jpeg');
+          }}
+        />
       </View>
 
       <View

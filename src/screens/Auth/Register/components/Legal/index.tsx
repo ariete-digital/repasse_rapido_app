@@ -78,6 +78,12 @@ const Legal = () => {
   const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false)
   const [toggleCheckBox1, setToggleCheckBox1] = useState<boolean>(false)
   const [toggleCheckBox2, setToggleCheckBox2] = useState<boolean>(false)
+  const [cnhImage, setCnhImage] = useState<string | null>(null);
+  const [cnhFileName, setCnhFileName] = useState<string | null>(null);
+  const [cnhMimeType, setCnhMimeType] = useState<string>('image/jpeg');
+  const [complementarImage, setComplementarImage] = useState<string | null>(null);
+  const [complementarFileName, setComplementarFileName] = useState<string | null>(null);
+  const [complementarMimeType, setComplementarMimeType] = useState<string>('image/jpeg');
 
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
@@ -115,16 +121,56 @@ const Legal = () => {
   };
 
   const handleRegister = async (data: LegalFormProps) => {
-    
-    const legalPersonData = {
-      tipo: 'PJ',
-      ...data,
-    };
+    // Criar FormData para multipart/form-data
+    const formData = new FormData();
+
+    // Adicionar campos de texto
+    formData.append('nome', data.nome);
+    formData.append('email', data.email);
+    formData.append('senha', data.senha);
+    formData.append('tipo', 'PJ');
+    formData.append('num_documento', data.num_documento.replace(/\D/g, '')); // Remove máscara
+    formData.append('telefone', data.telefone.replace(/\D/g, '')); // Remove máscara
+    formData.append('cep', data.cep.replace(/\D/g, '')); // Remove máscara
+    formData.append('logradouro', data.logradouro);
+    formData.append('numero', data.numero);
+    if (data.complemento) {
+      formData.append('complemento', data.complemento);
+    }
+    formData.append('bairro', data.bairro);
+    formData.append('id_cidade', data.id_cidade.toString());
+    formData.append('nome_fantasia', data.nome_fantasia);
+    formData.append('celular', data.celular.replace(/\D/g, '')); // Remove máscara
+    formData.append('nome_responsavel', data.nome_responsavel);
+    formData.append('cpf_responsavel', data.cpf_responsavel.replace(/\D/g, '')); // Remove máscara
+    formData.append('inscricao_estadual', data.inscricao_estadual);
+
+    // Adicionar arquivos se existirem
+    if (cnhImage) {
+      formData.append('cnh', {
+        uri: cnhImage,
+        type: cnhMimeType,
+        name: cnhFileName || 'cnh',
+      } as any);
+    }
+
+    if (complementarImage) {
+      formData.append('complementar', {
+        uri: complementarImage,
+        type: complementarMimeType,
+        name: complementarFileName || 'complementar',
+      } as any);
+    }
 
     setIsLoading(true);
 
     try {
-      const response = await api.post('/cadastrar', legalPersonData);
+      // Axios automaticamente define Content-Type com boundary para FormData
+      const response = await api.post('/cadastrar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       if (response.data) {
         toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
         navigation.navigate('registerSuccess');
@@ -505,11 +551,25 @@ const Legal = () => {
         <Text color="black" fontStyle="p-14-bold" spacingY={12}>
           Envie o cartão CNPJ com o CNAE 4511
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setComplementarImage(uri);
+            setComplementarFileName(fileName || null);
+            setComplementarMimeType(mimeType || 'image/jpeg');
+          }}
+          label="Selecionar"
+        />
         <Text color="black" fontStyle="p-14-bold" spacingY={12} style={{marginTop: 32}}>
           Envie a CNH do responsável legal para empresa.
         </Text>
-        <ImagePickerExample />
+        <ImagePickerExample 
+          onImageSelected={(uri, fileName, mimeType) => {
+            setCnhImage(uri);
+            setCnhFileName(fileName || null);
+            setCnhMimeType(mimeType || 'image/jpeg');
+          }}
+          label="Selecionar"
+        />
         <View>
           <Text color="black-700" fontStyle="p-14-bold" spacingY={32}>
             Ao se cadastrar como vendedor (loja ou repassador), você autoriza que seus dados sejam armazenados no banco de dados do aplicativo e compreende que, após cada venda, o comprador será convidado a avaliar seu atendimento e confiabilidade. Essas avaliações influenciam diretamente sua reputação dentro da plataforma. Em caso de inconformidades nas negociações ou reclamações recorrentes, seus anúncios poderão ser bloqueados temporariamente ou removidos, a critério da moderação. Mantenha sempre uma conduta profissional e transparente para garantir boas avaliações e maior visibilidade.

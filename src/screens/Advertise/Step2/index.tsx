@@ -28,10 +28,10 @@ const Step2 = () => {
   // Preencher opcionais se estiver editando
   useEffect(() => {
     
-    if ((advertiseData.id_anuncio || advertiseData.opcionais) && advertiseData.opcionais && advertiseData.opcionais.length > 0) {
+    if ((advertiseData.id || advertiseData.opcionais) && advertiseData.opcionais && advertiseData.opcionais.length > 0) {
       setSelectedOptionalIds(advertiseData.opcionais);
     }
-  }, [advertiseData.id_anuncio, advertiseData.opcionais]);
+  }, [advertiseData.id, advertiseData.opcionais]);
 
   // Usar opcionais dos parâmetros
   const availableOptions = parameters.opcionais;
@@ -56,7 +56,7 @@ const Step2 = () => {
   };
 
 
-  const isEditing = !!advertiseData.id_anuncio;
+  const isEditing = !!advertiseData.id;
 
   const handleContinue = () => {
     

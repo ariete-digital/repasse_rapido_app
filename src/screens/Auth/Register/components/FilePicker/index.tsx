@@ -1,36 +1,96 @@
 import Text from '@components/Text'
-import * as ImagePicker from 'expo-image-picker'
+import * as DocumentPicker from 'expo-document-picker'
 import React, { useState } from 'react'
+import { Alert } from 'react-native'
 import * as I from './styles'
 
-export default function ImgPicker() {
+interface ImgPickerProps {
+  onImageSelected?: (uri: string | null, fileName?: string, mimeType?: string) => void;
+  label?: string;
+}
+
+export default function ImgPicker({ onImageSelected, label = 'Arquivos' }: ImgPickerProps) {
   const [image, setImage] = useState<null | string>(null)
+  const [fileName, setFileName] = useState<null | string>(null)
 
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    })
+  const getMimeType = (fileName: string): string => {
+    const extension = fileName.split('.').pop()?.toLowerCase()
+    
+    const mimeTypes: { [key: string]: string } = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'pdf': 'application/pdf',
+      'webp': 'image/webp',
+    }
+    
+    return mimeTypes[extension || ''] || 'application/octet-stream'
+  }
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri)
+  const extractFileName = (uri: string): string => {
+    // Extrai o nome do arquivo da URI
+    // URI pode ser: file:///path/to/image.jpg ou content://...
+    const parts = uri.split('/')
+    const file = parts[parts.length - 1]
+    
+    // Se não conseguir extrair um nome válido, usa um nome genérico
+    if (file && file.includes('.')) {
+      return file
+    }
+    
+    // Tenta extrair da parte após o último /
+    const lastPart = uri.substring(uri.lastIndexOf('/') + 1)
+    if (lastPart && lastPart.length > 0) {
+      return lastPart.length > 30 ? `${lastPart.substring(0, 30)}...` : lastPart
+    }
+    
+    return 'arquivo'
+  }
+
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*', 'application/pdf'],
+        copyToCacheDirectory: true,
+      })
+
+      // Na versão 11 do expo-document-picker, o resultado tem um array assets
+      if (result && !result.canceled && (result as any).assets && (result as any).assets.length > 0) {
+        const asset = (result as any).assets[0]
+        const fileUri = asset.uri
+        const name = asset.name || extractFileName(fileUri)
+        const mimeType = asset.mimeType || getMimeType(name)
+        
+        setImage(fileUri)
+        setFileName('Arquivo selecionado') // Mostrar mensagem genérica
+        
+        if (onImageSelected) {
+          onImageSelected(fileUri, name, mimeType)
+        }
+      }
+    } catch (error: any) {
+      // Verificar se o usuário cancelou
+      if (error && error.code === 'E_DOCUMENT_PICKER_CANCELED') {
+        // Usuário cancelou, não precisa fazer nada
+        return
+      }
+      console.error('Erro ao selecionar documento:', error)
+      Alert.alert('Erro', 'Não foi possível selecionar o documento. Tente novamente.')
     }
   }
 
   return (
     <I.Container>
-      <I.PickerBTN onPress={pickImage}>
+      <I.PickerBTN onPress={pickDocument}>
         <Text color="white" fontStyle="p-14-bold">
           Arquivos
         </Text>
       </I.PickerBTN>
       <I.ImagePathContainer>
-        {image && (
-          <I.ImagePathLabel color="black">
-            {JSON.stringify(image)}
+        {fileName && (
+          <I.ImagePathLabel color="black" fontStyle="p-12-regular">
+            {fileName}
           </I.ImagePathLabel>
         )}
       </I.ImagePathContainer>

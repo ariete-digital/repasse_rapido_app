@@ -13,6 +13,13 @@ interface OfferHeadProps {
     cidade: {
       nome: string;
     };
+    cep?: string;
+    logradouro?: string;
+    numero?: string;
+    bairro?: string;
+    complemento?: string | null;
+    selo?: string;
+    qtd_vendas?: number;
   };
 }
 
@@ -49,32 +56,34 @@ const OfferHead = ({ anuncio, anunciante }: OfferHeadProps) => {
       <View  
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, marginTop: 20 }}
       >
-        <View style={{ 
-          display: 'flex', 
-          flexDirection: 'row', 
-          alignItems: 'center', 
-          gap: 10,
-          backgroundColor: '#E8E6DB80',
-          padding: 10,
-          borderTopRightRadius: 8,
-          borderTopLeftRadius: 8,
-        }}>
-          <Text 
-            color="black-500" 
-            fontStyle="p-14-bold"
-            spacingY={6}
-          >
-            Selo
-          </Text>
-          <SvgXml xml={StarGoldIcon()} width={24} height={24} />
-          <Text 
-            color="yellow" 
-            fontStyle="p-18-regular"
-            spacingY={6}
-          >
-            OURO
-          </Text>
-        </View>
+        {anunciante?.selo && anunciante.selo !== 'SEM_SELO' && (
+          <View style={{ 
+            display: 'flex', 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            gap: 10,
+            backgroundColor: '#E8E6DB80',
+            padding: 10,
+            borderTopRightRadius: 8,
+            borderTopLeftRadius: 8,
+          }}>
+            <Text 
+              color="black-500" 
+              fontStyle="p-14-bold"
+              spacingY={6}
+            >
+              Selo
+            </Text>
+            <SvgXml xml={StarGoldIcon()} width={24} height={24} />
+            <Text 
+              color="yellow" 
+              fontStyle="p-18-regular"
+              spacingY={6}
+            >
+              {anunciante.selo}
+            </Text>
+          </View>
+        )}
         <View style={{ 
           display: 'flex', 
           flexDirection: 'column', 
@@ -83,6 +92,8 @@ const OfferHead = ({ anuncio, anunciante }: OfferHeadProps) => {
           backgroundColor: '#E8E6DB80',
           padding: 10,
           width: '100%',
+          borderTopRightRadius: !anunciante?.selo || anunciante.selo === 'SEM_SELO' ? 8 : 0,
+          borderTopLeftRadius: !anunciante?.selo || anunciante.selo === 'SEM_SELO' ? 8 : 0,
         }}>
           <Text 
             color="black-500" 
@@ -106,62 +117,84 @@ const OfferHead = ({ anuncio, anunciante }: OfferHeadProps) => {
                 fontStyle="p-14-regular"
                 spacingY={6}
               >
-                {anunciante?.cidade?.nome || 'Cidade não informada'}
+                {(() => {
+                  const parts = [];
+                  if (anunciante?.logradouro) {
+                    parts.push(anunciante.logradouro);
+                    if (anunciante.numero) {
+                      parts.push(`nº ${anunciante.numero}`);
+                    }
+                  }
+                  if (anunciante?.bairro) {
+                    parts.push(anunciante.bairro);
+                  }
+                  if (anunciante?.complemento) {
+                    parts.push(anunciante.complemento);
+                  }
+                  if (anunciante?.cep) {
+                    parts.push(`CEP: ${anunciante.cep}`);
+                  }
+                  if (anunciante?.cidade?.nome) {
+                    parts.push(anunciante.cidade.nome);
+                  }
+                  return parts.length > 0 ? parts.join(', ') : 'Endereço não informado';
+                })()}
               </Text>
             </View>
           </View>
-          <View style={{
-            display: 'flex', 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            gap: 10,
-            backgroundColor: '#EBE8D9',
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            padding: 5,
-            width: 130,
-            height: 50,
-            borderBottomLeftRadius: 8,
-            borderBottomRightRadius: 8,
-          }}>
-
-            <View style={{ 
+          {anunciante?.qtd_vendas !== undefined && anunciante.qtd_vendas > 0 && (
+            <View style={{
               display: 'flex', 
               flexDirection: 'row', 
-              alignItems: 'center',
+              alignItems: 'center', 
               justifyContent: 'center',
-              width: 30,
-              height: 30,
-              borderRadius: 15, 
-              backgroundColor: "#E8CB57",
+              gap: 10,
+              backgroundColor: '#EBE8D9',
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              padding: 5,
+              width: 130,
+              height: 50,
+              borderBottomLeftRadius: 8,
+              borderBottomRightRadius: 8,
             }}>
-              <Text 
-                color="white" 
-                fontStyle="p-14-bold"
-                spacingY={6}
-              >
-                15
-              </Text>
+              <View style={{ 
+                display: 'flex', 
+                flexDirection: 'row', 
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 30,
+                height: 30,
+                borderRadius: 15, 
+                backgroundColor: "#E8CB57",
+              }}>
+                <Text 
+                  color="white" 
+                  fontStyle="p-14-bold"
+                  spacingY={6}
+                >
+                  {anunciante.qtd_vendas}
+                </Text>
+              </View>
+              <View style={{ 
+                display: 'flex', 
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                width: 70,
+              }}>
+                <Text 
+                  color="black-500" 
+                  fontStyle="c-12-medium"
+                  spacingY={6}
+                >
+                  vendas realizadas
+                </Text>
+              </View>
             </View>
-            <View style={{ 
-              display: 'flex', 
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              width: 70,
-            }}>
-              <Text 
-                color="black-500" 
-                fontStyle="c-12-medium"
-                spacingY={6}
-              >
-                vendas realizadas
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
       </View>
     </O.Container>

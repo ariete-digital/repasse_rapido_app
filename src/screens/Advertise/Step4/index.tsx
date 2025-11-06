@@ -19,6 +19,7 @@ interface Photo {
   uri: string;
   base64: string;
   index: number;
+  originalId?: number; // ID da imagem original (quando carregada de um anúncio existente)
 }
 
 const Step4 = () => {
@@ -27,15 +28,16 @@ const Step4 = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
 
   useEffect(() => {
-    if ((advertiseData.id_anuncio || advertiseData.imagens) && advertiseData.imagens && advertiseData.imagens.length > 0) {
+    if ((advertiseData.id || advertiseData.imagens) && advertiseData.imagens && advertiseData.imagens.length > 0) {
       const loadedPhotos = advertiseData.imagens.map((img: any, idx: number) => ({
         uri: img.uri || img.url,
         base64: img.base64 || '',
         index: idx,
+        originalId: img.id, // Preservar ID da imagem original se existir
       }));
       setPhotos(loadedPhotos);
     }
-  }, [advertiseData.id_anuncio, advertiseData.imagens]);
+  }, [advertiseData.id, advertiseData.imagens]);
 
   const pickImage = async (index: number) => {
     // Solicitar permissão
@@ -89,14 +91,21 @@ const Step4 = () => {
       setPhotos(updatedPhotos);
       
       // Atualizar o contexto imediatamente
-      const imageData = updatedPhotos.map((photo, arrayIndex) => ({
-        uri: photo.uri,
-        base64: photo.base64,
-        name: `image_${photo.index}.jpg`,
-        type: 'image/jpeg',
-        principal: arrayIndex === 0,
-        index: photo.index
-      }));
+      // Preservar ID original apenas se a imagem não foi substituída (não tem base64 novo)
+      const imageData = updatedPhotos.map((photo, arrayIndex) => {
+        // Se a imagem tem base64 novo, é uma nova imagem (sem ID)
+        // Se não tem base64 mas tem originalId, preservar o ID original
+        const hasNewBase64 = photo.base64 && photo.base64.length > 0;
+        return {
+          uri: photo.uri,
+          base64: photo.base64,
+          name: `image_${photo.index}.jpg`,
+          type: 'image/jpeg',
+          principal: arrayIndex === 0,
+          index: photo.index,
+          id: hasNewBase64 ? undefined : photo.originalId // Só preservar ID se não for nova imagem
+        };
+      });
       
       updateStep4Data({
         imagens: imageData,
@@ -130,14 +139,18 @@ const Step4 = () => {
             setPhotos(reorganizedPhotos);
             
             // Atualizar o contexto imediatamente com as imagens reorganizadas
-            const imageData = reorganizedPhotos.map((photo, arrayIndex) => ({
-              uri: photo.uri,
-              base64: photo.base64,
-              name: `image_${photo.index}.jpg`,
-              type: 'image/jpeg',
-              principal: arrayIndex === 0,
-              index: photo.index
-            }));
+            const imageData = reorganizedPhotos.map((photo, arrayIndex) => {
+              const hasNewBase64 = photo.base64 && photo.base64.length > 0;
+              return {
+                uri: photo.uri,
+                base64: photo.base64,
+                name: `image_${photo.index}.jpg`,
+                type: 'image/jpeg',
+                principal: arrayIndex === 0,
+                index: photo.index,
+                id: hasNewBase64 ? undefined : photo.originalId // Preservar ID se não for nova imagem
+              };
+            });
             
             
             updateStep4Data({
@@ -149,7 +162,7 @@ const Step4 = () => {
     );
   };
 
-  const isEditing = !!advertiseData.id_anuncio;
+  const isEditing = !!advertiseData.id;
 
   const handleContinue = () => {
     // Preparar dados das imagens para a API
@@ -167,18 +180,19 @@ const Step4 = () => {
     // Ordenar fotos por índice para garantir ordem correta
     const sortedPhotos = [...photos].sort((a, b) => a.index - b.index);
     
-    // Filtrar apenas fotos que têm base64 (novas fotos selecionadas)
-    const photosWithBase64 = sortedPhotos.filter(photo => photo.base64);
-    
-    // Retornar array de base64 com metadados
-    const imagesArray = photosWithBase64.map((photo, arrayIndex) => ({
-      uri: photo.uri, // Incluir URI também
-      base64: photo.base64,
-      name: `image_${photo.index}.jpg`,
-      type: 'image/jpeg',
-      principal: arrayIndex === 0, // O primeiro é sempre a imagem principal
-      index: photo.index
-    }));
+    // Retornar array com metadados, preservando IDs originais quando não há base64 novo
+    const imagesArray = sortedPhotos.map((photo, arrayIndex) => {
+      const hasNewBase64 = photo.base64 && photo.base64.length > 0;
+      return {
+        uri: photo.uri,
+        base64: photo.base64 || '',
+        name: `image_${photo.index}.jpg`,
+        type: 'image/jpeg',
+        principal: arrayIndex === 0,
+        index: photo.index,
+        id: hasNewBase64 ? undefined : photo.originalId // Preservar ID se não for nova imagem
+      };
+    });
 
     return imagesArray;
   };
@@ -313,7 +327,6 @@ const Step4 = () => {
               width: '30%',
               aspectRatio: 1,
               flexDirection: 'column',
-              paddingBottom: 16,
             })
           )}
         </View>

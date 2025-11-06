@@ -4,29 +4,84 @@ import { Text } from '@components/index';
 
 interface Testimonial {
   id: number;
-  name: string;
-  city: string;
-  date: string;
-  rating: number;
-  avatar: string;
-  text: string;
+  // Campos da API (nova estrutura)
+  nome_cliente?: string;
+  nota?: number | null;
+  comentario?: string;
+  data?: string;
+  // Campos legados (para compatibilidade)
+  name?: string;
+  city?: string;
+  date?: string;
+  rating?: number | null;
+  avatar?: string | null;
+  text?: string;
 }
+
+// Função auxiliar para obter cor do avatar baseado no nome
+const getAvatarColor = (name: string): string => {
+  const colors = [
+    '#E11138', // brand-red
+    '#001E47', // brand-blue
+    '#E3B505', // yellow
+    '#9A0B26', // brand-red-dark
+    '#25513C', // verde
+    '#38AE76', // verde claro
+    '#CE7720', // orange-text
+  ];
+  const index = name.charCodeAt(0) % colors.length;
+  return colors[index];
+};
+
+// Função auxiliar para obter inicial do nome
+const getInitials = (name: string): string => {
+  if (!name) return '?';
+  const parts = name.trim().split(' ');
+  if (parts.length === 1) {
+    return parts[0][0].toUpperCase();
+  }
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 interface TestimonialsProps {
   testimonials: Testimonial[];
 }
 
 const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
-  const avgRating = testimonials.length
+  // Normalizar e filtrar avaliações
+  const normalizedTestimonials = testimonials.map(t => ({
+    id: t.id,
+    name: t.nome_cliente || t.name || 'Usuário',
+    nota: t.nota ?? t.rating ?? null,
+    comentario: t.comentario || t.text || '',
+    data: t.data || t.date || '',
+    city: t.city || '',
+    avatar: t.avatar || null,
+  }));
+
+  // Filtrar apenas avaliações com rating válido e calcular média
+  const validTestimonials = normalizedTestimonials.filter(t => {
+    const rating = t.nota;
+    return rating !== undefined && rating !== null && !isNaN(Number(rating));
+  });
+  
+  const avgRating = validTestimonials.length > 0
     ? (
-        testimonials.reduce((acc, t) => acc + t.rating, 0) / testimonials.length
+        validTestimonials.reduce((acc, t) => {
+          const rating = t.nota ?? 0;
+          return acc + Number(rating);
+        }, 0) / validTestimonials.length
       ).toFixed(1)
     : '0.0';
 
   // Função para renderizar estrelas baseado na avaliação
-  const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
+  const renderStars = (rating: number | undefined | null) => {
+    if (rating === undefined || rating === null || isNaN(Number(rating))) {
+      rating = 0;
+    }
+    const numRating = Number(rating);
+    const fullStars = Math.floor(numRating);
+    const hasHalfStar = numRating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     
     return (
@@ -52,13 +107,13 @@ const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
       <Text color="black-700" fontStyle="t-24">Depoimentos</Text>
       <View style={styles.headerRow}>
         <View style={styles.ratingBox}>
-          <Text color='white' fontStyle='c-12-regular'>{testimonials.length} avaliações</Text>
+          <Text color='white' fontStyle='c-12-regular'>{validTestimonials.length} avaliações</Text>
           <View style={styles.rating}>
             {renderStars(parseFloat(avgRating))}
             <Text color='white' fontStyle='c-12-bold'>{avgRating}</Text>
           </View>
         </View>
-        {testimonials.length > 0 && (
+        {validTestimonials.length > 0 && (
           <View style={styles.recommendBox}>
             <Text color='white' fontStyle='p-14-bold'>{100}%</Text>
             <Text style={{width: 250}} color='white' fontStyle='c-12-regular'>dos compradores recomendam esta loja</Text>
@@ -66,22 +121,44 @@ const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
         )}
       </View>
       <View style={{ marginTop: 8 }}>
-        {testimonials.map((item) => (
-          <View style={styles.testimonial} key={item.id}>
-            <View style={styles.count}>
-              {renderStars(item.rating)}
-              <Text color='black-500' fontStyle='p-14-bold'>{item.rating.toFixed(1)}</Text>
-            </View>
-            <Text color='black-500' fontStyle='c-12-medium'>{item.text}</Text>
-            <View style={styles.row}>
-              <Image source={{ uri: item.avatar }} style={styles.avatar} />
-              <View style={styles.info}>
-                <Text  color='black-500' fontStyle='p-14-bold'>{item.name}</Text>
-                <Text color='black-500' fontStyle='c-12-regular'>{item.city} | {item.date}</Text>
+        {validTestimonials.map((item) => {
+          const rating = item.nota ?? 0;
+          const commentText = item.comentario || '';
+          const userName = item.name || 'Usuário';
+          const userCity = item.city || '';
+          const userDate = item.data || '';
+          
+          return (
+            <View style={styles.testimonial} key={item.id}>
+              <View style={styles.count}>
+                {renderStars(rating)}
+                <Text color='black-500' fontStyle='p-14-bold'>
+                  {Number(rating).toFixed(1)}
+                </Text>
+              </View>
+              <Text color='black-500' fontStyle='c-12-medium'>{commentText}</Text>
+              <View style={styles.row}>
+                {item.avatar ? (
+                  <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                ) : (
+                  <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: getAvatarColor(userName) }]}>
+                    <Text color='white' fontStyle='p-14-bold'>
+                      {getInitials(userName)}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.info}>
+                  <Text color='black-500' fontStyle='p-14-bold'>{userName}</Text>
+                  {userDate && (
+                    <Text color='black-500' fontStyle='c-12-regular'>
+                      {userDate}
+                    </Text>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </View>
   );
@@ -149,6 +226,10 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginRight: 10,
+  },
+  avatarPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   info: {
     flex: 1,

@@ -7,6 +7,7 @@
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'light',
+    scheme: 'com.repasserapido.client',
     plugins: [
       'expo-system-ui',
       [
@@ -44,6 +45,18 @@
       buildToolsVersion: '35.0.0',
       compileSdkVersion: 35,
       targetSdkVersion: 35,
+      intentFilters: [
+        {
+          action: 'VIEW',
+          data: [
+            {
+              scheme: 'com.repasserapido.client',
+              host: '*',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+      ],
     },
     web: {
       favicon: './assets/favicon.png',

@@ -74,6 +74,14 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
   const [loadingCities, setLoadingCities] = useState(false);
   const toast = useToast();
   const { updateUserProfile } = useAuth();
+  
+  // Estados para os arquivos
+  const [cnpjImage, setCnpjImage] = useState<string | null>(null);
+  const [cnpjFileName, setCnpjFileName] = useState<string | null>(null);
+  const [cnpjMimeType, setCnpjMimeType] = useState<string>('image/jpeg');
+  const [cnhImage, setCnhImage] = useState<string | null>(null);
+  const [cnhFileName, setCnhFileName] = useState<string | null>(null);
+  const [cnhMimeType, setCnhMimeType] = useState<string>('image/jpeg');
 
   const {
     control,
@@ -155,29 +163,47 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
     setIsLoading(true);
 
     try {
-      const updateData: any = {
-        nome: data.nome,
-        nome_fantasia: data.nome_fantasia,
-        num_documento: data.num_documento,
-        email: data.email,
-        celular: data.celular,
-        telefone: data.telefone,
-        cep: data.cep,
-        logradouro: data.logradouro,
-        bairro: data.bairro,
-        numero: data.numero,
-        complemento: data.complemento,
-        nome_responsavel: data.nome_responsavel,
-        cpf_responsavel: data.cpf_responsavel,
-        id_cidade: data.id_cidade, // Apenas id_cidade
-        inscricao_estadual: data.inscricao_estadual,
-        rg: data.rg,
-      };
+      const formData = new FormData();
+      
+      // Adicionar campos de texto
+      formData.append('nome', data.nome);
+      if (data.nome_fantasia) formData.append('nome_fantasia', data.nome_fantasia);
+      formData.append('num_documento', data.num_documento);
+      formData.append('email', data.email);
+      formData.append('celular', data.celular);
+      formData.append('telefone', data.telefone);
+      formData.append('cep', data.cep);
+      formData.append('logradouro', data.logradouro);
+      formData.append('bairro', data.bairro);
+      formData.append('numero', data.numero);
+      if (data.complemento) formData.append('complemento', data.complemento);
+      if (data.nome_responsavel) formData.append('nome_responsavel', data.nome_responsavel);
+      if (data.cpf_responsavel) formData.append('cpf_responsavel', data.cpf_responsavel);
+      if (data.id_cidade) formData.append('id_cidade', data.id_cidade.toString());
+      if (data.inscricao_estadual) formData.append('inscricao_estadual', data.inscricao_estadual);
+      if (data.rg) formData.append('rg', data.rg);
 
-      const response = await api.post('/cliente/minha_conta/salvar', updateData);
+      // Adicionar arquivos se existirem
+      if (cnpjImage) {
+        formData.append('cnpj', {
+          uri: cnpjImage,
+          type: cnpjMimeType,
+          name: cnpjFileName || 'cnpj',
+        } as any);
+      }
+
+      if (cnhImage) {
+        formData.append('cnh', {
+          uri: cnhImage,
+          type: cnhMimeType,
+          name: cnhFileName || 'cnh',
+        } as any);
+      }
+
+      const response = await api.post('/cliente/minha_conta/salvar', formData);
       
       if (response.data && response.data.status === 'success') {
-        const updatedUser = { ...userData, ...updateData };
+        const updatedUser = { ...userData, ...data };
         await updateUserProfile(updatedUser);
         toast.show('Perfil atualizado com sucesso!', { type: 'success' });
         onUpdate();
@@ -508,11 +534,23 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
             <Text color="black" fontStyle="p-14-bold" spacingY={12}>
             Envie o cartão CNPJ com o CNAE 4511
             </Text>
-            <ImagePickerExample />
+            <ImagePickerExample 
+              onImageSelected={(uri, fileName, mimeType) => {
+                setCnpjImage(uri);
+                setCnpjFileName(fileName || null);
+                setCnpjMimeType(mimeType || 'image/jpeg');
+              }}
+            />
             <Text color="black" fontStyle="p-14-bold" spacingY={12} style={{marginTop: 32}}>
             Envie a CNH do responsável legal para empresa.
             </Text>
-            <ImagePickerExample />
+            <ImagePickerExample 
+              onImageSelected={(uri, fileName, mimeType) => {
+                setCnhImage(uri);
+                setCnhFileName(fileName || null);
+                setCnhMimeType(mimeType || 'image/jpeg');
+              }}
+            />
         </L.DocumentsContainer>
 
 

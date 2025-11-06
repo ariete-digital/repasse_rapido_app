@@ -46,17 +46,23 @@ const Individual = () => {
 
   const handleRegister = async (data: IndividualFormProps) => {
     const { nome, email, senha } = data;
-    const userData = {
-      nome,
-      email,
-      senha,
-      tipo: 'PF',
-    };
+    
+    // Criar FormData para multipart/form-data
+    const formData = new FormData();
+    
+    formData.append('nome', nome);
+    formData.append('email', email);
+    formData.append('senha', senha);
+    formData.append('tipo', 'PF');
 
     setIsLoading(true);
 
     try {
-      const response = await api.post('/cadastrar', userData);
+      const response = await api.post('/cadastrar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       if (response.data) {
         toast.show('Usuário cadastrado com sucesso!', { type: 'success' });
         navigation.navigate('registerSuccess');
