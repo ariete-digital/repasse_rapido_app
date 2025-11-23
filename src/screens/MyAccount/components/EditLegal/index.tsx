@@ -253,7 +253,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
     if (cleanCep.length !== 8) return;
 
     try {
-      const response = await axios.get(`https:
+      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
 
       if (response.data && !response.data.erro) {
         const { bairro, logradouro, localidade } = response.data;

@@ -162,7 +162,7 @@ const Login = () => {
         <Text color="black-700">Para mais informações, verifique nossos</Text>
         <TouchableOpacity
           onPress={() =>
-            openUrl('https:
+            openUrl('https://www.repasserapido.com.br/termos')
           }
         >
           <Text color="black-700" decoration="underline">

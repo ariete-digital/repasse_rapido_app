@@ -16,17 +16,3 @@ export interface Banners {
   link?: string;
 }
 
-export type Store = {
-  id: number;
-  nome: string;
-  slug?: string;
-  bairro: string;
-  celular: string;
-  complemento: string;
-  logradouro: string;
-  nome_fantasia: string;
-  numero: string;
-  telefone: string;
-  imagem_logo?: string;
-  imagem_capa?: string;
-};

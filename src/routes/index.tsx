@@ -11,7 +11,7 @@ export const Routes = () => {
 
   const linking: LinkingOptions<RootStackParamList> = {
     prefixes: [
-      'com.repasserapido.client:
+      'com.repasserapido.client:',
     ],
     config: {
       screens: {

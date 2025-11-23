@@ -9,6 +9,7 @@
     userInterfaceStyle: 'light',
     scheme: 'com.repasserapido.client',
     plugins: [
+      "expo-font",
       'expo-system-ui',
       [
         'expo-image-picker',
@@ -42,9 +43,6 @@
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#E11138',
       },
-      buildToolsVersion: '35.0.0',
-      compileSdkVersion: 35,
-      targetSdkVersion: 35,
       intentFilters: [
         {
           action: 'VIEW',
@@ -62,7 +60,7 @@
       favicon: './assets/favicon.png',
     },
     extra: {
-      apiUrl: process.env.API_URL_PROD,
+      apiUrl: process.env.API_URL_PROD || 'https://api-repasses.arietedigital.com.br/api',
       eas: {
         projectId: '2b0cf35b-cdb7-43fa-8bf1-bd294cb41b9a',
       },

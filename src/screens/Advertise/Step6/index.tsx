@@ -185,11 +185,11 @@ const Step6 = () => {
           
           const isNewImage = !img.id || (img.base64 && img.base64.length > 0);
 
-          if (img.id && (!img.base64 || img.base64.length === 0) && img.uri && !img.uri.startsWith('file:
+          if (img.id && (!img.base64 || img.base64.length === 0) && img.uri && !img.uri.startsWith('file://')) {
             return false;
           }
 
-          return isNewImage && img.uri && (img.uri.startsWith('file:
+          return isNewImage && img.uri && (img.uri.startsWith('file://') || img.uri.startsWith('http://') || img.uri.startsWith('https://'));
         });
         
         newImages.forEach((img) => {

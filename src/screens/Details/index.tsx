@@ -97,7 +97,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
       const anuncioInfo = data?.anuncio;
       if (!anuncioInfo) return;
 
-      const deepLink = `com.repasserapido.client:
+      const deepLink = `com.repasserapido.client://anuncio/${code}`;
 
       const shareMessage = `Confira este veículo: ${anuncioInfo.marca_veiculo} ${anuncioInfo.modelo_veiculo}\n\n${deepLink}`;
 
@@ -140,7 +140,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
                           data?.anunciante?.telefone?.replace(/\D/g, '') || 
                           '5511999999999';
       const message = `Olá! Gostaria de saber mais sobre este veículo: ${data?.anuncio?.marca_veiculo} ${data?.anuncio?.modelo_veiculo} - ${data?.anuncio?.codigo}`;
-      const whatsappUrl = `whatsapp:
+      const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
       Linking.openURL(whatsappUrl);
     }
     

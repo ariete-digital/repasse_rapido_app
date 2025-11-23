@@ -8,7 +8,6 @@ import HeaderHome from './components/HeaderBanner';
 import HeaderUserRow from './components/HeaderUserRow';
 
 import * as H from './styles';
-import { StoresArea } from './components/StoresArea';
 import ItemCard from '@components/ItemCard';
 import Text from '@components/Text';
 
@@ -110,7 +109,6 @@ const Home = () => {
         <H.OffersContainer>
           {renderAds()}
         </H.OffersContainer>
-        <StoresArea />
       </H.ScrollingContent>
     </H.Container>
   );
