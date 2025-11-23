@@ -167,7 +167,6 @@ export const FiltersContextProvider = ({
     model: '',
   });
 
-  // UseQuery hooks
   const {
     data: colorsData,
     isLoading: isColorsLoading,
@@ -204,7 +203,6 @@ export const FiltersContextProvider = ({
     queryFn: () => getModels(search.model),
   });
 
-  // Novas queries para filtros
   const {
     data: tiposCambioData,
     isLoading: isTiposCambioLoading,
@@ -232,8 +230,6 @@ export const FiltersContextProvider = ({
     queryFn: () => getOpcionais(),
   });
 
-  // Removidas queries para rotas que não existem na API
-
   const filterKey = useMemo(() => JSON.stringify(filterParams), [filterParams]);
   const {
     data: searchResults,
@@ -247,10 +243,9 @@ export const FiltersContextProvider = ({
       const parsedParams = JSON.parse(queryKey[1]);
       return getFilteredData(parsedParams);
     },
-    enabled: true, // Mudado para true para executar automaticamente
+    enabled: true, 
   });
 
-  // Nova query para buscar dados de filtros com contagem
   const {
     data: filterDataWithCount,
     isLoading: isFilterDataLoading,
@@ -266,7 +261,6 @@ export const FiltersContextProvider = ({
     enabled: true,
   });
 
-  // Carrega todos os anúncios ao iniciar
   useEffect(() => {
   }, []);
 
@@ -359,7 +353,6 @@ export const FiltersContextProvider = ({
     });
   };
 
-  // Função para limpar filtros específicos
   const clearSpecificFilters = (filtersToClear: (keyof FilterOptions)[]) => {
     const newParams = { ...filterParams };
     filtersToClear.forEach(filter => {

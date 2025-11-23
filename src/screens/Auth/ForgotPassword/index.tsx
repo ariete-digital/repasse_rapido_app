@@ -32,7 +32,7 @@ const ForgotPassword = () => {
     try {
       const response = await api.post('/recuperar_senha', {
         email: data.email,
-        url: 'exp://repasse-rapido.com/forgot-password' // Deep link para o app
+        url: 'exp:
       });
 
       if (response.data) {

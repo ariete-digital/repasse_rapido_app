@@ -15,7 +15,6 @@ export const Label = styled.Text`
   color: #fff;
 `;
 
-
 export const SearchButton = styled.TouchableOpacity`
   background-color: #EBE8D9;
   padding: 8px;

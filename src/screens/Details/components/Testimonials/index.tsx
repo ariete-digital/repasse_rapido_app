@@ -4,12 +4,12 @@ import { Text } from '@components/index';
 
 interface Testimonial {
   id: number;
-  // Campos da API (nova estrutura)
+  
   nome_cliente?: string;
   nota?: number | null;
   comentario?: string;
   data?: string;
-  // Campos legados (para compatibilidade)
+  
   name?: string;
   city?: string;
   date?: string;
@@ -18,22 +18,20 @@ interface Testimonial {
   text?: string;
 }
 
-// Função auxiliar para obter cor do avatar baseado no nome
 const getAvatarColor = (name: string): string => {
   const colors = [
-    '#E11138', // brand-red
-    '#001E47', // brand-blue
-    '#E3B505', // yellow
-    '#9A0B26', // brand-red-dark
-    '#25513C', // verde
-    '#38AE76', // verde claro
-    '#CE7720', // orange-text
+    '#E11138', 
+    '#001E47', 
+    '#E3B505', 
+    '#9A0B26', 
+    '#25513C', 
+    '#38AE76', 
+    '#CE7720', 
   ];
   const index = name.charCodeAt(0) % colors.length;
   return colors[index];
 };
 
-// Função auxiliar para obter inicial do nome
 const getInitials = (name: string): string => {
   if (!name) return '?';
   const parts = name.trim().split(' ');
@@ -48,7 +46,7 @@ interface TestimonialsProps {
 }
 
 const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
-  // Normalizar e filtrar avaliações
+  
   const normalizedTestimonials = testimonials.map(t => ({
     id: t.id,
     name: t.nome_cliente || t.name || 'Usuário',
@@ -59,7 +57,6 @@ const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
     avatar: t.avatar || null,
   }));
 
-  // Filtrar apenas avaliações com rating válido e calcular média
   const validTestimonials = normalizedTestimonials.filter(t => {
     const rating = t.nota;
     return rating !== undefined && rating !== null && !isNaN(Number(rating));
@@ -74,7 +71,6 @@ const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
       ).toFixed(1)
     : '0.0';
 
-  // Função para renderizar estrelas baseado na avaliação
   const renderStars = (rating: number | undefined | null) => {
     if (rating === undefined || rating === null || isNaN(Number(rating))) {
       rating = 0;
@@ -86,15 +82,15 @@ const Testimonials: React.FC<TestimonialsProps> = ({ testimonials }) => {
     
     return (
       <View style={{ flexDirection: 'row' }}>
-        {/* Estrelas cheias */}
+        
         {Array.from({ length: fullStars }, (_, i) => (
           <Text key={`full-${i}`} color='yellow' fontStyle='c-12-bold'>★</Text>
         ))}
-        {/* Meia estrela */}
+        
         {hasHalfStar && (
           <Text color='yellow' fontStyle='c-12-bold'>☆</Text>
         )}
-        {/* Estrelas vazias */}
+        
         {Array.from({ length: emptyStars }, (_, i) => (
           <Text key={`empty-${i}`} color='gray-300' fontStyle='c-12-bold'>☆</Text>
         ))}

@@ -36,7 +36,6 @@ const ColorsFilter = ({
 
   const options: DefaultValue[] = filterValues.colors || [];
 
-  // ✅ sincronizar selectedColor ao abrir o modal
   useEffect(() => {
     if (isVisible) {
       setSelectedColor(filterParams.cor ?? undefined);

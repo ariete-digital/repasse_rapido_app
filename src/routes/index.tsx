@@ -9,10 +9,9 @@ import { RootStackParamList } from './app.routes';
 export const Routes = () => {
   const { isLoadingUserStorageData } = useAuth();
 
-  // Configuração de linking para deeplinks
   const linking: LinkingOptions<RootStackParamList> = {
     prefixes: [
-      'com.repasserapido.client://',
+      'com.repasserapido.client:
     ],
     config: {
       screens: {

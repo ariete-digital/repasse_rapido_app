@@ -61,7 +61,7 @@ export const StoresArea = () => {
               <Pressable
                 key={store.id}
                 onPress={() =>
-                  handlePress(`https://repasserapido.com.br/lojas/${store.slug}`)
+                  handlePress(`https:
                 }
               >
                 <SafeImage
@@ -84,7 +84,7 @@ export const StoresArea = () => {
       >
         <GradientButton
           label="Ver todas as lojas"
-          onPress={() => openUrl('https://repasserapido.com.br/lojas')}
+          onPress={() => openUrl('https:
         />
       </View>
     </>

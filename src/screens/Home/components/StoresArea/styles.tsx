@@ -23,5 +23,5 @@ export const StoreLogo = styled(Image)`
   width: 100px;
   height: 100px;
   margin: 10px;
-  border-radius: 6px; // opcional
+  border-radius: 6px; 
 `;

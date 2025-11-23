@@ -17,7 +17,7 @@ export const Pressable = styled.TouchableOpacity.attrs({
 export const Gradient = styled(LinearGradient)<ButtonProps>`
   align-items: center;
   justify-content: center;
-  /* gap: 15px; */
+  
   border-radius: 8px;
   flex-direction: row;
   width: ${(props) => props.width || '100%'};

@@ -58,8 +58,7 @@ const AdCardPF: React.FC<AdCardPFProps> = ({
             </Text>
           </View>
         )}
-        
-        {/* Carimbo de VENDIDO */}
+
         {isVendido && (
           <View style={{
             position: 'absolute',
@@ -94,13 +93,11 @@ const AdCardPF: React.FC<AdCardPFProps> = ({
             </View>
           </View>
         )}
-        
-        {/* Ícone de deletar */}
+
         <TouchableOpacity style={S.deleteIcon} onPress={onDelete}>
           <DeleteIcon size={20} color="#666" />
         </TouchableOpacity>
-        
-        {/* Ícone de editar */}
+
         <TouchableOpacity style={S.editIcon} onPress={onEdit}>
           <SettingsIcon size={16} color="#666" />
         </TouchableOpacity>

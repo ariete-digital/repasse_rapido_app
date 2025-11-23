@@ -29,17 +29,14 @@ export default function ImgPicker({ onImageSelected, label = 'Arquivos' }: ImgPi
   }
 
   const extractFileName = (uri: string): string => {
-    // Extrai o nome do arquivo da URI
-    // URI pode ser: file:///path/to/image.jpg ou content://...
+
     const parts = uri.split('/')
     const file = parts[parts.length - 1]
-    
-    // Se não conseguir extrair um nome válido, usa um nome genérico
+
     if (file && file.includes('.')) {
       return file
     }
-    
-    // Tenta extrair da parte após o último /
+
     const lastPart = uri.substring(uri.lastIndexOf('/') + 1)
     if (lastPart && lastPart.length > 0) {
       return lastPart.length > 30 ? `${lastPart.substring(0, 30)}...` : lastPart
@@ -55,7 +52,6 @@ export default function ImgPicker({ onImageSelected, label = 'Arquivos' }: ImgPi
         copyToCacheDirectory: true,
       })
 
-      // Na versão 11 do expo-document-picker, o resultado tem um array assets
       if (result && !result.canceled && (result as any).assets && (result as any).assets.length > 0) {
         const asset = (result as any).assets[0]
         const fileUri = asset.uri
@@ -63,16 +59,16 @@ export default function ImgPicker({ onImageSelected, label = 'Arquivos' }: ImgPi
         const mimeType = asset.mimeType || getMimeType(name)
         
         setImage(fileUri)
-        setFileName('Arquivo selecionado') // Mostrar mensagem genérica
+        setFileName('Arquivo selecionado') 
         
         if (onImageSelected) {
           onImageSelected(fileUri, name, mimeType)
         }
       }
     } catch (error: any) {
-      // Verificar se o usuário cancelou
+      
       if (error && error.code === 'E_DOCUMENT_PICKER_CANCELED') {
-        // Usuário cancelou, não precisa fazer nada
+        
         return
       }
       console.error('Erro ao selecionar documento:', error)

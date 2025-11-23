@@ -9,7 +9,7 @@ export interface UserDTO {
   nome: string;
   role: string;
   tipo: 'PF' | 'PJ' | 'A';
-  // Campos comuns
+  
   telefone?: string;
   celular?: string;
   cep?: string;
@@ -20,16 +20,16 @@ export interface UserDTO {
   cidade?: string;
   estado?: string;
   id_cidade?: number;
-  // Campos PF
+  
   num_documento?: string;
   data_nasc?: string;
-  // Campos PJ
+  
   nome_fantasia?: string;
   nome_responsavel?: string;
   cpf_responsavel?: string;
   inscricao_estadual?: string;
   rg?: string;
-  // Outros
+  
   [key: string]: any;
 }
 

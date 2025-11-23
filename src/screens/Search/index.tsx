@@ -28,7 +28,6 @@ const Search = () => {
 
   const navigation = useNavigation<SearchNavigationProps>();
 
-
   const toggleCarOrBycicle = async (vehicleType: 'C' | 'M') => {
     resetFilters('C');
     setFilterParams((prev) => ({
@@ -36,13 +35,13 @@ const Search = () => {
       tipo_veiculo: vehicleType,
       tipo_venda: 'C',
     }));
-    // Navega imediatamente, os dados serão carregados automaticamente
+    
     navigation.navigate('searchScreen');
   };
 
   const doSearch = async () => {
     setFilterParams({ ...filterParams, tipo_venda: 'C', marca: value });
-    // Navega imediatamente, os dados serão carregados automaticamente
+    
     navigation.navigate('searchScreen');
   };
 

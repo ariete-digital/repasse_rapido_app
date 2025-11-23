@@ -51,7 +51,6 @@ const ManageAds = () => {
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [currentImages, setCurrentImages] = useState<string[]>([]);
 
-  // Carregar anúncios ao montar o componente
   useEffect(() => {
     loadAnuncios();
   }, []);
@@ -60,8 +59,7 @@ const ManageAds = () => {
     try {
       setIsLoading(true);
       const response = await api.get<MeusAnunciosResponse>('/cliente/meus_anuncios');
-      
-      
+
       if (response.data.status === 'success' && response.data.content.anuncios) {
         setAnuncios(response.data.content.anuncios);
       }
@@ -84,15 +82,12 @@ const ManageAds = () => {
       return;
     }
 
-    // Preparar array de imagens para o visualizador
     const images: string[] = [];
-    
-    // Adicionar imagem principal se existir
+
     if (anuncio.imagemPrincipal) {
       images.push(anuncio.imagemPrincipal);
     }
-    
-    // Adicionar outras imagens se existirem
+
     if (anuncio.imagens && anuncio.imagens.length > 0) {
       anuncio.imagens.forEach(img => {
         const imageUrl = img.link || img.arquivo;
@@ -116,8 +111,7 @@ const ManageAds = () => {
   };
 
   const handleResume = (adId: string) => {
-    
-    // Buscar o código do anúncio
+
     const anuncio = anuncios.find(ad => ad.id.toString() === adId);
 
     if (!anuncio) {
@@ -125,7 +119,6 @@ const ManageAds = () => {
       return;
     }
 
-    // Navegar diretamente para Step1 com editCodigo
     // @ts-ignore
     navigation.navigate('AppTabs', { 
       screen: 'sell',
@@ -152,7 +145,7 @@ const ManageAds = () => {
 
               if (response.data.status === 'success') {
                 Alert.alert('Sucesso', response.data.content.message || 'Anúncio marcado como vendido!');
-                await loadAnuncios(); // Recarregar lista
+                await loadAnuncios(); 
               } else {
                 throw new Error(response.data.message || 'Erro ao marcar como vendido');
               }
@@ -183,7 +176,7 @@ const ManageAds = () => {
           <ScrollView showsVerticalScrollIndicator={false}>
             {anuncios.length > 0 ? (
               anuncios.map((ad) => {
-                // Preparar array de imagens para o AdCard
+                
                 const images: string[] = [];
                 if (ad.imagemPrincipal) {
                   images.push(ad.imagemPrincipal);

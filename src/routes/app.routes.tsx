@@ -43,10 +43,8 @@ import Step6 from '@screens/Advertise/Step6';
 import Success from '@screens/Advertise/Success';
 import SelectOptions from '@screens/Advertise/SelectOptions';
 
-// Componente para a tela de contato (placeholder)
 const ContactScreen = () => null;
 
-// Stack interno da aba 'search'
 export type SearchStackParamList = {
   searchScreen: undefined;
   filter: { filters: any };
@@ -54,7 +52,6 @@ export type SearchStackParamList = {
   SearchDetails: { code: string };
 };
 
-// Tabs principais
 export type RootTabParamList = {
   home: undefined;
   search: NavigatorScreenParams<SearchStackParamList>;
@@ -63,7 +60,6 @@ export type RootTabParamList = {
   menu: undefined;
 };
 
-// Stack principal
 export type RootStackParamList = {
   AppTabs: undefined;
   adDetails: { code: string };
@@ -146,7 +142,7 @@ const Tabs = () => {
 
   const checkAuthAndNavigate = (navigation: any, routeName: string) => {
     if (!user || !user.id) {
-      // Se não estiver logado, redireciona para login
+      
       navigation.dispatch(
         CommonActions.navigate({
           name: 'auth',

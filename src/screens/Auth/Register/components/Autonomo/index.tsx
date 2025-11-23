@@ -89,7 +89,7 @@ const Autonomo = () => {
       setLoadingCities(true);
       const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
       if (response.data?.content) {
-        // Converter value de number para string
+        
         const cities = response.data.content.map((city: any) => ({
           label: city.label,
           value: city.value.toString()
@@ -108,23 +108,21 @@ const Autonomo = () => {
     if (cleanCep.length !== 8) return;
 
     try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const response = await axios.get(`https:
 
       if (response.data && !response.data.erro) {
         const { logradouro, bairro, localidade } = response.data;
-        
-        
+
         setValue('endereço', logradouro);
         setValue('bairro', bairro);
-        
-        // Buscar id_cidade
+
         try {
           const cityData = await api.get(`/cliente/listagem/todas_cidades?filtro=${localidade}`);
           
           if (cityData.data?.content?.[0]) {
             const cityId = cityData.data.content[0].value;
             setValue('id_cidade', cityId);
-            // Atualizar a lista de cidades para incluir a cidade encontrada
+            
             const cityOption = {
               label: cityData.data.content[0].label,
               value: cityId.toString()
@@ -159,18 +157,16 @@ const Autonomo = () => {
       id_cidade, 
       senha
     } = data;
-    
-    // Criar FormData para multipart/form-data
+
     const formData = new FormData();
 
-    // Adicionar campos de texto
     formData.append('nome', nome);
     formData.append('email', email);
     formData.append('senha', senha);
-    formData.append('tipo', 'A'); // Anônimo type as per API documentation
-    formData.append('num_documento', cpf.replace(/\D/g, '')); // Remove máscara
-    formData.append('telefone', telefone.replace(/\D/g, '')); // Remove máscara
-    formData.append('cep', cep.replace(/\D/g, '')); // Remove máscara
+    formData.append('tipo', 'A'); 
+    formData.append('num_documento', cpf.replace(/\D/g, '')); 
+    formData.append('telefone', telefone.replace(/\D/g, '')); 
+    formData.append('cep', cep.replace(/\D/g, '')); 
     formData.append('logradouro', endereço);
     formData.append('numero', numero);
     if (complemento) {
@@ -179,7 +175,6 @@ const Autonomo = () => {
     formData.append('bairro', bairro);
     formData.append('id_cidade', id_cidade.toString());
 
-    // Adicionar arquivos se existirem
     if (cnhImage) {
       formData.append('cnh', {
         uri: cnhImage,
@@ -399,7 +394,6 @@ const Autonomo = () => {
           />
         )}
       />
-
 
       <I.DocumentsContainer>
         <Text color="black" fontStyle="p-16-bold">

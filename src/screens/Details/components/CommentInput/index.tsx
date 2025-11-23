@@ -10,22 +10,20 @@ interface CommentInputProps {
   anuncioId: number;
 }
 
-// Função auxiliar para obter cor do avatar baseado no nome
 const getAvatarColor = (name: string): string => {
   const colors = [
-    '#E11138', // brand-red
-    '#001E47', // brand-blue
-    '#E3B505', // yellow
-    '#9A0B26', // brand-red-dark
-    '#25513C', // verde
-    '#38AE76', // verde claro
-    '#CE7720', // orange-text
+    '#E11138', 
+    '#001E47', 
+    '#E3B505', 
+    '#9A0B26', 
+    '#25513C', 
+    '#38AE76', 
+    '#CE7720', 
   ];
   const index = name.charCodeAt(0) % colors.length;
   return colors[index];
 };
 
-// Função auxiliar para obter inicial do nome
 const getInitials = (name: string): string => {
   if (!name) return '?';
   const parts = name.trim().split(' ');
@@ -58,7 +56,7 @@ const CommentInput: React.FC<CommentInputProps> = ({ anuncioId }) => {
       Alert.alert('Sucesso', 'Comentário enviado com sucesso!');
       setComment('');
       setRating(5);
-      // Invalidar a query para recarregar os dados
+      
       queryClient.invalidateQueries({ queryKey: ['anuncio-details'] });
     },
     onError: (error: any) => {
@@ -81,7 +79,7 @@ const CommentInput: React.FC<CommentInputProps> = ({ anuncioId }) => {
   };
 
   if (!user || !user.id) {
-    return null; // Não renderiza se não estiver logado
+    return null; 
   }
 
   const userName = user.nome || 'Usuário';

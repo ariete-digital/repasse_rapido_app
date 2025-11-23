@@ -4,7 +4,7 @@ import styled from 'styled-components/native';
 export const Container = styled.ScrollView.attrs(() => ({
   contentContainerStyle: {
     flexGrow: 1,
-    paddingBottom: 100, // Aumentar padding para dar espaço aos botões flutuantes
+    paddingBottom: 100, 
   },
 }))`
   flex: 1;

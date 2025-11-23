@@ -43,8 +43,7 @@ interface ItemProps {
 const Item = ({ label, icon, onPress, filterName, filterValue, onRemoveFilter }: ItemProps) => {
   const getFilterDescription = () => {
     if (!filterValue) return null;
-    
-    
+
     switch (filterName) {
       case 'brands':
         return filterValue.marca ? `Marca: ${filterValue.marca}` : null;
@@ -67,7 +66,7 @@ const Item = ({ label, icon, onPress, filterName, filterValue, onRemoveFilter }:
       case 'optionals':
         return filterValue.opcionais?.length ? `Opcionais: ${filterValue.opcionais.length} selecionados` : null;
       case 'transmissionType':
-        // Para câmbio, não retornar descrição aqui, será tratado separadamente
+        
         return null;
       case 'fuelType':
         return filterValue.tipos_combustivel?.length ? `Combustível: ${filterValue.tipos_combustivel.length} selecionados` : null;
@@ -77,7 +76,7 @@ const Item = ({ label, icon, onPress, filterName, filterValue, onRemoveFilter }:
         return filterValue.cor ? `Cor: ${filterValue.cor}` : null;
       case 'location':
         if (filterValue.id_cidade) {
-          // Usar o nome da cidade salvo nos parâmetros de filtro
+          
           return (filterValue as any).cidade_nome ? `Cidade: ${(filterValue as any).cidade_nome}` : `Cidade selecionada`;
         }
         return null;
@@ -94,8 +93,7 @@ const Item = ({ label, icon, onPress, filterName, filterValue, onRemoveFilter }:
         <F.Icon source={icon} />
         <Text color="black-700">{label}</Text>
       </F.Item>
-      
-      {/* Badge de filtro aplicado */}
+
       {filterDescription && (
         <View style={{ 
           paddingHorizontal: 30, 
@@ -164,32 +162,27 @@ const Filter = () => {
   const [preFilteredCount, setPreFilteredCount] = useState<number | null>(null);
   const [totalInicialAnuncios, setTotalInicialAnuncios] = useState<number>(0);
 
-  // Função para obter o total fixo de anúncios (sem filtros)
   const getTotalAnunciosFixo = () => {
-    // Sempre retorna o total inicial salvo, nunca muda
+    
     return totalInicialAnuncios || filterDataWithCount?.total || searchResults?.total || 0;
   };
 
-  // Função para obter o total de anúncios com filtros aplicados (para o botão)
   const getTotalAnunciosFiltrados = () => {
-    // Se há pré-filtragem feita, usar esse valor
+    
     if (preFilteredCount !== null) {
       return preFilteredCount;
     }
-    // Caso contrário, usar o total geral
+    
     return getTotalAnunciosFixo();
   };
 
-  // Função para obter os nomes dos câmbios selecionados
   const getCambiosSelecionados = () => {
     if (!filterParams.tipos_cambio?.length) return [];
-    
-    
+
     const tiposCambio = filterValues.tiposCambio || searchResults?.listaTiposCambio || [];
-    
-    // Verificar se tiposCambio é um array válido
+
     if (!Array.isArray(tiposCambio) || tiposCambio.length === 0) {
-      // Dados de fallback mais realistas
+      
       const fallbackCambios = {
         1: 'Manual',
         2: 'Automático',
@@ -209,7 +202,6 @@ const Filter = () => {
     });
   };
 
-  // Função para remover um câmbio específico
   const removeCambio = (cambioId: number) => {
     const newParams = { ...filterParams };
     newParams.tipos_cambio = newParams.tipos_cambio?.filter(id => id !== cambioId);
@@ -220,7 +212,6 @@ const Filter = () => {
     toast.show('Câmbio removido!', { type: 'success' });
   };
 
-  // Função para verificar se há filtros ativos
   const hasActiveFilters = () => {
     const hasFilters = !!(
       filterParams.marca ||
@@ -240,12 +231,10 @@ const Filter = () => {
       filterParams.id_cidade ||
       filterParams.id_estado
     );
-    
-    
+
     return hasFilters;
   };
 
-  // Função para obter descrição dos filtros aplicados
   const getActiveFiltersDescription = () => {
     const filters = [];
     
@@ -273,7 +262,7 @@ const Filter = () => {
     
     if (filterParams.opcionais?.length) {
       const opcionais = filterParams.opcionais.map((id: number) => {
-        // Usar searchResults.listaOpcionais como fallback
+        
         const opcional = searchResults?.listaOpcionais?.find((o: any) => o.id === id);
         return opcional?.descricao || `Opcional ${id}`;
       });
@@ -313,11 +302,10 @@ const Filter = () => {
 
   const handleReset = () => {
     resetFilters('C');
-    // fetchSearch();
+    
     toast.show('Filtros redefinidos com sucesso!', { type: 'success' });
   };
 
-  // Função para remover filtro específico
   const removeFilter = (filterType: string) => {
     
     const newParams = { ...filterParams };
@@ -329,7 +317,7 @@ const Filter = () => {
         break;
       case 'models':
         delete newParams.modelo;
-        delete (newParams as any).id_modelo; // Remover id_modelo se existir
+        delete (newParams as any).id_modelo; 
         break;
       case 'year':
         delete newParams.ano;
@@ -358,14 +346,12 @@ const Filter = () => {
         delete newParams.cidade_nome;
         break;
     }
-    
-    
-    // Verificar se há filtros ativos com os novos parâmetros
+
     const hasFilters = !!(
       newParams.marca ||
       newParams.modelo ||
       newParams.id_marca ||
-      (newParams as any).id_modelo || // Verificar id_modelo também
+      (newParams as any).id_modelo || 
       newParams.ano?.min ||
       newParams.ano?.max ||
       newParams.valor?.min ||
@@ -380,11 +366,9 @@ const Filter = () => {
       newParams.id_cidade ||
       newParams.id_estado
     );
-    
-    
+
     setFilterParams(newParams);
-    
-    // Chamar preFilterSearch diretamente se há filtros, senão limpar
+
     if (hasFilters) {
       preFilterSearchWithParams(newParams);
     } else {
@@ -394,12 +378,9 @@ const Filter = () => {
     toast.show('Filtro removido!', { type: 'success' });
   };
 
-
-  // Função para fazer pré-filtragem (separada da filtragem inicial)
   const preFilterSearch = async () => {
     try {
-      
-      // Fazer uma busca separada apenas para contar resultados filtrados
+
       const result = await getFilteredData(filterParams);
       
       setPreFilteredCount(result.total);
@@ -408,27 +389,20 @@ const Filter = () => {
     }
   };
 
-  // Função para fazer pré-filtragem com parâmetros específicos
   const preFilterSearchWithParams = async (params: any) => {
     try {
-      
-      // Log detalhado de cada campo
-      
-      // Verificar se há campos undefined ou null
+
       const undefinedFields = Object.keys(params).filter(key => params[key] === undefined);
       const nullFields = Object.keys(params).filter(key => params[key] === null);
-      
-      // Criar uma cópia limpa dos params para enviar à API
+
       const cleanParams = { ...params };
-      // Remover campos undefined
+      
       Object.keys(cleanParams).forEach(key => {
         if (cleanParams[key] === undefined) {
           delete cleanParams[key];
         }
       });
-      
-      
-      // Fazer uma busca separada apenas para contar resultados filtrados
+
       const result = await getFilteredData(cleanParams);
       
       setPreFilteredCount(result.total);
@@ -441,14 +415,12 @@ const Filter = () => {
     const key = ['search-results', JSON.stringify(filterParams)];
 
     try {
-      // Fazer a filtragem real e aguardar o resultado
+      
       const result = await queryClient.fetchQuery({
         queryKey: key,
         queryFn: () => getFilteredData(filterParams),
       });
-      
-      
-      // Atualizar o contador do botão com o resultado real
+
       setPreFilteredCount(result.total);
       
       if (!isLoading) {
@@ -463,8 +435,7 @@ const Filter = () => {
       const newFilter: any = {
         tipo_veiculo: filters.tipo,
       };
-      
-      // Adicionar apenas os filtros que foram realmente selecionados
+
       if (filters.marca) {
         newFilter.id_marca = parseInt(filters.marca);
         newFilter.marca = filters.marca_nome || filters.marca;
@@ -480,10 +451,10 @@ const Filter = () => {
           max: filters.anoMax ? parseInt(filters.anoMax) : undefined,
           min: filters.anoMin ? parseInt(filters.anoMin) : undefined,
         };
-        // Remover campos undefined do objeto ano
+        
         if (newFilter.ano.max === undefined) delete newFilter.ano.max;
         if (newFilter.ano.min === undefined) delete newFilter.ano.min;
-        // Se o objeto ano ficou vazio, removê-lo
+        
         if (Object.keys(newFilter.ano).length === 0) delete newFilter.ano;
       }
       
@@ -504,11 +475,10 @@ const Filter = () => {
   useEffect(() => {
     if (shouldTriggerSearch) {
       fetchSearch();
-      setShouldTriggerSearch(false); // evita chamadas duplas
+      setShouldTriggerSearch(false); 
     }
   }, [shouldTriggerSearch]);
 
-  // useEffect para capturar o total inicial de anúncios
   useEffect(() => {
     if (!totalInicialAnuncios && (filterDataWithCount?.total || searchResults?.total)) {
       const totalInicial = filterDataWithCount?.total || searchResults?.total || 0;
@@ -516,7 +486,6 @@ const Filter = () => {
     }
   }, [filterDataWithCount?.total, searchResults?.total, totalInicialAnuncios]);
 
-  // useEffect para fazer pré-filtragem quando os filtros mudarem
   useEffect(() => {
     
     if (hasActiveFilters()) {
@@ -540,26 +509,7 @@ const Filter = () => {
             </Text>
           </Pressable>
         </View>
-        {/* <F.ButtonContainer>
-          <GradientButton
-            onPress={handleReset}
-            paddingY={16}
-            disabled={isRefetching}
-          >
-            {isRefetching ? (
-              <ActivityIndicator />
-            ) : (
-              <>
-                <MaterialIcons
-                  name="delete"
-                  color={theme.colors.white}
-                  size={24}
-                />
-                <Text color="white">Clique aqui para limpar os filtros</Text>
-              </>
-            )}
-          </GradientButton>
-        </F.ButtonContainer> */}
+        
         <VehicleType
           isVisible={currentFilter === 'vehicleType'}
           handleCancel={handleCancel}
@@ -650,7 +600,6 @@ const Filter = () => {
           />
         ))}
 
-        {/* Badges individuais dos câmbios selecionados */}
         {getCambiosSelecionados().length > 0 && (
           <View style={{ paddingHorizontal: 30, marginBottom: 16 }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

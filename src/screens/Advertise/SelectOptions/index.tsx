@@ -24,27 +24,24 @@ const SelectOptions = () => {
   const [allOptions, setAllOptions] = useState<OptionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Carregar opcionais da API ou usar os passados como parâmetro
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        // Se availableOptions foi passado, usar eles
+        
         if (availableOptions && availableOptions.length > 0) {
           setAllOptions(availableOptions);
           setIsLoading(false);
           return;
         }
 
-        // Caso contrário, buscar da API
         const response = await api.get('/cliente/listagem/opcionais');
-        
-        // Se a API retornou com sucesso mas a lista está vazia, usar mock
+
         if (response.data.status === 'success' && 
             response.data.content.listaOpcionais && 
             response.data.content.listaOpcionais.length > 0) {
           setAllOptions(response.data.content.listaOpcionais);
         } else {
-          // Mock de opcionais quando a API retorna vazio
+          
           setAllOptions([
             { id: 1, descricao: 'Alarme' },
             { id: 2, descricao: 'Ar condicionado' },
@@ -85,7 +82,7 @@ const SelectOptions = () => {
           ]);
         }
       } catch (error) {
-        // Fallback em caso de erro na requisição
+        
         setAllOptions([
           { id: 1, descricao: 'Alarme' },
           { id: 2, descricao: 'Ar condicionado' },
@@ -226,7 +223,6 @@ const SelectOptions = () => {
         )}
       </ScrollView>
 
-      {/* Botão flutuante fixo na parte inferior */}
       <View style={{ 
         position: 'absolute',
         bottom: 0,

@@ -1,4 +1,4 @@
-// vehicleOwner Details
+
 export interface VehicleOwnerResponse {
   status: string;
   content: VehicleOwnerContent;

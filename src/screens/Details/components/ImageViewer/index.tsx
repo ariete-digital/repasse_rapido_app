@@ -29,7 +29,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const handleImagePress = () => {
-    // Toggle zoom functionality can be added here
+    
   };
 
   const goToNext = () => {

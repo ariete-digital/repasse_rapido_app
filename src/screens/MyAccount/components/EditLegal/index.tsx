@@ -74,8 +74,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
   const [loadingCities, setLoadingCities] = useState(false);
   const toast = useToast();
   const { updateUserProfile } = useAuth();
-  
-  // Estados para os arquivos
+
   const [cnpjImage, setCnpjImage] = useState<string | null>(null);
   const [cnpjFileName, setCnpjFileName] = useState<string | null>(null);
   const [cnpjMimeType, setCnpjMimeType] = useState<string>('image/jpeg');
@@ -136,8 +135,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       senha: '',
       confirmacao: '',
     });
-    
-    // Buscar lista inicial de cidades
+
     loadCities('');
   }, [userData]);
 
@@ -146,7 +144,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       setLoadingCities(true);
       const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
       if (response.data?.content) {
-        // Converter value de number para string
+        
         const cities = response.data.content.map((city: any) => ({
           label: city.label,
           value: city.value.toString()
@@ -164,8 +162,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
 
     try {
       const formData = new FormData();
-      
-      // Adicionar campos de texto
+
       formData.append('nome', data.nome);
       if (data.nome_fantasia) formData.append('nome_fantasia', data.nome_fantasia);
       formData.append('num_documento', data.num_documento);
@@ -183,7 +180,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       if (data.inscricao_estadual) formData.append('inscricao_estadual', data.inscricao_estadual);
       if (data.rg) formData.append('rg', data.rg);
 
-      // Adicionar arquivos se existirem
       if (cnpjImage) {
         formData.append('cnpj', {
           uri: cnpjImage,
@@ -238,7 +234,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       
       if (response.data && response.data.status === 'success') {
         toast.show('Senha alterada com sucesso!', { type: 'success' });
-        // Limpar campos de senha
+        
         setValue('senhaAtual', '');
         setValue('senha', '');
         setValue('confirmacao', '');
@@ -251,14 +247,13 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
     }
   };
 
-
   const fetchAddressByCEP = async (cep: string) => {
     const cleanCep = unmask(cep);
     
     if (cleanCep.length !== 8) return;
 
     try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const response = await axios.get(`https:
 
       if (response.data && !response.data.erro) {
         const { bairro, logradouro, localidade } = response.data;
@@ -272,7 +267,7 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
           if (cityData.data?.content?.[0]) {
             const cityId = cityData.data.content[0].value;
             setValue('id_cidade', cityId);
-            // Atualizar a lista de cidades para incluir a cidade encontrada
+            
             const cityOption = {
               label: cityData.data.content[0].label,
               value: cityId.toString()
@@ -292,7 +287,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       toast.show('Erro ao buscar CEP', { type: 'danger' });
     }
   };
-
 
   return (
     <L.Container>
@@ -552,7 +546,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
               }}
             />
         </L.DocumentsContainer>
-
 
       <View
         style={{

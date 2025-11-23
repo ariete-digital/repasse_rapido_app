@@ -1,11 +1,11 @@
-// Auth Routes
+
 export { default as Login } from './Auth/Login';
 export { default as Register } from './Auth/Register';
 export { default as RegisterSuccess } from './Auth/RegisterSuccess';
 export { default as ForgotPassword } from './Auth/ForgotPassword';
 export { default as ForgotPasswordSuccess } from './Auth/ForgotPasswordSuccess';
 export { default as CreateNewPassword } from './Auth/CreateNewPassword';
-// Logged Routes
+
 export { default as Details } from './Details';
 export { default as Filter } from './Filter';
 export { default as Home } from './Home';

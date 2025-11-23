@@ -63,27 +63,25 @@ export default function Filters() {
 
   const handleSelectCidade = (option: { label: string; value: string }) => {
     setCidade(option.value);
-    // Limpar seleções dependentes quando mudar a cidade
+    
     setMarca(undefined);
     setModelo(undefined);
     setListaModelos([]);
-    // Recarregar marcas para a nova cidade
+    
     getBrandData(option.value);
   };
 
   const handleSelectMarca = (option: { label: string; value: string }) => {
     setMarca(option.value);
-    // Limpar modelo selecionado quando mudar marca
+    
     setModelo(undefined);
     getModelData(option.value);
   };
 
-
   const getBrandData = async (cidadeParam?: string) => {
     try {
       const cidadeToUse = cidadeParam || cidade;
-      
-      // Tentar diferentes endpoints
+
       let endpoints = [];
       
       if (cidadeToUse) {
@@ -91,30 +89,26 @@ export default function Filters() {
       }
       endpoints.push('cliente/listagem/marcas?filtro=');
       endpoints.push('cliente/listagem/marcas');
-      
-      
+
       for (const endpoint of endpoints) {
         try {
           const response: AxiosResponse<DataFetchProps> =
             await api.get<DataFetchProps>(endpoint);
-          
 
           if (response.data.content && Array.isArray(response.data.content)) {
-            
-            // Verificar se as marcas têm a estrutura correta
+
             const marcasValidas = response.data.content.filter(marca => 
               marca && typeof marca === 'object' && 
               marca.value && marca.label
             );
-            
-            
+
             if (marcasValidas.length > 0) {
               setListaMarcas(marcasValidas);
-              return; // Sucesso, sair do loop
+              return; 
             }
           }
         } catch (endpointError) {
-          continue; // Tentar próximo endpoint
+          continue; 
         }
       }
       
@@ -123,7 +117,6 @@ export default function Filters() {
       setListaMarcas([]);
     }
   };
-
 
   const getCityData = async (query: string) => {
     try {
@@ -136,7 +129,7 @@ export default function Filters() {
         await api.get<DataFetchProps>(`cliente/listagem/cidades?filtro=${query}`);
 
       if (response.data.content && Array.isArray(response.data.content)) {
-        // Converter para o formato esperado pelo SearchableSelect
+        
         const cidadesFormatadas = response.data.content.map(cidade => ({
           label: cidade.label,
           value: cidade.value.toString()
@@ -162,7 +155,6 @@ export default function Filters() {
           `cliente/listagem/modelos?id_marca=${id_marca}`
         );
 
-
       if (response.data.content) {
         setListaModelos(response.data.content);
       }
@@ -171,22 +163,17 @@ export default function Filters() {
     }
   };
 
-  // Carregar marcas iniciais quando o componente monta
   useEffect(() => {
     getBrandData();
   }, []);
 
-
-
-
   const handleClickBuscar = () => {
-    
-    // Aplicar filtros selecionados no contexto
+
     const filterParams: any = {};
     
     if (cidade) {
       filterParams.id_cidade = parseInt(cidade);
-      // Buscar o nome da cidade selecionada
+      
       const cidadeSelecionada = listaCidades.find(c => c.value === cidade);
       if (cidadeSelecionada) {
         filterParams.cidade_nome = cidadeSelecionada.label;
@@ -204,19 +191,17 @@ export default function Filters() {
     if (anoMax) {
       filterParams.ano = { ...filterParams.ano, max: parseInt(anoMax) };
     }
-    
-    // Se há filtros selecionados, aplicá-los
+
     if (Object.keys(filterParams).length > 0) {
       setFilterParams(filterParams);
     }
-    
-    // Buscar nomes das marcas e modelos para enviar junto
+
     const marcaSelecionada = listaMarcas.find(m => m.value === marca);
     const modeloSelecionado = listaModelos.find(m => m.value === modelo);
     
     const filtersToSend = {
       startSearch: true,
-      tipo: 'C', // Carro por padrão
+      tipo: 'C', 
       marca: marca,
       modelo: modelo,
       marca_nome: marcaSelecionada?.label,
@@ -226,9 +211,7 @@ export default function Filters() {
       cidade: cidade,
       cidade_nome: filterParams.cidade_nome,
     };
-    
-    
-    // Navegar para a tela de filtros para aplicar os filtros
+
     navigation.navigate('search', {
       screen: 'filter',
       params: { 
@@ -236,7 +219,6 @@ export default function Filters() {
       }
     });
   };
-
 
   return (
     <Container>

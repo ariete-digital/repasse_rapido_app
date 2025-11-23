@@ -10,7 +10,6 @@ import BasicButton from '@components/BasicButton';
 import { Text, ProgressSteps } from '@components/index';
 import { useAdvertise } from '../context/AdvertiseContext';
 
-
 type Step2NavigationProp = NativeStackNavigationProp<AdvertiseStackParamList, 'advertiseStep2'>;
 
 interface OptionItem {
@@ -21,11 +20,9 @@ interface OptionItem {
 const Step2 = () => {
   const navigation = useNavigation<Step2NavigationProp>();
   const { updateStep2Data, parameters, advertiseData } = useAdvertise();
-  
-  // Array de IDs dos opcionais selecionados
+
   const [selectedOptionalIds, setSelectedOptionalIds] = useState<number[]>([]);
 
-  // Preencher opcionais se estiver editando
   useEffect(() => {
     
     if ((advertiseData.id || advertiseData.opcionais) && advertiseData.opcionais && advertiseData.opcionais.length > 0) {
@@ -33,10 +30,8 @@ const Step2 = () => {
     }
   }, [advertiseData.id, advertiseData.opcionais]);
 
-  // Usar opcionais dos parâmetros
   const availableOptions = parameters.opcionais;
 
-  // Obter opcionais selecionados (objetos completos)
   const selectedOptionals = availableOptions.filter(option => 
     selectedOptionalIds.includes(option.id)
   );
@@ -46,7 +41,7 @@ const Step2 = () => {
       selectedOptions: selectedOptionals.map(opt => opt.descricao),
       availableOptions: availableOptions,
       onSelect: (selectedDescriptions: string[]) => {
-        // Converter descrições selecionadas em IDs
+        
         const ids = availableOptions
           .filter(opt => selectedDescriptions.includes(opt.descricao))
           .map(opt => opt.id);
@@ -55,12 +50,10 @@ const Step2 = () => {
     });
   };
 
-
   const isEditing = !!advertiseData.id;
 
   const handleContinue = () => {
-    
-    // Salvar dados no contexto
+
     updateStep2Data({
       opcionais: selectedOptionalIds,
     });

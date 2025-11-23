@@ -56,7 +56,7 @@ const ViewPFAds = () => {
           text: 'Excluir', 
           style: 'destructive',
           onPress: () => {
-            // TODO: Implementar lógica de exclusão
+            
           }
         }
       ]

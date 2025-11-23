@@ -31,7 +31,6 @@ const LoadingIndicator = () =>
 ;
 const queryClient = new QueryClient();
 
-// Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {

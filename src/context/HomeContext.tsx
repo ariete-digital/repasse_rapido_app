@@ -54,8 +54,7 @@ export const HomeContextProvider: React.FC<HomeContextProviderProps> = ({
       setIsLoading(true);
       
       const res: AxiosResponse<DataFetchProps> = await api.get('/cliente/home');
-      
-      
+
       if (res && res.data && res.data.status === 'success' && res.data.content) {
         setHomePageData({
           anuncios: res.data.content.anuncios || [],

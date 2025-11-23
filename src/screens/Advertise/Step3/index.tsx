@@ -70,7 +70,6 @@ const vehicleSchema = yup.object({
   passou_leilao: yup.string().required('Selecione uma opção!'),
 });
 
-// Opções padrão para campos Sim/Não (valores numéricos para API)
 const yesNoOptions = [
   { label: 'Sim', value: '1' },
   { label: 'Não', value: '0' },
@@ -108,7 +107,6 @@ const Step3 = () => {
   const navigation = useNavigation<Step3NavigationProp>();
   const { updateStep3Data, parameters, advertiseData } = useAdvertise();
 
-  // Usar opções dos parâmetros
   const tiposPneuOptions = parameters.tiposPneu;
   const tiposParabrisaOptions = parameters.tiposParabrisa;
 
@@ -122,7 +120,6 @@ const Step3 = () => {
     resolver: yupResolver(vehicleSchema),
   });
 
-  // Preencher campos se estiver editando
   useEffect(() => {
     if (advertiseData.id || advertiseData.status_veiculo || advertiseData.unico_dono) {
       if (advertiseData.status_veiculo) setValue('status_veiculo', advertiseData.status_veiculo);
@@ -152,10 +149,8 @@ const Step3 = () => {
     }
   }, [advertiseData.id, advertiseData.status_veiculo, advertiseData.unico_dono, setValue]);
 
-  // Monitorar todos os campos
   const formValues = watch();
-  
-  // Validação customizada: verifica se todos os campos obrigatórios estão preenchidos
+
   const isFormValid = !!(
     formValues.status_veiculo &&
     formValues.unico_dono &&
@@ -186,8 +181,7 @@ const Step3 = () => {
   const isEditing = !!advertiseData.id;
 
   const handleContinue = (data: VehicleFormProps) => {
-    
-    // Salvar dados no contexto
+
     updateStep3Data({
       status_veiculo: data.status_veiculo,
       unico_dono: data.unico_dono,
@@ -217,7 +211,6 @@ const Step3 = () => {
     
     navigation.navigate('advertiseStep4');
   };
-
 
   return (
     <PageScaffold
@@ -253,7 +246,6 @@ const Step3 = () => {
             Dados do Veículo
           </Text>
 
-          {/* 1. Status do Veículo */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -273,7 +265,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 2. Dono */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -293,7 +284,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 2. IPVA pago integralmente? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -313,7 +303,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 3. Veículo no nome do anunciante? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -333,7 +322,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 4. Financiado? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -353,7 +341,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 5. Parcelas em dia? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -373,7 +360,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 6. Revisões em concessionária? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -393,7 +379,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 7. Possui manual do proprietário? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -413,7 +398,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 8. Possui chave reserva? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -433,7 +417,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 9. Veículo possui ar condicionado? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -453,7 +436,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 10. Ar condicionado em perfeito funcionamento? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -473,7 +455,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 11. Escapamento solta fumaça? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -493,7 +474,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 12. Garantia de fábrica? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -513,7 +493,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 13. Motor bate ou raja? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -533,7 +512,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 14. Câmbio faz barulho estranho? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -553,7 +531,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 15. Câmbio escapa alguma marcha? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -573,7 +550,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 16. Já foi furtado ou roubado? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -593,7 +569,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 17. Estado dos Pneus */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -613,7 +588,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 18. Parabrisa */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -633,7 +607,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 19. Alguma luz de injeção acesa? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -653,7 +626,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 20. Alguma luz de airbag acesa? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -673,7 +645,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 21. Alguma luz de ABS acesa? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -693,7 +664,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 22. Tipo de colisão ocorrido */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}
@@ -713,7 +683,6 @@ const Step3 = () => {
             />
           </View>
 
-          {/* 23. Passou por leilão? */}
           <View style={{ marginBottom: 20 }}>
             <Controller
               control={control}

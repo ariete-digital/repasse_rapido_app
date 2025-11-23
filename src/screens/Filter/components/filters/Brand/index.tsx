@@ -21,7 +21,6 @@ const BrandFilter = ({
   const { filterParams, setFilterParams, isLoading, filterValues } = useFilters();
   const [selectedBrand, setSelectedBrand] = useState<string>('');
 
-  // Carregar seleção existente
   useEffect(() => {
     if (filterParams.marca) {
       setSelectedBrand(filterParams.marca);

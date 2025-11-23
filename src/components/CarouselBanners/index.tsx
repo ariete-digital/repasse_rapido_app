@@ -1,4 +1,4 @@
-// src/components/Carousel.tsx
+
 import { CarouselImage, useCarouselImages } from '@hooks/useBanners';
 import { openUrl } from '@utils/index';
 import React, { useEffect, useRef, useState } from 'react';
@@ -42,8 +42,8 @@ export const CarouselBanners: React.FC<CarouselProps> = ({ type }) => {
     useCarouselImages(type);
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(0)).current; // opacidade
-  const scaleAnim = useRef(new Animated.Value(0.95)).current; // scale leve
+  const fadeAnim = useRef(new Animated.Value(0)).current; 
+  const scaleAnim = useRef(new Animated.Value(0.95)).current; 
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -75,9 +75,8 @@ export const CarouselBanners: React.FC<CarouselProps> = ({ type }) => {
   };
 
   const onImageLoadEnd = (id: string) => {
-    handleImageLoad(id); // informa para o hook que carregou
+    handleImageLoad(id); 
 
-    // Agora anima a imagem
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,

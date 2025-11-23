@@ -15,17 +15,14 @@ import { api } from '@lib/api';
 import { maskPlaca } from '@utils/masks';
 import { useAdvertise } from '../context/AdvertiseContext';
 
-// Função para converter valor FIPE do formato brasileiro para numérico
 const convertFipeValueToNumeric = (valorFipe: string): string => {
   if (!valorFipe) return '0';
-  
-  // Remove "R$", espaços e converte vírgula para ponto
+
   let valor = valorFipe
-    .replace(/R\$\s*/g, '') // Remove "R$" e espaços
-    .replace(/\./g, '')     // Remove pontos (separadores de milhares)
-    .replace(',', '.');     // Converte vírgula para ponto decimal
-  
-  // Garante que seja um número válido
+    .replace(/R\$\s*/g, '') 
+    .replace(/\./g, '')     
+    .replace(',', '.');     
+
   const numero = parseFloat(valor);
   return isNaN(numero) ? '0' : numero.toFixed(2);
 };
@@ -82,19 +79,15 @@ const Step1 = () => {
       if (editCodigo) {
         try {
           setIsLoadingEditData(true);
-          
-          // IMPORTANTE: Só limpar cache e recarregar se não estamos já editando
-          // Se já temos id no contexto, significa que estamos navegando entre steps
-          // de uma edição existente, então não devemos limpar o cache e perder a referência
+
           const isAlreadyEditing = advertiseData.id !== undefined && advertiseData.id !== null;
           
           if (!isAlreadyEditing) {
-            // Só limpar e recarregar se realmente estamos iniciando uma nova edição
+            
             clearEditCache();
             await loadAdDataForEdit(editCodigo);
           }
-          
-          // Sempre atualizar shouldPublish se necessário (mesmo se já estamos editando)
+
           if (shouldPublish) {
             updateStep1Data({ shouldPublish: true });
           }
@@ -133,7 +126,6 @@ const Step1 = () => {
     }
   }, [advertiseData.id, advertiseData.placa, advertiseData.marca_veiculo, advertiseData.modelo_veiculo, editCodigo, setValue]);
 
-  // Monitorar todos os campos
   const formValues = watch();
   
   const isFormValid = !!(
@@ -149,7 +141,6 @@ const Step1 = () => {
     formValues.portas
   );
 
-  // Estados para os selects
   const [anoFabricacaoOptions, setAnoFabricacaoOptions] = useState<Array<{label: string, value: string}>>([]);
   const [anoModeloOptions, setAnoModeloOptions] = useState<Array<{label: string, value: string}>>([]);
   const [portasOptions] = useState([
@@ -159,20 +150,17 @@ const Step1 = () => {
     { label: '5', value: '5' },
   ]);
 
-  // Watch placa e modelo para buscar informações
   const placa = watch('placa');
   const modelo = watch('modelo');
   const [isLoadingVehicleInfo, setIsLoadingVehicleInfo] = useState(false);
 
-  // Função para extrair submodelo do modelo (primeira palavra)
   const extractSubmodelo = (modeloCompleto: string): string => {
     if (!modeloCompleto) return '';
-    // Remove espaços extras e pega a primeira palavra
+    
     const palavras = modeloCompleto.trim().split(/\s+/);
     return palavras[0] || '';
   };
 
-  // Função para gerar anos (2000 até ano atual + 1)
   const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
     const years = [];
@@ -182,7 +170,6 @@ const Step1 = () => {
     return years;
   };
 
-  // Converter parâmetros para formato dos selects
   const coresOptions = parameters.cores.map(cor => ({
     label: cor.descricao,
     value: cor.id.toString(),
@@ -198,44 +185,39 @@ const Step1 = () => {
     value: combustivel.id.toString(),
   }));
 
-  // Carregar opções dos selects
   useEffect(() => {
-    // Anos
+    
     const anos = generateYearOptions();
     setAnoFabricacaoOptions(anos);
     setAnoModeloOptions(anos);
   }, []);
 
-  // Buscar informações do veículo pela placa com debounce
   useEffect(() => {
-    // Só executa se a placa não estiver vazia e tiver pelo menos 7 caracteres
+    
     if (!placa || placa.length < 7) {
       return;
     }
 
     const timeoutId = setTimeout(() => {
       const fetchVehicleInfo = async () => {
-        if (placa && placa.length === 8 && !isLoadingVehicleInfo) { // Placa formatada tem 8 caracteres
+        if (placa && placa.length === 8 && !isLoadingVehicleInfo) { 
           setIsLoadingVehicleInfo(true);
           try {
             const response = await api.post('/cliente/meus_anuncios/obter_info_veiculo', {
-              placa: placa.replace(/-/g, ''), // Remove traço da placa
+              placa: placa.replace(/-/g, ''), 
             });
 
             if (response.data.status === 'success') {
               const data = response.data.content;
-              
-              // Preencher campos automaticamente
+
               if (data.marca) setValue('marca', data.marca);
               if (data.modelo) setValue('modelo', data.modelo);
               if (data.ano_fabricacao) setValue('ano_fabricacao', data.ano_fabricacao.toString());
               if (data.ano_modelo) setValue('ano_modelo', data.ano_modelo.toString());
-              
-              // Armazenar submodelo e valor_fipe no contexto (não são campos do formulário)
+
               if (data.submodelo || data.modelo) {
                 const submodelo = data.submodelo || extractSubmodelo(data.modelo);
-                
-                // Converter valor_fipe do formato brasileiro para numérico
+
                 let valorFipeConvertido = null;
                 if (data.valor_fipe) {
                   valorFipeConvertido = convertFipeValueToNumeric(data.valor_fipe);
@@ -255,12 +237,11 @@ const Step1 = () => {
       };
 
       fetchVehicleInfo();
-    }, 1000); // Aguarda 1 segundo após parar de digitar
+    }, 1000); 
 
     return () => clearTimeout(timeoutId);
   }, [placa, setValue]);
 
-  // Atualizar submodelo automaticamente quando o modelo mudar
   useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === 'modelo' && value.modelo) {
@@ -274,8 +255,7 @@ const Step1 = () => {
   }, [watch, updateStep1Data, extractSubmodelo]);
 
   const handleContinue = (data: VehicleFormProps) => {
-    
-    // Salvar dados no contexto
+
     updateStep1Data({
       placa: data.placa,
       marca_veiculo: data.marca,
@@ -292,10 +272,8 @@ const Step1 = () => {
     navigation.navigate('advertiseStep2');
   };
 
-
   const isEditing = !!advertiseData.id;
 
-  // Mostrar loading se estiver carregando dados para edição
   if (isLoadingEditData) {
     return (
       <PageScaffold
@@ -432,7 +410,6 @@ const Step1 = () => {
               />
             )}
           />
-
 
           <Controller
             control={control}

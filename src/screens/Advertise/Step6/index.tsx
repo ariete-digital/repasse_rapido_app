@@ -23,40 +23,34 @@ const Step6 = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'oficial' | 'gratis' | null>('oficial');
 
-  // Determinar se o usuário precisa selecionar plano
   const needsPlanSelection = user.tipo === 'A' || user.tipo === 'PJ';
 
-  // Validar se pode prosseguir
   const canProceed = needsPlanSelection 
-    ? selectedPlan !== null  // Para A/PJ: precisa selecionar plano
-    : agreeTerms;            // Para PF: precisa aceitar termos
+    ? selectedPlan !== null  
+    : agreeTerms;            
 
-  // Função auxiliar para converter string '1'/'0' para number (1 ou 0)
   const stringToNumber = (value: string | undefined): number | undefined => {
     if (!value) return undefined;
     const num = parseInt(value, 10);
     return isNaN(num) ? undefined : num;
   };
 
-  // Função auxiliar para converter string para boolean (1 ou 0)
   const stringToFormBoolean = (value: string | undefined): number => {
     return (value === '1' || value === 'true') ? 1 : 0;
   };
 
   const handleSaveAd = async () => {
-    // Para usuários PF, validar aceite dos termos
+    
     if (!needsPlanSelection && !agreeTerms) {
       Alert.alert('Atenção', 'Você precisa concordar com os termos para continuar.');
       return;
     }
 
-    // Para usuários A e PJ, validar seleção do plano
     if (needsPlanSelection && !selectedPlan) {
       Alert.alert('Atenção', 'Você precisa selecionar um plano para continuar.');
       return;
     }
 
-    // Validar se há dados mínimos necessários
     const missingFields = [];
     if (!advertiseData.placa) missingFields.push('Placa');
     if (!advertiseData.marca_veiculo) missingFields.push('Marca');
@@ -84,20 +78,15 @@ const Step6 = () => {
     setIsSubmitting(true);
 
     try {
-      // Verificar se está editando antes de preparar os dados
-      const isEditing = isEditingFromContext || !!advertiseData.id;
       
-      // Preparar FormData para multipart/form-data
+      const isEditing = isEditingFromContext || !!advertiseData.id;
+
       const formData = new FormData();
 
-      // CRÍTICO: Sempre enviar o ID quando existir, caso contrário a API criará um novo anúncio
-      // Este é o campo que diferencia criação de edição na API
-      // IMPORTANTE: O id deve estar sempre preservado no contexto, mesmo ao navegar entre steps
       if (advertiseData.id !== undefined && advertiseData.id !== null) {
         formData.append('id', advertiseData.id.toString());
       } else if (isEditing) {
-        // Se deveria estar editando mas não tem ID, há um problema crítico
-        // Isso não deveria acontecer se preserveCriticalFields estiver funcionando corretamente
+
         Alert.alert(
           'Erro Crítico',
           'ID do anúncio não encontrado. O anúncio não pode ser atualizado.\n\nPor favor, retorne à tela inicial e inicie a edição novamente.',
@@ -105,7 +94,7 @@ const Step6 = () => {
             { 
               text: 'OK',
               onPress: () => {
-                // Limpar dados e voltar para a tela inicial
+                
                 clearEditCache();
                 navigation.navigate('advertiseHome' as any);
               }
@@ -116,22 +105,19 @@ const Step6 = () => {
         return;
       }
 
-      formData.append('tipo_veiculo', 'C'); // C = Carro
+      formData.append('tipo_veiculo', 'C'); 
 
-      // Status do veículo (N = Novo, U = Usado)
       if (advertiseData.status_veiculo) {
         formData.append('status_veiculo', advertiseData.status_veiculo);
       }
 
-      // Step 1 - Dados do Veículo
       if (advertiseData.placa) {
-        formData.append('placa', advertiseData.placa.replace(/-/g, '')); // Placa sem hífen
+        formData.append('placa', advertiseData.placa.replace(/-/g, '')); 
       }
       if (advertiseData.marca_veiculo) formData.append('marca_veiculo', advertiseData.marca_veiculo);
       if (advertiseData.modelo_veiculo) formData.append('modelo_veiculo', advertiseData.modelo_veiculo);
       if (advertiseData.submodelo) formData.append('submodelo', advertiseData.submodelo);
-      
-      // Converter strings para numbers
+
       if (advertiseData.ano_fabricacao) formData.append('ano_fabricacao', stringToNumber(advertiseData.ano_fabricacao)!.toString());
       if (advertiseData.ano_modelo) formData.append('ano_modelo', stringToNumber(advertiseData.ano_modelo)!.toString());
       if (advertiseData.quilometragem) formData.append('quilometragem', stringToNumber(advertiseData.quilometragem)!.toString());
@@ -140,14 +126,12 @@ const Step6 = () => {
       if (advertiseData.id_tipo_combustivel) formData.append('id_tipo_combustivel', stringToNumber(advertiseData.id_tipo_combustivel)!.toString());
       if (advertiseData.num_portas) formData.append('num_portas', stringToNumber(advertiseData.num_portas)!.toString());
 
-      // Step 2 - Opcionais (adicionar como array)
       if (advertiseData.opcionais && advertiseData.opcionais.length > 0) {
         advertiseData.opcionais.forEach(opcional => {
           formData.append('opcionais[]', opcional.toString());
         });
       }
 
-      // Step 3 - Dados Detalhados do Veículo (converter para 1 ou 0)
       formData.append('unico_dono', stringToFormBoolean(advertiseData.unico_dono).toString());
       formData.append('ipva_pago', stringToFormBoolean(advertiseData.ipva_pago).toString());
       formData.append('veiculo_nome_anunciante', stringToFormBoolean(advertiseData.veiculo_nome_anunciante).toString());
@@ -165,61 +149,47 @@ const Step6 = () => {
       formData.append('cambio_escapa_marcha', stringToFormBoolean(advertiseData.cambio_escapa_marcha).toString());
       formData.append('furtado_roubado', stringToFormBoolean(advertiseData.furtado_roubado).toString());
       formData.append('passou_leilao', stringToFormBoolean(advertiseData.passou_leilao).toString());
-      
-      // Campos numéricos do Step 3
+
       if (advertiseData.id_tipo_pneu) formData.append('id_tipo_pneu', stringToNumber(advertiseData.id_tipo_pneu)!.toString());
       if (advertiseData.id_tipo_parabrisa) formData.append('id_tipo_parabrisa', stringToNumber(advertiseData.id_tipo_parabrisa)!.toString());
-      
-      // Tipo de monta - manter campo original
+
       if (advertiseData.tipo_monta) {
         formData.append('tipo_monta', advertiseData.tipo_monta);
       }
 
-      // Luzes - manter campos separados
       formData.append('luz_injecao', stringToFormBoolean(advertiseData.luz_injecao).toString());
       formData.append('luz_airbag', stringToFormBoolean(advertiseData.luz_airbag).toString());
       formData.append('luz_abs', stringToFormBoolean(advertiseData.luz_abs).toString());
 
-      // Step 4 - Imagens
       if (isEditing && advertiseData.imagensOriginais && advertiseData.imagensOriginais.length > 0) {
-        // Modo edição: detectar imagens removidas e novas
-        
-        // IDs das imagens originais
+
         const originalImageIds = advertiseData.imagensOriginais
           .map(img => img.id)
           .filter((id): id is number => id !== undefined);
-        
-        // Obter IDs das imagens atuais que são mantidas (têm ID e não foram substituídas)
+
         const currentMaintainedIds = (advertiseData.imagens || [])
           .filter(img => {
-            // Imagem mantida se tem ID E não tem base64 novo (não foi substituída)
+            
             return img.id !== undefined && (!img.base64 || img.base64.length === 0);
           })
           .map(img => img.id)
           .filter((id): id is number => id !== undefined);
-        
-        // Identificar IDs removidos (estavam nas originais mas não estão mais nas mantidas)
+
         const removedIds = originalImageIds.filter(id => !currentMaintainedIds.includes(id));
-        
-        // Enviar IDs removidos se houver
+
         if (removedIds.length > 0) {
           formData.append('idsRemovidos', removedIds.join(','));
         }
-        
-        // Enviar apenas novas imagens:
-        // - Imagens sem ID (totalmente novas)
-        // - Imagens com base64 (substituídas, mesmo que originalmente tinham ID)
+
         const newImages = (advertiseData.imagens || []).filter(img => {
-          // Nova imagem se não tem ID (totalmente nova) OU tem base64 (foi selecionada/substituída)
-          const isNewImage = !img.id || (img.base64 && img.base64.length > 0);
           
-          // Não enviar imagens mantidas (têm ID, não têm base64, e URI é URL remota)
-          if (img.id && (!img.base64 || img.base64.length === 0) && img.uri && !img.uri.startsWith('file://') && !img.uri.startsWith('content://')) {
+          const isNewImage = !img.id || (img.base64 && img.base64.length > 0);
+
+          if (img.id && (!img.base64 || img.base64.length === 0) && img.uri && !img.uri.startsWith('file:
             return false;
           }
-          
-          // Enviar apenas se for nova imagem e tiver URI válida
-          return isNewImage && img.uri && (img.uri.startsWith('file://') || img.uri.startsWith('content://') || (img.base64 && img.base64.length > 0));
+
+          return isNewImage && img.uri && (img.uri.startsWith('file:
         });
         
         newImages.forEach((img) => {
@@ -230,7 +200,7 @@ const Step6 = () => {
           } as any);
         });
       } else {
-        // Modo criação: enviar todas as imagens
+        
         if (advertiseData.imagens && advertiseData.imagens.length > 0) {
           advertiseData.imagens.forEach((img, index) => {
             if (img.uri) {
@@ -244,48 +214,38 @@ const Step6 = () => {
         }
       }
 
-      // Step 5 - Valor e Descrição
       if (advertiseData.descricao) formData.append('descricao', advertiseData.descricao);
-      
-      // Valor
+
       if (advertiseData.valor) {
         formData.append('valor', parseFloat(advertiseData.valor).toString());
       }
-      
-      // Valor FIPE (se disponível)
+
       if (advertiseData.valor_fipe) {
         formData.append('valor_fipe', advertiseData.valor_fipe);
       }
-      
-      // Aceite termos
+
       formData.append('aceite_termos', stringToFormBoolean(advertiseData.aceite_termos) ? 'true' : 'false');
 
-      // Tipo de plano baseado na seleção do usuário
       if (needsPlanSelection && selectedPlan) {
         formData.append('tipo_plano', selectedPlan === 'oficial' ? 'O' : 'G');
       } else {
-        // Para usuários PF, usar plano padrão
+        
         formData.append('tipo_plano', 'G');
       }
 
-      // Log de debug
-
-      // Enviar para a API com Content-Type: multipart/form-data
       const response = await api.post('/cliente/meus_anuncios/salvar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 60000, // 60 segundos de timeout
+        timeout: 60000, 
       });
 
-
       if (response.data.status === 'success') {
-        // A API retorna id (não id_anuncio_rascunho)
+        
         const adNumber = response.data.content?.id || response.data.content?.id_anuncio_rascunho || advertiseData.id || 'N/A';
         
         const isEditing = !!advertiseData.id;
-        
-        // Verificar se deve publicar automaticamente
+
         if (advertiseData.shouldPublish && isEditing) {
           try {
             const publishResponse = await api.post('/cliente/anuncios/publicar_anuncio', {
@@ -295,20 +255,18 @@ const Step6 = () => {
             if (publishResponse.data.status === 'success') {
             }
           } catch (publishError) {
-            // Não bloquear o fluxo se a publicação falhar
+            
           }
         }
-        
-        // Limpar dados do contexto
+
         if (isEditing) {
-          // Se estava editando, limpar apenas o cache de edição
+          
           clearEditCache();
         } else {
-          // Se estava criando, limpar todos os dados
+          
           clearAdvertiseData();
         }
-        
-        // Navegar diretamente para tela de sucesso
+
         navigation.navigate('advertiseSuccess', { 
           adNumber: adNumber.toString(),
           isEditing: isEditing
@@ -319,11 +277,9 @@ const Step6 = () => {
     } catch (error: any) {
       setIsSubmitting(false);
 
-      // Tratar erros específicos
       if (error.response?.data) {
         const errorData = error.response.data;
-        
-        // Verificar se há erros de validação específicos de campos
+
         if (errorData.errors) {
           const firstError = Object.keys(errorData.errors)[0];
           const errorMessage = errorData.errors[firstError][0];
@@ -333,7 +289,7 @@ const Step6 = () => {
             `Campo: ${firstError}\n${errorMessage}\n\nPor favor, volte e corrija o erro.`,
             [
               { text: 'OK', onPress: () => {
-                // Redirecionar para a etapa específica baseado no erro
+                
                 redirectToStepWithError(firstError);
               }}
             ]
@@ -360,7 +316,7 @@ const Step6 = () => {
   const isEditing = !!advertiseData.id;
 
   const redirectToStepWithError = (fieldName: string) => {
-    // Mapear campos para suas respectivas etapas
+    
     const step1Fields = ['placa', 'marca_veiculo', 'modelo_veiculo', 'ano_fabricacao', 'ano_modelo', 'quilometragem', 'id_cor', 'id_tipo_cambio', 'id_tipo_combustivel', 'num_portas'];
     const step2Fields = ['opcionais'];
     const step3Fields = ['unico_dono', 'ipva_pago', 'veiculo_nome_anunciante', 'financiado', 'parcelas_em_dia', 'todas_revisoes_concessionaria', 'possui_manual', 'possui_chave_reserva', 'possui_ar', 'ar_funcionando', 'escapamento_solta_fumaca', 'garantia_fabrica', 'motor_bate', 'cambio_faz_barulho', 'cambio_escapa_marcha', 'furtado_roubado', 'id_tipo_pneu', 'id_tipo_parabrisa', 'luz_injecao', 'luz_airbag', 'luz_abs', 'tipo_monta', 'passou_leilao'];
@@ -390,7 +346,6 @@ const Step6 = () => {
         Escolha o plano que mais se adequa às suas necessidades.
       </Text>
 
-      {/* Plano Oficial */}
       <TouchableOpacity
         onPress={() => setSelectedPlan('oficial')}
         style={{
@@ -436,7 +391,6 @@ const Step6 = () => {
         </TouchableOpacity>
       </TouchableOpacity>
 
-      {/* Plano Grátis */}
       <TouchableOpacity
         onPress={() => setSelectedPlan('gratis')}
         style={{

@@ -54,17 +54,16 @@ export const openUrl = (url: string) => Linking.openURL(url);
 export const canOpenURL = (url: string) => Linking.canOpenURL(url);
 
 export function formatarTelefone(input: string) {
-  // Remove tudo que não for dígito
+  
   const numeros = input.replace(/\D/g, '');
 
-  // Aplica a máscara de telefone nova: (XX) XXXXX-XXXX
   if (numeros.length >= 11) {
     return numeros.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
   } else if (numeros.length >= 10) {
-    // Caso esteja no formato antigo (com 4 dígitos após o DDD)
+    
     return numeros.replace(/^(\d{2})(\d{4})(\d{4}).*/, '($1) $2-$3');
   } else {
-    // Retorna o que for possível formatar até o momento
+    
     return numeros;
   }
 }

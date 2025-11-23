@@ -5,7 +5,6 @@ export const Container = styled.ScrollView`
   flex: 1;
 `
 
-// Item
 export const Item = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;

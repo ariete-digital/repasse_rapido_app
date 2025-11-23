@@ -32,15 +32,13 @@ interface LegalFormProps {
   logradouro: string;
   bairro: string;
   numero: string;
-  complemento?: string; // Opcional
+  complemento?: string; 
   nome_responsavel: string;
   cpf_responsavel: string;
   id_cidade: number;
   inscricao_estadual: string;
-  rg?: string; // Opcional
-  // comprovEnd?: File
-  // cnh?: File
-  // docComplementar?: File
+  rg?: string; 
+
 }
 
 const signUpSchema = yup.object({
@@ -60,14 +58,14 @@ const signUpSchema = yup.object({
   logradouro: yup.string().required('Informe o logradouro!'),
   bairro: yup.string().required('Informe o bairro!'),
   numero: yup.string().required('Informe o número!'),
-  complemento: yup.string().optional(), // Opcional
+  complemento: yup.string().optional(), 
   nome_responsavel: yup.string().required('Informe o nome do responsável!'),
   cpf_responsavel: yup.string().required('Informe o CPF do responsável'),
   id_cidade: yup.number().required('Informe a cidade!'),
   inscricao_estadual: yup
     .string()
     .required('Informe o nome a inscrição estadual!'),
-  rg: yup.string().optional(), // Opcional
+  rg: yup.string().optional(), 
 });
 
 const Legal = () => {
@@ -84,7 +82,6 @@ const Legal = () => {
   const [complementarImage, setComplementarImage] = useState<string | null>(null);
   const [complementarFileName, setComplementarFileName] = useState<string | null>(null);
   const [complementarMimeType, setComplementarMimeType] = useState<string>('image/jpeg');
-
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
   const toast = useToast();
@@ -107,7 +104,7 @@ const Legal = () => {
       setLoadingCities(true);
       const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
       if (response.data?.content) {
-        // Converter value de number para string
+        
         const cities = response.data.content.map((city: any) => ({
           label: city.label,
           value: city.value.toString()
@@ -121,17 +118,16 @@ const Legal = () => {
   };
 
   const handleRegister = async (data: LegalFormProps) => {
-    // Criar FormData para multipart/form-data
+    
     const formData = new FormData();
 
-    // Adicionar campos de texto
     formData.append('nome', data.nome);
     formData.append('email', data.email);
     formData.append('senha', data.senha);
     formData.append('tipo', 'PJ');
-    formData.append('num_documento', data.num_documento.replace(/\D/g, '')); // Remove máscara
-    formData.append('telefone', data.telefone.replace(/\D/g, '')); // Remove máscara
-    formData.append('cep', data.cep.replace(/\D/g, '')); // Remove máscara
+    formData.append('num_documento', data.num_documento.replace(/\D/g, '')); 
+    formData.append('telefone', data.telefone.replace(/\D/g, '')); 
+    formData.append('cep', data.cep.replace(/\D/g, '')); 
     formData.append('logradouro', data.logradouro);
     formData.append('numero', data.numero);
     if (data.complemento) {
@@ -140,12 +136,11 @@ const Legal = () => {
     formData.append('bairro', data.bairro);
     formData.append('id_cidade', data.id_cidade.toString());
     formData.append('nome_fantasia', data.nome_fantasia);
-    formData.append('celular', data.celular.replace(/\D/g, '')); // Remove máscara
+    formData.append('celular', data.celular.replace(/\D/g, '')); 
     formData.append('nome_responsavel', data.nome_responsavel);
-    formData.append('cpf_responsavel', data.cpf_responsavel.replace(/\D/g, '')); // Remove máscara
+    formData.append('cpf_responsavel', data.cpf_responsavel.replace(/\D/g, '')); 
     formData.append('inscricao_estadual', data.inscricao_estadual);
 
-    // Adicionar arquivos se existirem
     if (cnhImage) {
       formData.append('cnh', {
         uri: cnhImage,
@@ -165,7 +160,7 @@ const Legal = () => {
     setIsLoading(true);
 
     try {
-      // Axios automaticamente define Content-Type com boundary para FormData
+      
       const response = await api.post('/cadastrar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -196,7 +191,7 @@ const Legal = () => {
     if (cleanCep.length !== 8) return;
 
     try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const response = await axios.get(`https:
 
       if (response.data && !response.data.erro) {
         const { bairro, logradouro, localidade } = response.data;
@@ -210,7 +205,7 @@ const Legal = () => {
           if (cityData.data?.content?.[0]) {
             const cityId = cityData.data.content[0].value;
             setValue('id_cidade', cityId);
-            // Atualizar a lista de cidades para incluir a cidade encontrada
+            
             const cityOption = {
               label: cityData.data.content[0].label,
               value: cityId.toString()

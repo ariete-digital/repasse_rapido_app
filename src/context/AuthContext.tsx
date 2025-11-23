@@ -92,8 +92,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   async function signOut() {
     try {
       setIsLoadingUserStorageData(true)
-      
-      // Call logout API endpoint if user has a token
+
       const { token } = await storageAuthTokenGet()
       if (token) {
         try {
@@ -103,16 +102,14 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
             }
           })
         } catch (error) {
-          // Continue with logout even if API call fails
+          
         }
       }
-      
-      // Clear local storage
+
       setUser({} as UserDTO)
       await storageUserRemove()
       await storageAuthTokenRemove()
-      
-      // Clear authorization header
+
       delete api.defaults.headers.common['Authorization']
       
       toast.show('Usuário desconectado com sucesso!', { type: 'success' })
@@ -158,7 +155,6 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         return null
       }
 
-      
       const response = await api.post('/refresh', {}, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -169,11 +165,10 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         const newToken = response.data.access_token || response.data.content?.access_token
         
         if (newToken) {
-          // Atualizar token no storage e no header
+          
           await storageAuthTokenSave({ token: newToken })
           api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
-          
-          // Atualizar token no objeto do usuário se existir
+
           if (user && user.id) {
             const updatedUser = { ...user, access_token: newToken }
             setUser(updatedUser)
@@ -192,8 +187,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
   useEffect(() => {
     loadUserData()
-    
-    // Setup API interceptors with refresh token and signOut functions
+
     setupApiInterceptors(refreshToken, signOut)
   }, [])
 

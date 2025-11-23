@@ -27,39 +27,27 @@ const SearchResults = () => {
   const [orderingOpen, setOrderingOpen] = useState(false);
   const { searchResults, filterDataWithCount, isSearchResultsLoading, isRefetching, filterParams } = useFilters();
 
-  // Função para verificar se há filtros ativos
   const hasActiveFilters = (filters: FilterOptions): boolean => {
-    // Verificar filtros básicos
+    
     if (filters.id_cidade || filters.cidade_nome) return true;
     if (filters.id_marca || filters.marca) return true;
     if (filters.modelo) return true;
     if (filters.id_estado) return true;
-    
-    // Verificar filtros de ano
+
     if (filters.ano?.min || filters.ano?.max) return true;
-    
-    // Verificar filtros de valor
+
     if (filters.valor?.min || filters.valor?.max) return true;
-    
-    // Verificar filtros de quilometragem (se existir na interface)
-    // if (filters.km?.min || filters.km?.max) return true;
-    
-    // Verificar filtros de opcionais
+
     if (filters.opcionais && filters.opcionais.length > 0) return true;
-    
-    // Verificar filtros de câmbio
+
     if (filters.tipos_cambio && filters.tipos_cambio.length > 0) return true;
-    
-    // Verificar filtros de combustível
+
     if (filters.tipos_combustivel && filters.tipos_combustivel.length > 0) return true;
-    
-    // Verificar filtros de cor
+
     if (filters.cores && filters.cores.length > 0) return true;
-    
-    // Verificar filtros de portas
+
     if (filters.num_portas && filters.num_portas.length > 0) return true;
-    
-    // Verificar filtros de status
+
     if (filters.status_veiculo) return true;
     
     return false;
@@ -67,7 +55,7 @@ const SearchResults = () => {
 
   const handleConfirm = () => {
     toggleOrderingModal();
-    // setShouldTriggerSearch(true);
+    
   };
 
   const handleCancel = () => {
@@ -98,14 +86,12 @@ const SearchResults = () => {
     setOrderingOpen(!orderingOpen);
   };
 
-  // Helper function to get image URL
   const getImageUrl = (ad: any) => {
-    // Primeiro, verificar se há imagemPrincipal
+    
     if (ad.imagemPrincipal) {
       return ad.imagemPrincipal;
     }
-    
-    // Depois, verificar se há array de imagens
+
     if (ad.imagens && ad.imagens.length > 0) {
       const firstImage = ad.imagens[0];
       if (typeof firstImage === 'string') return firstImage;

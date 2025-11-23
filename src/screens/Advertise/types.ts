@@ -1,11 +1,11 @@
 export interface ImageData {
-  uri?: string; // Opcional para compatibilidade
+  uri?: string; 
   base64: string;
   name: string;
   type: string;
   principal: boolean;
   index: number;
-  id?: number; // ID da imagem no servidor (quando carregada de um anúncio existente)
+  id?: number; 
 }
 
 export interface Step5Data {

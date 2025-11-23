@@ -3,12 +3,6 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 
-/**
- *
- * Chamar o componente no App.tsx, comentar todo o resto
- *
- */
-
 const DebugScreen = () => {
   const apiUrl = Constants.expoConfig?.extra?.apiUrl;
   const [status, setStatus] = useState<string>('Verificando...');
@@ -18,7 +12,7 @@ const DebugScreen = () => {
   useEffect(() => {
     const testarApi = async () => {
       try {
-        const res = await axios.get(`${apiUrl}/cliente/home`); // Substitua por um endpoint leve se necessário
+        const res = await axios.get(`${apiUrl}/cliente/home`); 
         setStatus('✅ Conexão bem-sucedida');
         setResponse(res.data);
       } catch (error: any) {

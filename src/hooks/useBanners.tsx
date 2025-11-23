@@ -1,4 +1,4 @@
-// src/hooks/useCarouselImages.ts
+
 import { api } from '@lib/api';
 import { useEffect, useState } from 'react';
 
@@ -50,7 +50,7 @@ export function useCarouselImages(type: string): UseCarouselImagesResult {
         if (Array.isArray(imagesData)) {
           const adaptedData: CarouselImage[] = imagesData.map((item: any) => ({
             id: item.id,
-            url: item.url_imagem, // adapta aqui!
+            url: item.url_imagem, 
             link: item.link,
           }));
           setImages(adaptedData);

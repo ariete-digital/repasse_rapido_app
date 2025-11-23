@@ -34,14 +34,12 @@ const Home = () => {
       );
     }
 
-    // Helper function to get image URL
     const getImageUrl = (ad: any) => {
-      // Primeiro, verificar se há imagemPrincipal
+      
       if (ad.imagemPrincipal) {
         return ad.imagemPrincipal;
       }
-      
-      // Depois, verificar se há array de imagens
+
       if (ad.imagens && ad.imagens.length > 0) {
         const firstImage = ad.imagens[0];
         if (typeof firstImage === 'string') return firstImage;
@@ -51,7 +49,6 @@ const Home = () => {
       return undefined;
     };
 
-    // Renderizar os anúncios em pares (2 por linha)
     const rows = [];
     for (let i = 0; i < homePageData.anuncios.length; i += 2) {
       const firstAd = homePageData.anuncios[i];
@@ -104,8 +101,8 @@ const Home = () => {
           <RefreshControl
             refreshing={isLoading}
             onRefresh={loadHomePageData}
-            colors={['rgba(154, 11, 38, 1)', 'rgba(225, 17, 56, 1)']} // Para Android
-            tintColor="rgba(225, 17, 56, 1)" // Para iOS
+            colors={['rgba(154, 11, 38, 1)', 'rgba(225, 17, 56, 1)']} 
+            tintColor="rgba(225, 17, 56, 1)" 
           />
         }
       >

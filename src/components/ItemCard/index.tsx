@@ -15,12 +15,11 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { NoPhotoIcon } from '@components/CustomIcons';
 
-
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface ItemCardProps {
   itemID: number;
-  codigo?: string; // Adicionar código do anúncio
+  codigo?: string; 
   imageUrl?: string;
   brand: string;
   model: string;
@@ -47,7 +46,7 @@ const ItemCard = ({
 }: ItemCardProps) => {
   const navigation = useNavigation<NavigationProp>();
   const seeOffer = () => {
-    // Usar código se disponível, senão usar itemID como fallback
+    
     const codeToUse = codigo || itemID.toString();
     navigation.navigate('adDetails', { code: codeToUse });
   };
@@ -77,8 +76,7 @@ const ItemCard = ({
             </Text>
           </View>
         )}
-        
-        {/* Carimbo de VENDIDO */}
+
         {isVendido && (
           <View style={{
             position: 'absolute',

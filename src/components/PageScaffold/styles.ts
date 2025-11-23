@@ -61,4 +61,3 @@ export const Separator = styled.View`
   background-color: ${(props) => props.theme.colors['gray-200']};
 `;
 
-

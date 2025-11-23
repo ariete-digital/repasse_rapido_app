@@ -28,7 +28,7 @@ const Services = () => {
         <S.ButtonRow>
           <S.Pressable
             style={shadow.services}
-            onPress={() => openUrl('https://veiculos.fipe.org.br/')}
+            onPress={() => openUrl('https:
           >
             <Image source={Fipe} style={{ width: 80, height: 80 }} />
             <S.TextContainer>
@@ -42,7 +42,7 @@ const Services = () => {
           </S.Pressable>
           <S.Pressable
             style={shadow.services}
-            onPress={() => openUrl('https://repasserapido.com.br/lojas')}
+            onPress={() => openUrl('https:
           >
             <Image source={Stores} style={{ width: 80, height: 80 }} />
             <S.TextContainer>
@@ -56,7 +56,7 @@ const Services = () => {
           </S.Pressable>
           <S.Pressable
             style={shadow.services}
-            onPress={() => openUrl('https://repasserapido.com.br/fale-conosco')}
+            onPress={() => openUrl('https:
           >
             <Image source={Call} style={{ width: 80, height: 80 }} />
             <S.TextContainer>

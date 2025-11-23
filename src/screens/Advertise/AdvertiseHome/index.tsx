@@ -19,7 +19,6 @@ const AdvertiseHome = () => {
   const { loadAdDataForEdit, clearAdvertiseData } = useAdvertise();
   const [isLoadingAd, setIsLoadingAd] = useState(false);
 
-  // Verificar se está editando
   const editCodigo = (route.params as any)?.editCodigo;
 
   useEffect(() => {
@@ -28,7 +27,7 @@ const AdvertiseHome = () => {
         try {
           setIsLoadingAd(true);
           await loadAdDataForEdit(editCodigo);
-          // Navegar automaticamente para Step1 após carregar
+          
           navigation.navigate('advertiseStep1');
         } catch (error) {
           Alert.alert(
@@ -51,7 +50,7 @@ const AdvertiseHome = () => {
   }, [editCodigo]);
 
   const handleStartAd = () => {
-    // Limpar dados antes de iniciar novo anúncio
+    
     clearAdvertiseData();
     navigation.navigate('advertiseStep1');
   };

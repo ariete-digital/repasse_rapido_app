@@ -19,7 +19,7 @@ export const SellVehicleCard = () => {
           <Text color="white" fontStyle='p-18-bold' align='center'>em 24 horas!</Text>
           <Text color="white" fontStyle='p-14-bold' align='center'>Rapidez e segurança para você!</Text>
           <View style={{ width: '50%' }}>
-            <GradientButton onPress={() => openUrl('https://marciarepasses.com.br/')} paddingY={8}>
+            <GradientButton onPress={() => openUrl('https:
               <Text color='white'>Saiba Mais</Text>
             </GradientButton>
           </View>
@@ -38,7 +38,7 @@ export const SpecialistHelpCard = () => {
           <Text color="white" fontStyle='p-18-bold' align='center'>um especialista</Text>
           <Text color="white" fontStyle='p-14-bold' align='center'>Compre ou venda com segurança!</Text>
           <View style={{ width: '50%' }}>
-            <GradientButton onPress={() => openUrl('https://assessoria.repasserapido.com.br/')} paddingY={8}>
+            <GradientButton onPress={() => openUrl('https:
               <Text color='white'>Saiba Mais</Text>
             </GradientButton>
           </View>
@@ -56,7 +56,7 @@ export const LawyerHelpCard = () => {
           <Text color='white' fontStyle='p-14-bold' align='center'>Preciso da ajuda de um</Text>
           <Text color="white" fontStyle='p-14-bold' align='center'>ADVOGADO!</Text>
           <Text color="white" fontStyle='p-10-bold' align='center'>Estou tendo problemas comprando ou vendendo um veículo</Text>
-          <MoreInfo onPress={() => openUrl('https://grazianoadvogados.com.br/preciso-de-ajuda-de-um-advogado/')} />
+          <MoreInfo onPress={() => openUrl('https:
         </DataContainer>
       </ImgBackground>
     </Container>
@@ -73,7 +73,7 @@ export const SecurityCard = () => {
           <Text color="brand-blue" fontStyle='p-14-bold' align='center'>desprotegido!</Text>
           <Text color="brand-blue" align='center' fontStyle='p-10-bold'>Faça a cotação do </Text>
           <Text color="brand-blue" align='center' fontStyle='p-10-bold'>seu seguro agora!</Text>
-          <MoreInfo onPress={() => openUrl('https://serginhoseguros.repasserapido.com.br/')} />
+          <MoreInfo onPress={() => openUrl('https:
         </DataContainer>
       </ImgBackground>
     </Container>

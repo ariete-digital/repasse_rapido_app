@@ -19,7 +19,6 @@ const MyAccount = () => {
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
 
-
   useEffect(() => {
     loadUserData();
   }, []);
@@ -29,9 +28,8 @@ const MyAccount = () => {
       setIsLoading(true);
       const response = await api.get('/cliente/minha_conta/obter');
 
-      
       if (response.data && response.data.content) {
-        // A API retorna { content: { cliente: { ... } } }
+        
         const clienteData = response.data.content.cliente;
         if (clienteData) {
           setUserData(clienteData);

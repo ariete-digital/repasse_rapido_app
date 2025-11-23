@@ -20,10 +20,9 @@ const Step5 = () => {
   const [price, setPrice] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  // Função para formatar valor para exibição (retorna "35.000,00")
   const formatPriceForDisplay = (value: string) => {
     if (!value) return '';
-    // Se o valor está em formato "35000.00", converter para "35.000,00"
+    
     const numericValue = parseFloat(value);
     if (isNaN(numericValue)) return value;
     
@@ -33,7 +32,6 @@ const Step5 = () => {
     });
   };
 
-  // Preencher campos se estiver editando
   useEffect(() => {
     if (advertiseData.id || advertiseData.descricao || advertiseData.valor) {
       if (advertiseData.descricao) setDescription(advertiseData.descricao);
@@ -42,39 +40,32 @@ const Step5 = () => {
     }
   }, [advertiseData.id, advertiseData.descricao, advertiseData.valor]);
 
-  // Função para formatar o preço com máscara (exibição)
   const formatPrice = (text: string) => {
-    // Remove todos os caracteres não numéricos
+    
     const numericValue = text.replace(/\D/g, '');
     
     if (numericValue === '') {
       return '';
     }
-    
-    // Converte para número e divide por 100 para obter os centavos
+
     const value = parseInt(numericValue) / 100;
-    
-    // Formata como moeda brasileira (ex: "1.234,56")
+
     return value.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
   };
 
-  // Função para converter preço formatado para formato da API
   const convertPriceToAPI = (formattedPrice: string) => {
-    // Remove pontos e substitui vírgula por ponto
-    // "35.000,00" -> "35000.00"
+
     return formattedPrice.replace(/\./g, '').replace(',', '.');
   };
 
-  // Função para lidar com a mudança do texto do preço
   const handlePriceChange = (text: string) => {
     const formattedPrice = formatPrice(text);
     setPrice(formattedPrice);
   };
 
-  // Validar se todos os campos obrigatórios estão preenchidos
   const isFormValid = description.trim() !== '' && price !== '' && agreeTerms;
 
   const isEditing = !!advertiseData.id;
@@ -84,15 +75,12 @@ const Step5 = () => {
       return;
     }
 
-    // Preparar dados para a API
     const step5Data = {
       descricao: description,
-      valor: convertPriceToAPI(price), // Converte para formato da API (35000.00)
-      aceite_termos: "true" // Backend espera string "true"
+      valor: convertPriceToAPI(price), 
+      aceite_termos: "true" 
     };
 
-    
-    // Salvar dados no contexto
     updateStep5Data(step5Data);
     
     navigation.navigate('advertiseStep6', { step5Data });
@@ -132,11 +120,9 @@ const Step5 = () => {
             Valor e descrição do veículo
           </Text>
 
-
             <Text color="orange-text" style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'left', lineHeight: 18, marginBottom: 20 }}>IMPORTANTE:
                <Text color="black" style={{ fontSize: 14, color: 'black', textAlign: 'left', lineHeight: 18 }}> O valor do veículo deve ser no mínimo 20% abaixo do valor da tabela FIPE. Consulte o valor do seu veículo na FIPE aqui!</Text>
             </Text>
-
 
           <Text color="black" style={{ fontSize: 14, color: 'black', textAlign: 'left', lineHeight: 18, marginBottom: 20 }}>
             Faça um breve relato sobre seu veículo, cite os detalhes, defeitos ocultos ou acessórios que não estão funcionando perfeitamente (não omita nada) pois isso interfere na negociação e a omissão pode acarretar na desistência por parte do comprador no ato da entrega do veículo se algo não informado for detectado. Todos os itens serão conferidos.

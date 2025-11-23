@@ -101,16 +101,15 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     }
   }, [selectedValue, options]);
 
-  // Atualizar filteredOptions quando options mudar
   useEffect(() => {
     if (!onInputChange) {
-      // Só fazer filtro local se não houver onInputChange
+      
       const filtered = options.filter((option) =>
         option.label.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredOptions(filtered);
     } else {
-      // Se houver onInputChange, usar options diretamente
+      
       setFilteredOptions(options);
     }
   }, [options, query, onInputChange]);
@@ -142,12 +141,11 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
   const handleInputChange = (text: string) => {
     setQuery(text);
-    
-    // Chamar onInputChange se fornecido (para busca dinâmica)
+
     if (onInputChange) {
       onInputChange(text);
     } else {
-      // Filtro local padrão
+      
       const filtered = options.filter((option) =>
         option.label.toLowerCase().includes(text.toLowerCase())
       );

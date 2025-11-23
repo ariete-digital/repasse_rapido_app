@@ -34,7 +34,7 @@ const Security = ({ visible, setModalVisible, onAccept }: SecurityModalProps) =>
         }}
       >
         <SafeAreaView>
-          {/* Header com botão de fechar */}
+          
           <S.HeaderContainer>
             <Pressable onPress={handleClose} style={{ padding: 10 }}>
               <CloseIcon size={24} color="#353535" />

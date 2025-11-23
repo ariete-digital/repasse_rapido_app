@@ -7,7 +7,6 @@ import {
 import { Content } from '@screens/Details/types';
 import * as A from './styles';
 
-
 const About = ({ anuncio, aceitouTermos }: Content) => {
   return (
     <A.Container>

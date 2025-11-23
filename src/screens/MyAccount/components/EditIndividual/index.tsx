@@ -79,7 +79,7 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
       numero: userData?.numero || '',
       complemento: userData?.complemento || '',
       bairro: userData?.bairro || '',
-      cidade: userData?.id_cidade?.toString() || '', // Usa id_cidade
+      cidade: userData?.id_cidade?.toString() || '', 
       senhaAtual: '',
       senha: '',
       confirmacao: '',
@@ -97,13 +97,12 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
       numero: userData?.numero || '',
       complemento: userData?.complemento || '',
       bairro: userData?.bairro || '',
-      cidade: userData?.id_cidade?.toString() || '', // Usa id_cidade
+      cidade: userData?.id_cidade?.toString() || '', 
       senhaAtual: '',
       senha: '',
       confirmacao: '',
     });
-    
-    // Buscar lista inicial de cidades
+
     loadCities('');
   }, [userData]);
 
@@ -112,7 +111,7 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
       setLoadingCities(true);
       const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
       if (response.data?.content) {
-        // Converter value de number para string
+        
         const cities = response.data.content.map((city: any) => ({
           label: city.label,
           value: city.value.toString()
@@ -131,20 +130,19 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
     if (cleanCep.length !== 8) return;
 
     try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const response = await axios.get(`https:
 
       if (response.data && !response.data.erro) {
         const { logradouro, bairro, localidade } = response.data;
         setValue('logradouro', logradouro);
         setValue('bairro', bairro);
-        
-        // Buscar id_cidade pela API
+
         try {
           const cityData = await api.get(`/cliente/listagem/todas_cidades?filtro=${localidade}`);
           if (cityData.data?.content?.[0]) {
             const cityId = cityData.data.content[0].value;
-            setValue('cidade', cityId.toString()); // Salva o ID no form como string
-            // Atualizar a lista de cidades para incluir a cidade encontrada
+            setValue('cidade', cityId.toString()); 
+            
             const cityOption = {
               label: cityData.data.content[0].label,
               value: cityId.toString()
@@ -179,7 +177,7 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
         numero: data.numero,
         complemento: data.complemento,
         bairro: data.bairro,
-        id_cidade: Number(data.cidade), // Converte string para number
+        id_cidade: Number(data.cidade), 
       };
 
       const response = await api.post('/cliente/minha_conta/salvar', updateData);
@@ -220,7 +218,7 @@ const EditIndividual = ({ userData, onUpdate }: EditIndividualProps) => {
       
       if (response.data && response.data.status === 'success') {
         toast.show('Senha alterada com sucesso!', { type: 'success' });
-        // Limpar campos de senha
+        
         setValue('senhaAtual', '');
         setValue('senha', '');
         setValue('confirmacao', '');

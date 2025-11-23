@@ -50,13 +50,13 @@ const Select: React.FC<SelectProps> = ({
   const handleSelect = (value: string) => {
     onSelect(value);
     setModalVisible(false);
-    setSearchQuery(''); // Limpa a busca ao fechar
+    setSearchQuery(''); 
   };
 
   const openModal = () => {
     if (!disabled) {
       setModalVisible(true);
-      setSearchQuery(''); // Limpa a busca ao abrir
+      setSearchQuery(''); 
     }
   };
 
@@ -103,7 +103,6 @@ const Select: React.FC<SelectProps> = ({
         </Text>
       )}
 
-      {/* Modal de Seleção */}
       <Modal
         visible={modalVisible}
         transparent={true}

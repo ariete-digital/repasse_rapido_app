@@ -61,8 +61,7 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
   const [loadingCities, setLoadingCities] = useState(false);
   const toast = useToast();
   const { updateUserProfile } = useAuth();
-  
-  // Estados para os arquivos
+
   const [cnhImage, setCnhImage] = useState<string | null>(null);
   const [cnhFileName, setCnhFileName] = useState<string | null>(null);
   const [cnhMimeType, setCnhMimeType] = useState<string>('image/jpeg');
@@ -114,8 +113,7 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
       senha: '',
       confirmacao: '',
     });
-    
-    // Buscar lista inicial de cidades
+
     loadCities('');
   }, [userData]);
 
@@ -124,7 +122,7 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
       setLoadingCities(true);
       const response = await api.get(`/cliente/listagem/todas_cidades?filtro=${filtro}`);
       if (response.data?.content) {
-        // Converter value de number para string
+        
         const cities = response.data.content.map((city: any) => ({
           label: city.label,
           value: city.value.toString()
@@ -143,20 +141,19 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
     if (cleanCep.length !== 8) return;
 
     try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const response = await axios.get(`https:
 
       if (response.data && !response.data.erro) {
         const { bairro, logradouro, localidade } = response.data;
         setValue('bairro', bairro);
         setValue('logradouro', logradouro);
-        
-        // Buscar id_cidade
+
         try {
           const cityData = await api.get(`/cliente/listagem/todas_cidades?filtro=${localidade}`);
           if (cityData.data?.content?.[0]) {
             const cityId = cityData.data.content[0].value;
             setValue('id_cidade', cityId);
-            // Atualizar a lista de cidades para incluir a cidade encontrada
+            
             const cityOption = {
               label: cityData.data.content[0].label,
               value: cityId.toString()
@@ -182,8 +179,7 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
 
     try {
       const formData = new FormData();
-      
-      // Adicionar campos de texto
+
       formData.append('nome', data.nome);
       formData.append('email', data.email);
       formData.append('num_documento', data.num_documento);
@@ -195,7 +191,6 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
       formData.append('bairro', data.bairro);
       if (data.id_cidade) formData.append('id_cidade', data.id_cidade.toString());
 
-      // Adicionar arquivos se existirem
       if (cnhImage) {
         formData.append('cnh', {
           uri: cnhImage,
@@ -221,7 +216,6 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
       }
 
       const response = await api.post('/cliente/minha_conta/salvar', formData);
-      
 
       if (response.data && response.data.status === 'success') {
         const updatedUser = { ...userData, ...data };
@@ -259,7 +253,7 @@ const EditAutonomo = ({ userData, onUpdate }: EditAutonomoProps) => {
       
       if (response.data && response.data.status === 'success') {
         toast.show('Senha alterada com sucesso!', { type: 'success' });
-        // Limpar campos de senha
+        
         setValue('senhaAtual', '');
         setValue('senha', '');
         setValue('confirmacao', '');

@@ -23,7 +23,7 @@ const LocationFilter = ({
     setFilterParams({
       ...filterParams,
       id_cidade: selectedCity?.value || undefined,
-      cidade_nome: selectedCity?.label || undefined, // Salvar o nome da cidade também
+      cidade_nome: selectedCity?.label || undefined, 
     });
     handleConfirm();
   };

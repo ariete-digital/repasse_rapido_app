@@ -29,7 +29,7 @@ export default function ImgPicker({ onImageSelected, label = 'Arquivos' }: ImgPi
   }
 
   const extractFileName = (uri: string): string => {
-    // Extrai o nome do arquivo da URI
+    
     const parts = uri.split('/')
     const file = parts[parts.length - 1]
     
@@ -52,7 +52,6 @@ export default function ImgPicker({ onImageSelected, label = 'Arquivos' }: ImgPi
         copyToCacheDirectory: true,
       })
 
-      // Na versão 11 do expo-document-picker, o resultado tem um array assets
       if (result && !result.canceled && (result as any).assets && (result as any).assets.length > 0) {
         const asset = (result as any).assets[0]
         const fileUri = asset.uri

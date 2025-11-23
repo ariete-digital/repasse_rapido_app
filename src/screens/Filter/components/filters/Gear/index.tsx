@@ -25,10 +25,8 @@ const GearFilter = ({
   const [selectedGear, setSelectedGear] = useState<number[]>([]);
   const [options, setOptions] = useState<GenericItem[]>([]);
 
-  // Atualizar options quando os dados estiverem disponíveis
   useEffect(() => {
-    
-    // Tentar diferentes fontes de dados
+
     let tiposCambio = [];
     
     if (filterValues.tiposCambio && Array.isArray(filterValues.tiposCambio)) {
@@ -36,7 +34,7 @@ const GearFilter = ({
     } else if (searchResults?.listaTiposCambio && Array.isArray(searchResults.listaTiposCambio)) {
       tiposCambio = searchResults.listaTiposCambio;
     } else {
-      // Dados de fallback para teste
+      
       tiposCambio = [
         { id: 1, descricao: 'Manual' },
         { id: 2, descricao: 'Automático' },
@@ -44,15 +42,13 @@ const GearFilter = ({
         { id: 4, descricao: 'Semi-automático' }
       ];
     }
-    
-    
+
     if (Array.isArray(tiposCambio) && tiposCambio.length > 0) {
       setOptions(tiposCambio);
     } else {
     }
   }, [filterValues.tiposCambio, searchResults?.listaTiposCambio]);
 
-  // Carregar seleções existentes
   useEffect(() => {
     if (filterParams.tipos_cambio) {
       setSelectedGear(filterParams.tipos_cambio);
@@ -69,7 +65,6 @@ const GearFilter = ({
     });
   };
 
-
   const handleSubmit = () => {
     setFilterParams({ ...filterParams, tipos_cambio: selectedGear });
     handleConfirm();
@@ -85,7 +80,7 @@ const GearFilter = ({
       render={() => {
         return (
           <ScrollView style={{ maxHeight: 400 }}>
-            {/* Lista de opções */}
+            
             <Col style={{ marginVertical: 16 }}>
               {Array.isArray(options) && options.length > 0 ? (
                 options.map(({ id, descricao }) => (

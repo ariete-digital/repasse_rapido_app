@@ -20,22 +20,18 @@ const { width } = Dimensions.get('window');
 
 type DetailsProps = NativeStackScreenProps<RootStackParamList, 'adDetails'>;
 
-
 const Details = ({ route, navigation }: DetailsProps) => {
   const intents = useSafeAreaInsets();
   const { user } = useAuth();
   const { code } = route.params;
-  
-  // Estado para controlar o modal de visualização de imagem
+
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllImages, setShowAllImages] = useState(false);
-  
-  // Estado para controlar o modal de segurança
+
   const [securityModalVisible, setSecurityModalVisible] = useState(false);
   const [pendingAction, setPendingAction] = useState<'call' | 'whatsapp' | null>(null);
-  
-  // Buscar dados do anúncio
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['anuncio-details', code],
     queryFn: () => getAnuncioDetails(code),
@@ -46,14 +42,13 @@ const Details = ({ route, navigation }: DetailsProps) => {
   const isLoadingData = isLoading;
 
   const handleCall = () => {
-    // Verifica se o usuário está logado
+    
     if (!user || !user.id) {
       // @ts-ignore - navigation type
       navigation.navigate('auth', { screen: 'login' });
       return;
     }
-    
-    // Verifica se há dados do anunciante e telefone disponível
+
     if (!data?.anunciante?.telefone && !data?.anunciante?.celular) {
       alert('Telefone do anunciante não disponível');
       return;
@@ -64,14 +59,13 @@ const Details = ({ route, navigation }: DetailsProps) => {
   };
 
   const handleWhatsApp = () => {
-    // Verifica se o usuário está logado
+    
     if (!user || !user.id) {
       // @ts-ignore - navigation type
       navigation.navigate('auth', { screen: 'login' });
       return;
     }
-    
-    // Verifica se há dados do anunciante e celular/telefone disponível
+
     if (!data?.anunciante?.celular && !data?.anunciante?.telefone) {
       alert('Celular do anunciante não disponível');
       return;
@@ -88,14 +82,13 @@ const Details = ({ route, navigation }: DetailsProps) => {
   };
 
   const handleRequestMorePhotos = () => {
-    // Verifica se o usuário está logado
+    
     if (!user || !user.id) {
       // @ts-ignore - navigation type
       navigation.navigate('auth', { screen: 'login' });
       return;
     }
-    
-    // Abre o viewer com todas as imagens
+
     handleOpenImageViewer(0, true);
   };
 
@@ -104,20 +97,18 @@ const Details = ({ route, navigation }: DetailsProps) => {
       const anuncioInfo = data?.anuncio;
       if (!anuncioInfo) return;
 
-      // Criar deeplink para o anúncio
-      const deepLink = `com.repasserapido.client://anuncio/${code}`;
-      
-      // Criar mensagem para compartilhar com deeplink
+      const deepLink = `com.repasserapido.client:
+
       const shareMessage = `Confira este veículo: ${anuncioInfo.marca_veiculo} ${anuncioInfo.modelo_veiculo}\n\n${deepLink}`;
 
       const result = await Share.share({
         message: shareMessage,
-        url: deepLink, // Usar deeplink custom
-        title: `${anuncioInfo.marca_veiculo} ${anuncioInfo.modelo_veiculo}`, // Android
+        url: deepLink, 
+        title: `${anuncioInfo.marca_veiculo} ${anuncioInfo.modelo_veiculo}`, 
       });
 
       if (result.action === Share.sharedAction) {
-        // Opcional: mostrar feedback de sucesso
+        
       }
     } catch (error) {
       console.error('Erro ao compartilhar:', error);
@@ -138,20 +129,18 @@ const Details = ({ route, navigation }: DetailsProps) => {
     setSecurityModalVisible(false);
     
     if (pendingAction === 'call') {
-      // Executar a ligação após aceitar os termos
-      // Prioriza telefone fixo, depois celular
+
       const phoneNumber = data?.anunciante?.telefone?.replace(/\D/g, '') || 
                           data?.anunciante?.celular?.replace(/\D/g, '') || 
                           '5511999999999';
       Linking.openURL(`tel:+${phoneNumber}`);
     } else if (pendingAction === 'whatsapp') {
-      // Executar o WhatsApp após aceitar os termos
-      // Prioriza celular, depois telefone fixo
+
       const phoneNumber = data?.anunciante?.celular?.replace(/\D/g, '') || 
                           data?.anunciante?.telefone?.replace(/\D/g, '') || 
                           '5511999999999';
       const message = `Olá! Gostaria de saber mais sobre este veículo: ${data?.anuncio?.marca_veiculo} ${data?.anuncio?.modelo_veiculo} - ${data?.anuncio?.codigo}`;
-      const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `whatsapp:
       Linking.openURL(whatsappUrl);
     }
     
@@ -245,7 +234,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
           </D.LoadingContainer>
         )}
       </ScrollView>
-      {/* Botões flutuantes */}
+      
       <D.FloatingButtonsContainer>
         <D.FloatingButton 
           backgroundColor="#25513C" 
@@ -263,8 +252,7 @@ const Details = ({ route, navigation }: DetailsProps) => {
           <Text fontStyle="p-14-bold" color="white">WhatsApp</Text>
         </D.FloatingButton>
       </D.FloatingButtonsContainer>
-      
-      {/* Modal de visualização de imagem */}
+
       <ImageViewer
         visible={imageViewerVisible}
         onClose={handleCloseImageViewer}
@@ -276,7 +264,6 @@ const Details = ({ route, navigation }: DetailsProps) => {
         initialIndex={currentImageIndex}
       />
 
-      {/* Modal de segurança */}
       <SecurityModal
         visible={securityModalVisible}
         setModalVisible={handleSecurityModalClose}

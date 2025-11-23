@@ -19,7 +19,7 @@ interface Photo {
   uri: string;
   base64: string;
   index: number;
-  originalId?: number; // ID da imagem original (quando carregada de um anúncio existente)
+  originalId?: number; 
 }
 
 const Step4 = () => {
@@ -33,14 +33,14 @@ const Step4 = () => {
         uri: img.uri || img.url,
         base64: img.base64 || '',
         index: idx,
-        originalId: img.id, // Preservar ID da imagem original se existir
+        originalId: img.id, 
       }));
       setPhotos(loadedPhotos);
     }
   }, [advertiseData.id, advertiseData.imagens]);
 
   const pickImage = async (index: number) => {
-    // Solicitar permissão
+    
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
     if (status !== 'granted') {
@@ -51,13 +51,12 @@ const Step4 = () => {
       return;
     }
 
-    // Abrir seletor de imagens
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
-      base64: true, // Retorna base64
+      base64: true, 
     });
 
     if (!result.canceled && result.assets[0]) {
@@ -74,27 +73,23 @@ const Step4 = () => {
         index: index,
       };
 
-      // Verificar se já existe uma foto neste índice
       const existingPhotoIndex = photos.findIndex(p => p.index === index);
       
       let updatedPhotos: Photo[];
       
       if (existingPhotoIndex >= 0) {
-        // Substituir foto existente
+        
         updatedPhotos = [...photos];
         updatedPhotos[existingPhotoIndex] = newPhoto;
       } else {
-        // Adicionar nova foto
+        
         updatedPhotos = [...photos, newPhoto];
       }
       
       setPhotos(updatedPhotos);
-      
-      // Atualizar o contexto imediatamente
-      // Preservar ID original apenas se a imagem não foi substituída (não tem base64 novo)
+
       const imageData = updatedPhotos.map((photo, arrayIndex) => {
-        // Se a imagem tem base64 novo, é uma nova imagem (sem ID)
-        // Se não tem base64 mas tem originalId, preservar o ID original
+
         const hasNewBase64 = photo.base64 && photo.base64.length > 0;
         return {
           uri: photo.uri,
@@ -103,7 +98,7 @@ const Step4 = () => {
           type: 'image/jpeg',
           principal: arrayIndex === 0,
           index: photo.index,
-          id: hasNewBase64 ? undefined : photo.originalId // Só preservar ID se não for nova imagem
+          id: hasNewBase64 ? undefined : photo.originalId 
         };
       });
       
@@ -127,18 +122,16 @@ const Step4 = () => {
           text: 'Remover', 
           style: 'destructive',
           onPress: () => {
-            // Remover a foto do array
-            const updatedPhotos = photos.filter(photo => photo.index !== index);
             
-            // Reorganizar os índices para manter sequência
+            const updatedPhotos = photos.filter(photo => photo.index !== index);
+
             const reorganizedPhotos = updatedPhotos.map((photo, newIndex) => ({
               ...photo,
               index: newIndex
             }));
             
             setPhotos(reorganizedPhotos);
-            
-            // Atualizar o contexto imediatamente com as imagens reorganizadas
+
             const imageData = reorganizedPhotos.map((photo, arrayIndex) => {
               const hasNewBase64 = photo.base64 && photo.base64.length > 0;
               return {
@@ -148,11 +141,10 @@ const Step4 = () => {
                 type: 'image/jpeg',
                 principal: arrayIndex === 0,
                 index: photo.index,
-                id: hasNewBase64 ? undefined : photo.originalId // Preservar ID se não for nova imagem
+                id: hasNewBase64 ? undefined : photo.originalId 
               };
             });
-            
-            
+
             updateStep4Data({
               imagens: imageData,
             });
@@ -165,10 +157,9 @@ const Step4 = () => {
   const isEditing = !!advertiseData.id;
 
   const handleContinue = () => {
-    // Preparar dados das imagens para a API
-    const imageData = prepareImagesForAPI();
     
-    // Salvar dados no contexto
+    const imageData = prepareImagesForAPI();
+
     updateStep4Data({
       imagens: imageData,
     });
@@ -177,10 +168,9 @@ const Step4 = () => {
   };
 
   const prepareImagesForAPI = () => {
-    // Ordenar fotos por índice para garantir ordem correta
-    const sortedPhotos = [...photos].sort((a, b) => a.index - b.index);
     
-    // Retornar array com metadados, preservando IDs originais quando não há base64 novo
+    const sortedPhotos = [...photos].sort((a, b) => a.index - b.index);
+
     const imagesArray = sortedPhotos.map((photo, arrayIndex) => {
       const hasNewBase64 = photo.base64 && photo.base64.length > 0;
       return {
@@ -190,7 +180,7 @@ const Step4 = () => {
         type: 'image/jpeg',
         principal: arrayIndex === 0,
         index: photo.index,
-        id: hasNewBase64 ? undefined : photo.originalId // Preservar ID se não for nova imagem
+        id: hasNewBase64 ? undefined : photo.originalId 
       };
     });
 
@@ -217,7 +207,7 @@ const Step4 = () => {
               alignItems: 'center',
               overflow: 'hidden',
               flex: 1,
-              // Sombra para iOS
+              
               shadowColor: '#000',
               shadowOffset: {
                 width: 0,
@@ -225,7 +215,7 @@ const Step4 = () => {
               },
               shadowOpacity: 0.1,
               shadowRadius: 4,
-              // Sombra para Android
+              
               elevation: 3,
             }
           ]}
@@ -247,8 +237,7 @@ const Step4 = () => {
             </>
           )}
         </TouchableOpacity>
-        
-        {/* Ícone de lixeira - só aparece quando há uma imagem */}
+
         {photo && (
           <TouchableOpacity
             onPress={() => handleRemovePhoto(index)}
@@ -271,7 +260,6 @@ const Step4 = () => {
     );
   };
 
-
   const renderPhotoGrid = () => {    
     return (
       <View style={{ 
@@ -281,7 +269,7 @@ const Step4 = () => {
         justifyContent: 'space-between', 
         gap: 10,
       }}>
-        {/* Foto principal grande */}
+        
         {renderPhotoSlot(0, {
           width: '64%',
           minHeight: 180,
@@ -299,7 +287,7 @@ const Step4 = () => {
             minHeight: 180,
           }}
         >
-          {/* Duas fotos pequenas ao lado da grande */}
+          
           {renderPhotoSlot(1, {
             flex: 1,
             minWidth: '100%',
@@ -312,7 +300,6 @@ const Step4 = () => {
           })}
         </View>
 
-        {/* 12 fotos restantes */}
         <View style={{
           display: 'flex',
           flexDirection: 'row',

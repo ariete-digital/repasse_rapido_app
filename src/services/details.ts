@@ -152,13 +152,11 @@ export interface AvaliacaoResponse {
   message: string;
 }
 
-// Buscar detalhes do anúncio
 export const getAnuncioDetails = async (codigo: string): Promise<AnuncioDetailsResponse> => {
   const { data } = await api.get(`/cliente/anuncios/detalhe?codigo=${codigo}`);
   return data.content;
 };
 
-// Salvar avaliação do anúncio
 export const saveAvaliacao = async (avaliacao: AvaliacaoRequest): Promise<AvaliacaoResponse> => {
   const { data } = await api.post('/cliente/anuncios/salvar_avaliacao', avaliacao);
   return data.content;

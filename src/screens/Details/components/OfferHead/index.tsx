@@ -27,13 +27,7 @@ const OfferHead = ({ anuncio, anunciante }: OfferHeadProps) => {
   return (
     <O.Container>
       <Text color="black-700" fontStyle='t-24' style={{ fontWeight: 'bold' }}>{anuncio.marca_veiculo + ' ' + anuncio.modelo_veiculo}</Text>
-      {/* <Text 
-        color="black-700" 
-        fontStyle="p-18-regular"
-        spacingY={6}
-      >
-        {anuncio?.descricao || ""}
-      </Text> */}
+      
       <Text color="brand-red" style={{ fontWeight: 'bold' }} spacingX={4} spacingY={7} fontStyle='t-32'>{currencyFormat(anuncio.valor)}</Text>
       <View 
         style={{ display: 'flex', flexDirection: 'row', gap: 4 }}

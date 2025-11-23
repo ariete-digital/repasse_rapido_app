@@ -15,7 +15,7 @@ const CompleteDetails = (offer: Offer) => {
   const navigation = useNavigation<NavigationProps>();
 
   const goToSpecs = () => {
-    // navigation.navigate('specifications', offer);
+    
     navigation.dispatch(
       CommonActions.navigate({
         name: 'search',

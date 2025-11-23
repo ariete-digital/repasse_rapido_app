@@ -16,10 +16,6 @@ import { HelpIcon } from '@icons/HelpIcon';
 import { ExitIcon } from '@icons/ExitIcon';
 import PageScaffold from '@components/PageScaffold';
 
-/**
- * Tela de Menu - Exibe as opções principais do aplicativo
- * Inclui perfil do usuário, navegação para outras telas e logout
- */
 const Menu = () => {
   const navigation = useNavigation();
   const { user, signOut } = useAuth();
@@ -62,7 +58,7 @@ const Menu = () => {
       title: 'Ajuda',
       icon: <SvgXml xml={HelpIcon()} width={20} height={20} />,
       onPress: () => {
-        // Navegar para tela de ajuda
+        
       }
     },
     {
@@ -75,7 +71,6 @@ const Menu = () => {
     }
   ];
 
-  // Adiciona item "Visualizar anúncios de PF" apenas para usuários tipo A (autônomo) ou PJ (pessoa jurídica)
   if (user?.tipo === 'A' || user?.tipo === 'PJ') {
     const managePFItem = {
       id: 'managePF',
@@ -85,8 +80,7 @@ const Menu = () => {
         navigation.navigate('viewPFAds' as never);
       }
     };
-    
-    // Insere antes do item "Ajuda" (penúltimo item)
+
     menuItems.splice(menuItems.length - 2, 0, managePFItem);
   }
   

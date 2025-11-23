@@ -119,13 +119,11 @@ const PageScaffold: React.FC<PageScaffoldProps> = ({
 
         {children}
       </ScrollView>
-      
-      {/* Renderizar botão flutuante se fornecido */}
+
       {floatingButton}
     </S.Container>
   );
 };
 
 export default PageScaffold;
-
 

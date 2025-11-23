@@ -65,7 +65,6 @@ export const ButtonText = styled.Text`
   font-family: 'MontserratBold';
 `;
 
-// Progress Indicator Styles
 export const ProgressContainer = styled.View`
   flex-direction: row;
   justify-content: center;
@@ -89,7 +88,6 @@ export const ProgressStepText = styled.Text<{ active: boolean }>`
   color: ${props => props.active ? theme.colors.white : theme.colors.black};
 `;
 
-// Form Styles
 export const FormContainer = styled.ScrollView`
   flex: 1;
 `;
@@ -141,7 +139,6 @@ export const SelectArrow = styled.Text`
   color: ${theme.colors.black};
 `;
 
-// Options Selection Styles
 export const OptionsContainer = styled.View`
   margin-bottom: 20px;
 `;
@@ -209,7 +206,6 @@ export const ArrowIcon = styled.Text`
   color: ${theme.colors.black};
 `;
 
-// Photo Upload Styles
 export const PhotoGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
@@ -248,7 +244,6 @@ export const PhotoCounterText = styled.Text`
   color: ${theme.colors.black};
 `;
 
-// Description Styles
 export const DescriptionInput = styled.TextInput`
   background-color: ${theme.colors['gray-200']};
   border-radius: 8px;
@@ -310,7 +305,6 @@ export const TermsText = styled.Text`
   line-height: 20px;
 `;
 
-// Plan Selection Styles
 export const PlanContainer = styled.View`
   margin-bottom: 20px;
 `;
@@ -361,7 +355,6 @@ export const PlanSelectText = styled.Text`
   font-family: 'MontserratBold';
 `;
 
-// Success Screen Styles
 export const SuccessContainer = styled.View`
   flex: 1;
   justify-content: center;
@@ -402,7 +395,6 @@ export const SuccessMessage = styled.Text`
   line-height: 20px;
 `;
 
-// Modal Styles
 export const ModalOverlay = styled.View`
   flex: 1;
   background-color: rgba(0, 0, 0, 0.5);

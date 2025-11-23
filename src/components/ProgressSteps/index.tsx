@@ -66,4 +66,3 @@ const ProgressSteps: React.FC<ProgressStepsProps> = ({
 
 export default ProgressSteps;
 
-

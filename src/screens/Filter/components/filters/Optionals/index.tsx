@@ -51,17 +51,11 @@ const OptionalsFilter = ({
     const response: AxiosResponse<DataFetchProps> =
       await api.get<DataFetchProps>(`cliente/listagem/opcionais`);
 
-
     if (response.data.content) {
       setOptions(response.data.content);
     }
   };
 
-  // useEffect(() => {
-  //   getOptionalsData();
-  // }, []);
-
-  // Carregar seleções existentes
   useEffect(() => {
     if (filterParams.opcionais) {
       setSelectedOptionals(filterParams.opcionais);
@@ -87,7 +81,7 @@ const OptionalsFilter = ({
         return (
           <SafeAreaView style={{ height: 500, paddingVertical: 24 }}>
             <ScrollView>
-              {/* Mostrar seleções atuais */}
+              
               {selectedOptionals.length > 0 && (
                 <View style={{ padding: 10, marginBottom: 20 }}>
                   <Text color="black-700" fontStyle="p-16-bold" style={{ marginBottom: 10 }}>
@@ -127,7 +121,6 @@ const OptionalsFilter = ({
                 </View>
               )}
 
-              {/* Lista de opcionais disponíveis */}
               <View style={{ padding: 10 }}>
                 <Text color="black-700" fontStyle="p-16-bold" style={{ marginBottom: 10 }}>
                   Opcionais Disponíveis:

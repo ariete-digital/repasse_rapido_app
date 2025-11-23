@@ -62,8 +62,7 @@ const AdCard: React.FC<AdCardProps> = ({
             </Text>
           </View>
         )}
-        
-        {/* Carimbo de VENDIDO */}
+
         {isVendido && (
           <View style={{
             position: 'absolute',
@@ -98,8 +97,7 @@ const AdCard: React.FC<AdCardProps> = ({
             </View>
           </View>
         )}
-        
-        {/* Ícone de visualizar imagens */}
+
         {images && images.length > 0 && (
           <TouchableOpacity style={S.viewIcon} onPress={onViewImages}>
             <FullscreenIcon size={16} color="#666" />

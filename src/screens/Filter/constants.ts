@@ -20,16 +20,7 @@ interface Item {
 }
 
 export const items: Item[] = [
-  // {
-  //   icon: Car,
-  //   label: 'Carro ou Moto',
-  //   filterName: 'vehicleType',
-  // },
-  // {
-  //   icon: Car,
-  //   label: 'Tipo de Venda',
-  //   filterName: 'sellType',
-  // },
+
   {
     icon: Location,
     label: 'Localização',
@@ -50,11 +41,7 @@ export const items: Item[] = [
     label: 'Versão',
     filterName: 'version',
   },
-  // {
-  //   icon: CarTime,
-  //   label: 'Novo ou Usado',
-  //   filterName: 'vehicleCurrentState',
-  // },
+
   {
     icon: Calendar,
     label: 'Ano',
@@ -65,34 +52,11 @@ export const items: Item[] = [
     label: 'Valor',
     filterName: 'price',
   },
-  // {
-  //   icon: Speedometer,
-  //   label: 'Quilometragem',
-  //   filterName: 'km',
-  // },
+
   {
     icon: Transmission,
     label: 'Câmbio',
     filterName: 'transmissionType',
   },
-  // {
-  //   icon: Gas,
-  //   label: 'Combustível',
-  //   filterName: 'fuelType',
-  // },
-  // {
-  //   icon: Door,
-  //   label: 'Portas',
-  //   filterName: 'doorsQt',
-  // },
-  // {
-  //   icon: Oil,
-  //   label: 'Cor',
-  //   filterName: 'colors',
-  // },
-  // {
-  //   icon: Options,
-  //   label: 'Opcionais',
-  //   filterName: 'optionals',
-  // },
+
 ];

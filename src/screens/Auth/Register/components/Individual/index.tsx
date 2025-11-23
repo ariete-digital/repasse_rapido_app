@@ -46,8 +46,7 @@ const Individual = () => {
 
   const handleRegister = async (data: IndividualFormProps) => {
     const { nome, email, senha } = data;
-    
-    // Criar FormData para multipart/form-data
+
     const formData = new FormData();
     
     formData.append('nome', nome);

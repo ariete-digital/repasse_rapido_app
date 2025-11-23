@@ -40,7 +40,6 @@ export const getCity = async (keyword: string) => {
   return content;
 };
 
-// Novas rotas para filtros - verificando se existem na API
 export const getTiposCambio = async () => {
   try {
     const {
@@ -70,35 +69,17 @@ export const getOpcionais = async () => {
   return content;
 };
 
-// Removidas rotas que não existem na API
-// export const getTiposVendedor = async () => {
-//   const {
-//     data: { content },
-//   } = await api.get('/cliente/listagem/tipos_vendedor');
-//   return content;
-// };
-
-// export const getTiposVenda = async () => {
-//   const {
-//     data: { content },
-//   } = await api.get('/cliente/listagem/tipos_venda');
-//   return content;
-// };
-
 export const getFilteredData = async (
   properties: FilterOptions
 ): Promise<FilteredApiResponse> => {
-  
-  
+
   const {
     data: { content },
   } = await api.post('/cliente/anuncios/filtrar', properties);
-  
-  
+
   return content as FilteredApiResponse;
 };
 
-// Nova função para buscar dados de filtros com contagem
 export const getFilterDataWithCount = async (
   properties: FilterOptions
 ): Promise<{
@@ -113,11 +94,9 @@ export const getFilterDataWithCount = async (
     opcionais: { id: number; descricao: string; count: number }[];
   };
 }> => {
-  
-  // Buscar dados filtrados
+
   const filteredData = await getFilteredData(properties);
-  
-  // Buscar contagens para cada filtro
+
   const [marcas, modelos, cores, tiposCambio, tiposCombustivel, opcionais] = await Promise.all([
     getBrands(''),
     getModels(''),
