@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ScrollView, View, Alert, ActivityIndicator } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { EyeIcon } from '@icons/EyeIcon';
@@ -12,7 +12,7 @@ import { getPFAds, publishAd, PFAd } from '@services/pfAds';
 import * as S from './styles';
 
 const ViewPFAds = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
@@ -23,6 +23,8 @@ const ViewPFAds = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  const [publishingId, setPublishingId] = useState<number | null>(null);
+
   const publishMutation = useMutation({
     mutationFn: publishAd,
     onSuccess: (data) => {
@@ -31,6 +33,9 @@ const ViewPFAds = () => {
     },
     onError: (error) => {
       Alert.alert('Erro', 'Erro ao publicar anúncio. Tente novamente.');
+    },
+    onSettled: () => {
+      setPublishingId(null);
     },
   });
 
@@ -73,17 +78,9 @@ const ViewPFAds = () => {
     } as never);
   };
 
-  const handleEditAndPublish = (adId: string) => {
-    navigation.navigate('AppTabs' as never, {
-      screen: 'sell',
-      params: {
-        screen: 'advertiseStep1',
-        params: { 
-          editCodigo: adId,
-          shouldPublish: true 
-        }
-      }
-    } as never);
+  const handlePublish = (adId: number) => {
+    setPublishingId(adId);
+    publishMutation.mutate(adId);
   };
 
   const handleAdNumberSearch = (value: string) => {
@@ -132,7 +129,7 @@ const ViewPFAds = () => {
         titleIcon={<SvgXml xml={EyeIcon()} width={20} height={20} />}
       >
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text fontStyle="p-16-bold" color="red-500">
+          <Text fontStyle="p-16-bold" color="brand-red">
             Erro ao carregar anúncios
           </Text>
           <Text fontStyle="p-14-regular" color="black-200" style={{ marginTop: 8, textAlign: 'center' }}>
@@ -169,7 +166,8 @@ const ViewPFAds = () => {
                 isVendido={!ad.ativo || ad.pausado}
                 onDelete={() => handleDelete(ad.codigo)}
                 onEdit={() => handleEdit(ad.codigo)}
-                onEditAndPublish={() => handleEditAndPublish(ad.codigo)}
+                onPublish={() => handlePublish(ad.id)}
+                isPublishing={publishingId === ad.id && publishMutation.isPending}
               />
             ))
           ) : (

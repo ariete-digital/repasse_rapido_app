@@ -5,7 +5,7 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigatorScreenParams, CommonActions, useNavigation } from '@react-navigation/native';
 import React, { useEffect } from 'react';
-import { Image, Platform } from 'react-native';
+import { Image, Platform, Linking } from 'react-native';
 import { useAuth } from '@hooks/useAuth';
 
 import {
@@ -151,6 +151,13 @@ const Tabs = () => {
       );
       return false;
     }
+    
+    // Verificar se a rota 'sell' só pode ser acessada por PF e PJ (não Autônomo)
+    if (routeName === 'sell' && user.tipo === 'A') {
+      // Prevenir navegação para Autônomo
+      return false;
+    }
+    
     return true;
   };
 
@@ -198,23 +205,26 @@ const Tabs = () => {
         ),
       }}
     />
-    <Tab.Screen
-      name="sell"
-      component={AdvertiseRoutes}
-      options={{
-        title: 'Vender',
-        tabBarIcon: ({ color }) => (
-          <SellTabIcon color={color} />
-        ),
-      }}
-      listeners={({ navigation }) => ({
-        tabPress: (e) => {
-          if (!checkAuthAndNavigate(navigation, 'sell')) {
-            e.preventDefault();
-          }
-        },
-      })}
-    />
+    {/* Só mostrar tab "Vender" para PF e PJ (não para Autônomo) */}
+    {user?.tipo !== 'A' && (
+      <Tab.Screen
+        name="sell"
+        component={AdvertiseRoutes}
+        options={{
+          title: 'Vender',
+          tabBarIcon: ({ color }) => (
+            <SellTabIcon color={color} />
+          ),
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            if (!checkAuthAndNavigate(navigation, 'sell')) {
+              e.preventDefault();
+            }
+          },
+        })}
+      />
+    )}
     <Tab.Screen
       name="contact"
       component={ContactScreen}
@@ -224,6 +234,28 @@ const Tabs = () => {
           <ContactTabIcon color={color} />
         ),
       }}
+      listeners={({ navigation }) => ({
+        tabPress: (e) => {
+          // Prevenir navegação para a tab de contato
+          e.preventDefault();
+          
+          // Abrir WhatsApp sem sair da página atual
+          const phoneNumber = '5517982109999'; // 55 17 98210-9999 sem espaços e caracteres especiais
+          const whatsappUrl = `whatsapp://send?phone=${phoneNumber}`;
+          
+          Linking.canOpenURL(whatsappUrl).then((supported) => {
+            if (supported) {
+              Linking.openURL(whatsappUrl);
+            } else {
+              // Se não tiver WhatsApp instalado, tenta abrir no navegador
+              Linking.openURL(`https://wa.me/${phoneNumber}`);
+            }
+          }).catch(() => {
+            // Fallback para web
+            Linking.openURL(`https://wa.me/${phoneNumber}`);
+          });
+        },
+      })}
     />  
     <Tab.Screen
       name="menu"

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TextInput as RNTextInput, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, ScrollView, TextInput as RNTextInput, Alert, Dimensions } from 'react-native';
 import { Text, TextInput, ProgressSteps, Select } from '@components/index';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -63,6 +63,10 @@ const Step1 = () => {
   const editCodigo = (route.params as any)?.editCodigo;
   const shouldPublish = (route.params as any)?.shouldPublish;
   const [isLoadingEditData, setIsLoadingEditData] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const placaInputRef = useRef<View>(null);
+  const placaContainerRef = useRef<View>(null);
+  const [placaYPosition, setPlacaYPosition] = useState(0);
 
   const {
     control,
@@ -193,8 +197,26 @@ const Step1 = () => {
   }, []);
 
   useEffect(() => {
+    // Limpar campos quando a placa for limpa (usar ref para evitar execuções durante digitação)
+    const placaLength = placa?.length || 0;
     
-    if (!placa || placa.length < 7) {
+    if (placaLength === 0) {
+      // Só limpar se os campos ainda tiverem valores
+      const currentMarca = watch('marca');
+      if (currentMarca) {
+        setValue('marca', '');
+        setValue('modelo', '');
+        setValue('ano_fabricacao', '');
+        setValue('ano_modelo', '');
+        updateStep1Data({
+          submodelo: undefined,
+          valor_fipe: undefined,
+        });
+      }
+      return;
+    }
+    
+    if (placaLength < 7) {
       return;
     }
 
@@ -240,7 +262,7 @@ const Step1 = () => {
     }, 1000); 
 
     return () => clearTimeout(timeoutId);
-  }, [placa, setValue]);
+  }, [placa, setValue, updateStep1Data]);
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
@@ -270,6 +292,61 @@ const Step1 = () => {
     });
     
     navigation.navigate('advertiseStep2');
+  };
+
+  const handlePlacaFocus = () => {
+    const scrollView = scrollViewRef.current;
+    if (!scrollView) {
+      return;
+    }
+    
+    const screenHeight = Dimensions.get('window').height;
+    const targetY = screenHeight * 0.4; // Um pouco acima do meio (40% da altura)
+    
+    const performScroll = () => {
+      if (!scrollView) return;
+      
+      // Tentar medir a posição do container
+      if (placaContainerRef.current) {
+        placaContainerRef.current.measureLayout(
+          scrollView as any,
+          (x, y) => {
+            // Calcular scroll para posicionar o input no targetY, depois adicionar 100px para rolar mais para baixo (faz o input subir)
+            const scrollY = Math.max(0, y - targetY + 300);
+            scrollView.scrollTo({ y: scrollY, animated: true });
+          },
+          () => {
+            // Fallback: usar posição Y do onLayout ou posição fixa
+            if (placaYPosition > 0) {
+              const scrollY = Math.max(0, placaYPosition - targetY + 100);
+              scrollView.scrollTo({ y: scrollY, animated: true });
+            } else {
+              // Posição fixa que funciona na maioria dos casos (100px a mais para rolar mais)
+              scrollView.scrollTo({ y: 300, animated: true });
+            }
+          }
+        );
+      } else {
+        // Fallback direto: usar posição Y ou fixa
+        if (placaYPosition > 0) {
+          const scrollY = Math.max(0, placaYPosition - targetY + 100);
+          scrollView.scrollTo({ y: scrollY, animated: true });
+        } else {
+          scrollView.scrollTo({ y: 300, animated: true });
+        }
+      }
+    };
+    
+    // Executar imediatamente e com delays para garantir
+    performScroll();
+    setTimeout(performScroll, 100);
+    setTimeout(performScroll, 300);
+    setTimeout(performScroll, 500);
+  };
+
+  const handlePlacaLayout = (event: any) => {
+    const { y } = event.nativeEvent.layout;
+    setPlacaYPosition(y);
   };
 
   const isEditing = !!advertiseData.id;
@@ -312,6 +389,7 @@ const Step1 = () => {
           />
         </View>
       }
+      scrollViewRef={scrollViewRef}
     >
       <View style={{ flex: 1, backgroundColor: 'white' }}>
         <View style={{ paddingHorizontal: 30, paddingTop: 30 }}>
@@ -319,71 +397,79 @@ const Step1 = () => {
         </View>
 
         <View style={{ paddingHorizontal: 30, paddingTop: 30 }}>
-          <Text fontStyle="p-16-bold" color="gray-500" style={{marginBottom: 30}}>
-            Dados do Veículo
-          </Text>
-          
-          <View style={{ 
-            height: 80,
-            justifyContent: 'center', 
-            alignItems: 'center',
-            marginBottom: 20,
-          }}>
-            <Controller
-              control={control}
-              name="placa"
-              render={({ field: { onChange, value } }) => (
-                <View style={{ width: 250 }}>
-                  <Text 
-                    color="black"
-                    style={{ 
-                      fontFamily: 'MontserratRegular',
-                      marginTop: 8,
-                      marginBottom: 10,
-                      textAlign: 'center'
-                    }}
-                  >
-                    Placa
-                  </Text>
-                  <View style={{
-                    backgroundColor: '#F3F2ED',
-                    borderRadius: 8,
-                    height: 40,
-                    justifyContent: 'center',
-                    borderWidth: errors.placa ? 1 : 0,
-                    borderColor: errors.placa ? 'red' : 'transparent'
-                  }}>
-                    <RNTextInput
-                      value={value}
-                      onChangeText={(text) => onChange(maskPlaca(text))}
-                      placeholder="ABC-1234"
-                      maxLength={8}
-                      style={{
-                        textAlign: 'center',
-                        fontFamily: 'MontserratRegular',
-                        fontSize: 16,
-                        paddingHorizontal: 10,
-                        color: '#000'
-                      }}
-                      placeholderTextColor="#999"
-                    />
-                  </View>
-                  {errors.placa && (
+            <Text fontStyle="p-16-bold" color="gray-500" style={{marginBottom: 30}}>
+              Dados do Veículo
+            </Text>
+            
+            <View 
+              ref={placaContainerRef}
+              onLayout={handlePlacaLayout}
+              style={{ 
+                height: 80,
+                justifyContent: 'center', 
+                alignItems: 'center',
+                marginBottom: 20,
+              }}
+            >
+              <Controller
+                control={control}
+                name="placa"
+                render={({ field: { onChange, value } }) => (
+                  <View style={{ width: 250 }} ref={placaInputRef}>
                     <Text 
-                      color="red"
-                      style={{
-                        fontSize: 10,
-                        marginTop: 2,
+                      color="black"
+                      style={{ 
+                        fontFamily: 'MontserratRegular',
+                        marginTop: 8,
+                        marginBottom: 10,
                         textAlign: 'center'
                       }}
                     >
-                      {errors.placa.message}
+                      Placa
                     </Text>
-                  )}
-                </View>
-              )}
-            />
-          </View>
+                    <View style={{
+                      backgroundColor: '#F3F2ED',
+                      borderRadius: 8,
+                      height: 40,
+                      justifyContent: 'center',
+                      borderWidth: errors.placa ? 1 : 0,
+                      borderColor: errors.placa ? 'red' : 'transparent'
+                    }}>
+                      <RNTextInput
+                        value={value}
+                        onChangeText={(text) => onChange(maskPlaca(text))}
+                        onFocus={handlePlacaFocus}
+                        placeholder="ABC-1234"
+                        maxLength={8}
+                        editable={true}
+                        keyboardType="default"
+                        autoCapitalize="characters"
+                        style={{
+                          textAlign: 'center',
+                          fontFamily: 'MontserratRegular',
+                          fontSize: 16,
+                          paddingHorizontal: 10,
+                          color: '#000'
+                        }}
+                        placeholderTextColor="#999"
+                      />
+                    </View>
+                    {errors.placa && (
+                      <Text 
+                        color="red"
+                        style={{
+                          fontSize: 10,
+                          marginTop: 2,
+                          textAlign: 'center'
+                        }}
+                      >
+                        {errors.placa.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
 
           <Controller
             control={control}
@@ -394,6 +480,7 @@ const Step1 = () => {
                 value={value}
                 onChangeText={onChange}
                 errorMessage={errors.marca?.message}
+                editable={false}
               />
             )}
           />
@@ -407,6 +494,7 @@ const Step1 = () => {
                 value={value}
                 onChangeText={onChange}
                 errorMessage={errors.modelo?.message}
+                editable={false}
               />
             )}
           />
@@ -425,6 +513,7 @@ const Step1 = () => {
                   error={errors.ano_fabricacao?.message}
                   labelFontStyle="p-14-regular"
                   placeholderFontStyle="p-14-regular"
+                  disabled={true}
                 />
               </View>
             )}
@@ -444,10 +533,19 @@ const Step1 = () => {
                   error={errors.ano_modelo?.message}
                   labelFontStyle="p-14-regular"
                   placeholderFontStyle="p-14-regular"
+                  disabled={true}
                 />
               </View>
             )}
           />
+
+          {advertiseData.valor_fipe && (
+            <TextInput
+              label="Valor FIPE"
+              value={advertiseData.valor_fipe ? `R$ ${parseFloat(advertiseData.valor_fipe).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''}
+              editable={false}
+            />
+          )}
 
           <Controller
             control={control}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { TouchableOpacity, ScrollView, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeftIcon } from '@components/CustomIcons';
@@ -16,6 +16,7 @@ type PageScaffoldProps = {
   children: React.ReactNode;
   onBackPress?: () => void;
   floatingButton?: React.ReactNode;
+  scrollViewRef?: React.RefObject<ScrollView>;
 };
 
 const PageScaffold: React.FC<PageScaffoldProps> = ({
@@ -27,6 +28,7 @@ const PageScaffold: React.FC<PageScaffoldProps> = ({
   children,
   onBackPress,
   floatingButton,
+  scrollViewRef,
 }) => {
   const navigation = useNavigation();
   const { user } = useAuth();
@@ -98,6 +100,7 @@ const PageScaffold: React.FC<PageScaffoldProps> = ({
       </S.UserSection>
 
       <ScrollView 
+        ref={scrollViewRef}
         style={{ flex: 1 }}
         contentContainerStyle={floatingButton ? { paddingBottom: 100 } : undefined}
       >

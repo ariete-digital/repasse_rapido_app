@@ -242,7 +242,7 @@ const Step6 = () => {
 
       if (response.data.status === 'success') {
         
-        const adNumber = response.data.content?.id || response.data.content?.id_anuncio_rascunho || advertiseData.id || 'N/A';
+        const adNumber = response.data.content?.codigo || response.data.content?.id || response.data.content?.id_anuncio_rascunho || advertiseData.id || null;
         
         const isEditing = !!advertiseData.id;
 
@@ -268,7 +268,7 @@ const Step6 = () => {
         }
 
         navigation.navigate('advertiseSuccess', { 
-          adNumber: adNumber.toString(),
+          adNumber: adNumber ? adNumber.toString() : '',
           isEditing: isEditing
         });
       } else {

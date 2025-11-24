@@ -30,7 +30,11 @@ const Success = () => {
       
       <View>
         <Text color="brand-red-dark" fontStyle="t-24" align='center'>
-          Anúncio nº {adNumber} {isEditing ? 'atualizado' : 'cadastrado'} com sucesso!
+          {adNumber ? (
+            <>Anúncio nº {adNumber} {isEditing ? 'atualizado' : 'cadastrado'} com sucesso!</>
+          ) : (
+            <>Anúncio {isEditing ? 'atualizado' : 'cadastrado'} com sucesso!</>
+          )}
         </Text>
       </View>
       

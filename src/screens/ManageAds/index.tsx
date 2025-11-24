@@ -48,6 +48,7 @@ const ManageAds = () => {
   const navigation = useNavigation<ManageAdsNavigationProp>();
   const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [tipoCliente, setTipoCliente] = useState<string | null>(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [currentImages, setCurrentImages] = useState<string[]>([]);
 
@@ -62,6 +63,7 @@ const ManageAds = () => {
 
       if (response.data.status === 'success' && response.data.content.anuncios) {
         setAnuncios(response.data.content.anuncios);
+        setTipoCliente(response.data.content.tipo_cliente || null);
       }
     } catch (error) {
       Alert.alert(
@@ -200,12 +202,13 @@ const ManageAds = () => {
                     imageUrl={ad.imagemPrincipal}
                     images={images}
                     createdAt={ad.created_at}
-                    adNumber={ad.id.toString()}
+                    adNumber={ad.codigo}
                     isVendido={!!ad.vendido_em}
                     onViewImages={() => handleViewImages(ad.id.toString())}
                     onEdit={() => handleEdit(ad.id.toString())}
                     onResume={() => handleResume(ad.id.toString())}
                     onMarkSold={() => handleMarkSold(ad.id.toString())}
+                    showMarkSold={tipoCliente === 'PJ'}
                   />
                 );
               })

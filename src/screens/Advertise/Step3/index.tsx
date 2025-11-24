@@ -271,7 +271,7 @@ const Step3 = () => {
               name="unico_dono"
               render={({ field: { onChange, value } }) => (
                 <Select
-                  label="Dono"
+                  label="Único dono"
                   placeholder="Selecione uma opção"
                   options={yesNoOptions}
                   selectedValue={value}

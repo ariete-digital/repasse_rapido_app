@@ -37,22 +37,24 @@ const Menu = () => {
         navigation.navigate('search' as never);
       }
     },
-    {
+    // Só mostrar "Anunciar meu veículo" para PF e PJ (não para Autônomo)
+    ...(user?.tipo !== 'A' ? [{
       id: 'advertise',
       title: 'Anunciar meu veículo',
       icon: <SvgXml xml={CarIcon()} width={20} height={20} />,
       onPress: () => {
         navigation.navigate('sell' as never);
       }
-    },
-    {
+    }] : []),
+    // Só mostrar "Gerenciar meus anúncios" para PF e PJ
+    ...(user?.tipo !== 'A' ? [{
       id: 'manage',
       title: 'Gerenciar meus anúncios',
       icon: <SvgXml xml={GearIcon()} width={20} height={20} />,
       onPress: () => {
         navigation.navigate('manageAds' as never);
       }
-    },
+    }] : []),
     {
       id: 'help',
       title: 'Ajuda',
@@ -71,7 +73,8 @@ const Menu = () => {
     }
   ];
 
-  if (user?.tipo === 'A' || user?.tipo === 'PJ') {
+  // Só mostrar "Visualizar anúncios de PF" para PJ
+  if (user?.tipo === 'PJ') {
     const managePFItem = {
       id: 'managePF',
       title: 'Visualizar anúncios de PF',

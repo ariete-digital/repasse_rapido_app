@@ -17,7 +17,12 @@ const Home = () => {
   const renderAds = () => {
     if (isLoading) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
+        <View style={{ 
+          minHeight: 400,
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          width: '100%' 
+        }}>
           <ActivityIndicator size="large" color="#E11138" />
         </View>
       );

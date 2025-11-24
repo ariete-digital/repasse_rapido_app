@@ -16,7 +16,8 @@ export interface AdCardPFProps {
   isVendido?: boolean;
   onDelete?: () => void;
   onEdit?: () => void;
-  onEditAndPublish?: () => void;
+  onPublish?: () => void;
+  isPublishing?: boolean;
 }
 
 const AdCardPF: React.FC<AdCardPFProps> = ({
@@ -30,7 +31,8 @@ const AdCardPF: React.FC<AdCardPFProps> = ({
   isVendido = false,
   onDelete,
   onEdit,
-  onEditAndPublish,
+  onPublish,
+  isPublishing = false,
 }) => {
   return (
     <S.Container>
@@ -124,13 +126,17 @@ const AdCardPF: React.FC<AdCardPFProps> = ({
 
         <S.ButtonContainer>
           <BasicButton
-            label={isVendido ? "Anúncio Vendido" : "Editar e Publicar Anúncio"}
-            onPress={() => onEditAndPublish?.()}
+            label={
+              isVendido 
+                ? "Anúncio Vendido" 
+                : (isPublishing ? "Publicando..." : "Publicar Anúncio")
+            }
+            onPress={() => onPublish?.()}
             backgroundColor="#CE7720"
             color="white"
             width="100%"
             customStyles={{ paddingHorizontal: 16 }}
-            disabled={isVendido}
+            disabled={isVendido || isPublishing}
           />
         </S.ButtonContainer>
       </S.ContentContainer>

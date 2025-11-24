@@ -93,19 +93,6 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     try {
       setIsLoadingUserStorageData(true)
 
-      const { token } = await storageAuthTokenGet()
-      if (token) {
-        try {
-          await api.post('/logout', {}, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
-        } catch (error) {
-          
-        }
-      }
-
       setUser({} as UserDTO)
       await storageUserRemove()
       await storageAuthTokenRemove()

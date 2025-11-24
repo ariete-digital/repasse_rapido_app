@@ -19,6 +19,7 @@ export interface AdCardProps {
   onEdit?: () => void;
   onResume?: () => void;
   onMarkSold?: () => void;
+  showMarkSold?: boolean;
 }
 
 const AdCard: React.FC<AdCardProps> = ({
@@ -35,6 +36,7 @@ const AdCard: React.FC<AdCardProps> = ({
   onEdit,
   onResume,
   onMarkSold,
+  showMarkSold = true,
 }) => {
   return (
     <S.Container>
@@ -126,21 +128,23 @@ const AdCard: React.FC<AdCardProps> = ({
         <S.ButtonsContainer>
           <BasicButton
             label="Retomar Anúncio"
-            width='50%'
+            width={showMarkSold ? '50%' : '100%'}
             onPress={() => onResume?.()}
             backgroundColor="#CE7720"
             color="white"
             customStyles={{ paddingHorizontal: 0 }}
           />
-          <BasicButton
-            label={isVendido ? "Já Vendido" : "Veículo Vendido"}
-            width='50%'
-            onPress={() => onMarkSold?.()}
-            backgroundColor="#CE2020"
-            color="white"
-            customStyles={{ paddingHorizontal: 0 }}
-            disabled={isVendido}
-          />
+          {showMarkSold && (
+            <BasicButton
+              label={isVendido ? "Já Vendido" : "Veículo Vendido"}
+              width='50%'
+              onPress={() => onMarkSold?.()}
+              backgroundColor="#CE2020"
+              color="white"
+              customStyles={{ paddingHorizontal: 0 }}
+              disabled={isVendido}
+            />
+          )}
         </S.ButtonsContainer>
       </S.ContentContainer>
     </S.Container>

@@ -60,6 +60,7 @@ export default function Filters() {
   const [modelo, setModelo] = useState<string>();
   const [anoMin, setAnoMin] = useState<string>();
   const [anoMax, setAnoMax] = useState<string>();
+  const [loadingCidades, setLoadingCidades] = useState(false);
 
   const handleSelectCidade = (option: { label: string; value: string }) => {
     setCidade(option.value);
@@ -74,7 +75,9 @@ export default function Filters() {
   const handleSelectMarca = (option: { label: string; value: string }) => {
     setMarca(option.value);
     
+    // Limpar modelo e lista de modelos
     setModelo(undefined);
+    setListaModelos([]);
     getModelData(option.value);
   };
 
@@ -120,16 +123,24 @@ export default function Filters() {
 
   const getCityData = async (query: string) => {
     try {
+      // Se o usuário apagou tudo, limpar a seleção de cidade
+      if (query.length === 0) {
+        setCidade(undefined);
+        setListaCidades([]);
+        return;
+      }
+
       if (query.length < 3) {
         setListaCidades([]);
         return;
       }
       
+      setLoadingCidades(true);
+      
       const response: AxiosResponse<DataFetchProps> =
         await api.get<DataFetchProps>(`cliente/listagem/cidades?filtro=${query}`);
 
       if (response.data.content && Array.isArray(response.data.content)) {
-        
         const cidadesFormatadas = response.data.content.map(cidade => ({
           label: cidade.label,
           value: cidade.value.toString()
@@ -140,6 +151,35 @@ export default function Filters() {
       }
     } catch (error) {
       setListaCidades([]);
+    } finally {
+      setLoadingCidades(false);
+    }
+  };
+
+  const loadIncrementalCities = async (filter: string) => {
+    try {
+      setLoadingCidades(true);
+      
+      const response: AxiosResponse<DataFetchProps> =
+        await api.get<DataFetchProps>(`cliente/listagem/cidades?filtro=${filter}`);
+
+      if (response.data.content && Array.isArray(response.data.content)) {
+        const cidadesFormatadas = response.data.content.map(cidade => ({
+          label: cidade.label,
+          value: cidade.value.toString()
+        }));
+        
+        // Acumular resultados, evitando duplicatas
+        setListaCidades(prev => {
+          const existingValues = new Set(prev.map(c => c.value));
+          const newCidades = cidadesFormatadas.filter(c => !existingValues.has(c.value));
+          return [...prev, ...newCidades].sort((a, b) => a.label.localeCompare(b.label));
+        });
+      }
+    } catch (error) {
+      // Não limpar a lista em caso de erro no carregamento incremental
+    } finally {
+      setLoadingCidades(false);
     }
   };
 
@@ -230,7 +270,11 @@ export default function Filters() {
           options={listaCidades}
           onSelect={handleSelectCidade}
           selectedValue={cidade}
-          {...({ onInputChange: getCityData } as any)}
+          onInputChange={getCityData}
+          onIncrementalLoad={loadIncrementalCities}
+          isLoading={loadingCidades}
+          enableIncrementalLoading={true}
+          showChevron={false}
         />
 
         <RowContainer>
@@ -245,20 +289,41 @@ export default function Filters() {
             options={listaModelos}
             onSelect={(selected) => setModelo(selected.value)}
             selectedValue={modelo}
+            disabled={!marca}
           />
         </RowContainer>
 
         <AnoContainer>
           <SearchableSelect
             placeholder="ANO INICIAL"
-            options={yearOptions}
-            onSelect={(selected) => setAnoMin(selected.value)}
+            options={
+              anoMax
+                ? yearOptions.filter((year) => parseInt(year.value) <= parseInt(anoMax))
+                : yearOptions
+            }
+            onSelect={(selected) => {
+              setAnoMin(selected.value);
+              // Se ano final existe e é menor que o inicial, limpar ano final
+              if (anoMax && parseInt(anoMax) < parseInt(selected.value)) {
+                setAnoMax(undefined);
+              }
+            }}
             selectedValue={anoMin}
           />
           <SearchableSelect
             placeholder="ANO FINAL"
-            options={yearOptions}
-            onSelect={(selected) => setAnoMax(selected.value)}
+            options={
+              anoMin
+                ? yearOptions.filter((year) => parseInt(year.value) >= parseInt(anoMin))
+                : yearOptions
+            }
+            onSelect={(selected) => {
+              setAnoMax(selected.value);
+              // Se ano inicial existe e é maior que o final, limpar ano inicial
+              if (anoMin && parseInt(anoMin) > parseInt(selected.value)) {
+                setAnoMin(undefined);
+              }
+            }}
             selectedValue={anoMax}
           />
         </AnoContainer>

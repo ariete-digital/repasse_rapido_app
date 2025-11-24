@@ -51,7 +51,7 @@ export const TitleContainer = styled.View`
 `;
 export const OffersContainer = styled.View`
   width: 100%;
-  align-items: center;
+  align-items: flex-start;
   padding: 0 10px;
 `;
 
