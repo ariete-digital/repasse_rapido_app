@@ -2,7 +2,7 @@
   expo: {
     name: 'Repasse Rápido',
     slug: 'repasse-rapido',
-    owner: "repasse-rapido",
+    owner: "andrehf8",
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -35,6 +35,7 @@
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: true,
         },
+        ITSAppUsesNonExemptEncryption: false,
       },
     },
     android: {
@@ -62,7 +63,7 @@
     extra: {
       apiUrl: process.env.API_URL_PROD || 'https://api-repasses.arietedigital.com.br/api',
       eas: {
-        projectId: '2b0cf35b-cdb7-43fa-8bf1-bd294cb41b9a',
+        projectId: '3f7e8885-01f1-45b1-b8ab-f4a284f7e3f2',
       },
     },
   },

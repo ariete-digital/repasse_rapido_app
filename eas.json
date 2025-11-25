@@ -26,12 +26,15 @@
       }
     },
     "production": {
-      "distribution": "internal",
+      "distribution": "store",
       "android": {
         "buildType": "app-bundle",
         "image": "latest"
       },
       "autoIncrement": true,
+      "cache": {
+        "disabled": true
+      },
       "env": {
         "NODE_ENV": "production",
         "API_URL_PROD": "https://api-repasses.arietedigital.com.br/api"

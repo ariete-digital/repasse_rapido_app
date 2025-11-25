@@ -2,3 +2,9 @@ Build para Android
 
 1 - Rodar o build
 eas build -p android --profile preview
+
+Build para iOS
+eas build --platform ios --profile production
+
+Submit:
+eas submit -p ios --latest
