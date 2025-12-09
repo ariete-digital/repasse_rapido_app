@@ -19,8 +19,16 @@ type NavigationProps = NativeStackNavigationProp<
 const MoreInfo = ({ route: { params } }: MoreInfoParams) => {
   const navigation = useNavigation<NavigationProps>();
 
-  const convertAnswer = (value: number | string) =>
-    value === 0 || value === 'N' ? 'Não' : 'Sim';
+  const convertAnswer = (value: number | string | null | undefined) => {
+    if (value === null || value === undefined) return '-';
+    if (value === 0 || value === 'N' || value === '0') return 'Não';
+    if (value === 1 || value === 'S' || value === '1') return 'Sim';
+    return '-';
+  };
+
+  const getStringValue = (value: string | null | undefined) => {
+    return value && value.trim() !== '' ? value : '-';
+  };
 
   return (
     <M.Container>
@@ -38,13 +46,13 @@ const MoreInfo = ({ route: { params } }: MoreInfoParams) => {
       <M.Row>
         <M.LeftItem>
           <Text color="black" fontStyle="p-14-bold">
-            Aceita Troca?
+            Aceita troca?
           </Text>
-          <Text color="black">{params.tipo_troca_str}</Text>
+          <Text color="black">{getStringValue(params.tipo_troca_str)}</Text>
         </M.LeftItem>
         <M.RightItem>
           <Text color="black" fontStyle="p-14-bold">
-            Passou em leilão?
+            Leilão?
           </Text>
           <Text color="black">{convertAnswer(params.passou_leilao)}</Text>
         </M.RightItem>
@@ -52,9 +60,23 @@ const MoreInfo = ({ route: { params } }: MoreInfoParams) => {
       <M.Row>
         <M.LeftItem>
           <Text color="black" fontStyle="p-14-bold">
+            Tipo de leilão
+          </Text>
+          <Text color="black">-</Text>
+        </M.LeftItem>
+        <M.RightItem>
+          <Text color="black" fontStyle="p-14-bold">
+            Manual do proprietário
+          </Text>
+          <Text color="black">{convertAnswer(params.possui_manual)}</Text>
+        </M.RightItem>
+      </M.Row>
+      <M.Row>
+        <M.LeftItem>
+          <Text color="black" fontStyle="p-14-bold">
             Dono
           </Text>
-          <Text color="black">{params.unico_dono_str}</Text>
+          <Text color="black">{getStringValue(params.unico_dono_str)}</Text>
         </M.LeftItem>
         <M.RightItem>
           <Text color="black" fontStyle="p-14-bold">
@@ -98,7 +120,7 @@ const MoreInfo = ({ route: { params } }: MoreInfoParams) => {
       <M.Row>
         <M.LeftItem>
           <Text color="black" fontStyle="p-14-bold">
-            Possui ar-condicionado?
+            Ar condicionado funcionando?
           </Text>
           <Text color="black">{convertAnswer(params.ar_funcionando)}</Text>
         </M.LeftItem>
@@ -131,22 +153,6 @@ const MoreInfo = ({ route: { params } }: MoreInfoParams) => {
             Câmbio faz barulho estranho?
           </Text>
           <Text color="black">{convertAnswer(params.cambio_faz_barulho)}</Text>
-        </M.LeftItem>
-        <M.RightItem>
-          <Text color="black" fontStyle="p-14-bold">
-            Câmbio escapa alguma marcha?
-          </Text>
-          <Text color="black">
-            {convertAnswer(params.cambio_escapa_marcha)}
-          </Text>
-        </M.RightItem>
-      </M.Row>
-      <M.Row>
-        <M.LeftItem>
-          <Text color="black" fontStyle="p-14-bold">
-            Tipo de colisão ocorrido
-          </Text>
-          <Text color="black">{convertAnswer(params.tipo_monta)}</Text>
         </M.LeftItem>
         <M.RightItem>
           <Text color="black" fontStyle="p-14-bold">
@@ -200,7 +206,12 @@ const MoreInfo = ({ route: { params } }: MoreInfoParams) => {
           </Text>
           <Text color="black">{convertAnswer(params.luz_abs)}</Text>
         </M.LeftItem>
-        <M.RightItem></M.RightItem>
+        <M.RightItem>
+          <Text color="black" fontStyle="p-14-bold">
+            Colisão?
+          </Text>
+          <Text color="black">{getStringValue(params.tipo_monta_str) || convertAnswer(params.tipo_monta)}</Text>
+        </M.RightItem>
       </M.Row>
     </M.Container>
   );

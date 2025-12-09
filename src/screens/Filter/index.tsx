@@ -432,42 +432,77 @@ const Filter = () => {
 
   useEffect(() => {
     if (filters && filters.startSearch) {
-      const newFilter: any = {
-        tipo_veiculo: filters.tipo,
-      };
-
-      if (filters.marca) {
-        newFilter.id_marca = parseInt(filters.marca);
-        newFilter.marca = filters.marca_nome || filters.marca;
-      }
-      
-      if (filters.modelo) {
-        newFilter.id_modelo = parseInt(filters.modelo);
-        newFilter.modelo = filters.modelo_nome || filters.modelo;
-      }
-      
-      if (filters.anoMin || filters.anoMax) {
-        newFilter.ano = {
-          max: filters.anoMax ? parseInt(filters.anoMax) : undefined,
-          min: filters.anoMin ? parseInt(filters.anoMin) : undefined,
+      setFilterParams((prev: any) => {
+        // Começar com os filtros anteriores, mas remover os filtros da home
+        const updated: any = {
+          ...prev,
+          tipo_veiculo: filters.tipo,
+          tipo_venda: 'C',
+          // Remover filtros da home que não foram enviados
+          id_marca: undefined,
+          marca: undefined,
+          id_modelo: undefined,
+          modelo: undefined,
+          ano: undefined,
+          id_cidade: undefined,
+          cidade_nome: undefined,
+          valor: undefined,
         };
+
+        // Aplicar apenas os filtros que foram enviados
+        if (filters.marca) {
+          updated.id_marca = parseInt(filters.marca);
+          updated.marca = filters.marca_nome || filters.marca;
+        }
         
-        if (newFilter.ano.max === undefined) delete newFilter.ano.max;
-        if (newFilter.ano.min === undefined) delete newFilter.ano.min;
+        if (filters.modelo) {
+          updated.id_modelo = parseInt(filters.modelo);
+          updated.modelo = filters.modelo_nome || filters.modelo;
+        }
         
-        if (Object.keys(newFilter.ano).length === 0) delete newFilter.ano;
-      }
+        if (filters.anoMin || filters.anoMax) {
+          updated.ano = {
+            max: filters.anoMax ? parseInt(filters.anoMax) : undefined,
+            min: filters.anoMin ? parseInt(filters.anoMin) : undefined,
+          };
+          
+          if (updated.ano.max === undefined) delete updated.ano.max;
+          if (updated.ano.min === undefined) delete updated.ano.min;
+          
+          if (Object.keys(updated.ano).length === 0) delete updated.ano;
+        }
+        
+        if (filters.cidade) {
+          updated.id_cidade = parseInt(filters.cidade);
+          updated.cidade_nome = filters.cidade_nome;
+        }
+        
+        if (filters.precoMin || filters.precoMax) {
+          updated.valor = {
+            max: filters.precoMax ? parseInt(filters.precoMax) : undefined,
+            min: filters.precoMin ? parseInt(filters.precoMin) : undefined,
+          };
+          
+          if (updated.valor.max === undefined) delete updated.valor.max;
+          if (updated.valor.min === undefined) delete updated.valor.min;
+          
+          if (Object.keys(updated.valor).length === 0) delete updated.valor;
+        }
+        
+        if (filters.loja) {
+          updated.id_loja = filters.loja;
+        }
+        
+        // Remover propriedades undefined
+        Object.keys(updated).forEach(key => {
+          if (updated[key] === undefined) {
+            delete updated[key];
+          }
+        });
+        
+        return updated;
+      });
       
-      if (filters.cidade) {
-        newFilter.id_cidade = parseInt(filters.cidade);
-        newFilter.cidade_nome = filters.cidade_nome;
-      }
-      
-      if (filters.loja) {
-        newFilter.id_loja = filters.loja;
-      }
-      
-      setFilterParams(newFilter);
       setShouldTriggerSearch(true);
     }
   }, [filters]);

@@ -17,14 +17,14 @@ export const LeftItem = styled.View`
   flex-direction: column;
   width: 48%;
   align-items: flex-start;
-  gap: 16px;
-  padding: 20px 2px;
+  gap: 8px;
+  padding: 12px 2px;
 `;
 
 export const RightItem = styled.View`
   flex-direction: column;
   width: 48%;
   align-items: flex-start;
-  gap: 16px;
-  padding: 20px 2px;
+  gap: 8px;
+  padding: 12px 2px;
 `;

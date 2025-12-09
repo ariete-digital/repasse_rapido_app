@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, ScrollView, Image, View } from 'react-native';
+import { TouchableOpacity, ScrollView, Image, View, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
 import Text from '@components/Text';
@@ -60,7 +60,21 @@ const Menu = () => {
       title: 'Ajuda',
       icon: <SvgXml xml={HelpIcon()} width={20} height={20} />,
       onPress: () => {
+        // Abrir WhatsApp
+        const phoneNumber = '5517982109999'; // 55 17 98210-9999 sem espaços e caracteres especiais
+        const whatsappUrl = `whatsapp://send?phone=${phoneNumber}`;
         
+        Linking.canOpenURL(whatsappUrl).then((supported) => {
+          if (supported) {
+            Linking.openURL(whatsappUrl);
+          } else {
+            // Se não tiver WhatsApp instalado, tenta abrir no navegador
+            Linking.openURL(`https://wa.me/${phoneNumber}`);
+          }
+        }).catch(() => {
+          // Fallback para web
+          Linking.openURL(`https://wa.me/${phoneNumber}`);
+        });
       }
     },
     {

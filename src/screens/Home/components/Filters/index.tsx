@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+  TextInput as RNTextInput,
 } from 'react-native';
 import {
   AnoContainer,
@@ -44,6 +45,7 @@ const yearOptions: OptionsList[] = Array.from(
   }
 );
 
+
 type NavigationProps = CompositeNavigationProp<
   BottomTabNavigationProp<RootTabParamList, 'search'>,
   NativeStackNavigationProp<SearchStackParamList>
@@ -60,7 +62,28 @@ export default function Filters() {
   const [modelo, setModelo] = useState<string>();
   const [anoMin, setAnoMin] = useState<string>();
   const [anoMax, setAnoMax] = useState<string>();
+  const [precoMin, setPrecoMin] = useState<string>('');
+  const [precoMax, setPrecoMax] = useState<string>('');
   const [loadingCidades, setLoadingCidades] = useState(false);
+
+  const formatCurrency = (value: string) => {
+    let cleanValue = value.replace(/\D/g, '');
+    if (cleanValue === '' || cleanValue === '0') return '';
+    let intValue = parseInt(cleanValue);
+    if (isNaN(intValue) || intValue === 0) return '';
+    let formattedValue = `R$ ${intValue.toLocaleString('pt-BR')}`;
+    return formattedValue;
+  };
+
+  const handlePriceChange = (value: string, setter: (value: string) => void) => {
+    const formatted = formatCurrency(value);
+    setter(formatted);
+  };
+
+  const unmaskCurrency = (value: string) => {
+    if (!value) return 0;
+    return Number(value.replace(/[^\d]/g, ''));
+  };
 
   const handleSelectCidade = (option: { label: string; value: string }) => {
     setCidade(option.value);
@@ -79,6 +102,37 @@ export default function Filters() {
     setModelo(undefined);
     setListaModelos([]);
     getModelData(option.value);
+  };
+
+  const handleMarcaInputChange = (query: string) => {
+    // Se o usuário apagou todo o texto, limpar a marca selecionada
+    if (query.trim() === '') {
+      setMarca(undefined);
+      setModelo(undefined);
+      setListaModelos([]);
+      getBrandData();
+    }
+  };
+
+  const handleModeloInputChange = (query: string) => {
+    // Se o usuário apagou todo o texto, limpar o modelo selecionado
+    if (query.trim() === '') {
+      setModelo(undefined);
+    }
+  };
+
+  const handleAnoMinInputChange = (query: string) => {
+    // Se o usuário apagou todo o texto, limpar o ano mínimo
+    if (query.trim() === '') {
+      setAnoMin(undefined);
+    }
+  };
+
+  const handleAnoMaxInputChange = (query: string) => {
+    // Se o usuário apagou todo o texto, limpar o ano máximo
+    if (query.trim() === '') {
+      setAnoMax(undefined);
+    }
   };
 
   const getBrandData = async (cidadeParam?: string) => {
@@ -231,6 +285,18 @@ export default function Filters() {
     if (anoMax) {
       filterParams.ano = { ...filterParams.ano, max: parseInt(anoMax) };
     }
+    const precoMinValue = precoMin && precoMin.trim() !== '' ? unmaskCurrency(precoMin) : null;
+    const precoMaxValue = precoMax && precoMax.trim() !== '' ? unmaskCurrency(precoMax) : null;
+    
+    if (precoMinValue || precoMaxValue) {
+      filterParams.valor = {};
+      if (precoMinValue) {
+        filterParams.valor.min = precoMinValue;
+      }
+      if (precoMaxValue) {
+        filterParams.valor.max = precoMaxValue;
+      }
+    }
 
     if (Object.keys(filterParams).length > 0) {
       setFilterParams(filterParams);
@@ -239,18 +305,24 @@ export default function Filters() {
     const marcaSelecionada = listaMarcas.find(m => m.value === marca);
     const modeloSelecionado = listaModelos.find(m => m.value === modelo);
     
-    const filtersToSend = {
+    const precoMinString = precoMin && precoMin.trim() !== '' ? unmaskCurrency(precoMin).toString() : undefined;
+    const precoMaxString = precoMax && precoMax.trim() !== '' ? unmaskCurrency(precoMax).toString() : undefined;
+    
+    const filtersToSend: any = {
       startSearch: true,
       tipo: 'C', 
-      marca: marca,
-      modelo: modelo,
-      marca_nome: marcaSelecionada?.label,
-      modelo_nome: modeloSelecionado?.label,
-      anoMin: anoMin,
-      anoMax: anoMax,
-      cidade: cidade,
-      cidade_nome: filterParams.cidade_nome,
     };
+    
+    if (marca) filtersToSend.marca = marca;
+    if (modelo) filtersToSend.modelo = modelo;
+    if (marcaSelecionada?.label) filtersToSend.marca_nome = marcaSelecionada.label;
+    if (modeloSelecionado?.label) filtersToSend.modelo_nome = modeloSelecionado.label;
+    if (anoMin) filtersToSend.anoMin = anoMin;
+    if (anoMax) filtersToSend.anoMax = anoMax;
+    if (precoMinString) filtersToSend.precoMin = precoMinString;
+    if (precoMaxString) filtersToSend.precoMax = precoMaxString;
+    if (cidade) filtersToSend.cidade = cidade;
+    if (filterParams.cidade_nome) filtersToSend.cidade_nome = filterParams.cidade_nome;
 
     navigation.navigate('search', {
       screen: 'filter',
@@ -283,6 +355,7 @@ export default function Filters() {
             options={listaMarcas}
             onSelect={handleSelectMarca}
             selectedValue={marca}
+            onInputChange={handleMarcaInputChange}
           />
           <SearchableSelect
             placeholder="MODELO"
@@ -290,6 +363,7 @@ export default function Filters() {
             onSelect={(selected) => setModelo(selected.value)}
             selectedValue={modelo}
             disabled={!marca}
+            onInputChange={handleModeloInputChange}
           />
         </RowContainer>
 
@@ -309,6 +383,7 @@ export default function Filters() {
               }
             }}
             selectedValue={anoMin}
+            onInputChange={handleAnoMinInputChange}
           />
           <SearchableSelect
             placeholder="ANO FINAL"
@@ -325,8 +400,49 @@ export default function Filters() {
               }
             }}
             selectedValue={anoMax}
+            onInputChange={handleAnoMaxInputChange}
           />
         </AnoContainer>
+
+        <AnoContainer>
+          <View style={{ flex: 1 }}>
+            <RNTextInput
+              placeholder="PREÇO INICIAL"
+              keyboardType="number-pad"
+              value={precoMin}
+              onChangeText={(value) => handlePriceChange(value, setPrecoMin)}
+              style={{
+                backgroundColor: 'white',
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 8,
+                padding: 10,
+                height: 48,
+                fontSize: 16,
+              }}
+              placeholderTextColor="#999"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <RNTextInput
+              placeholder="PREÇO FINAL"
+              keyboardType="number-pad"
+              value={precoMax}
+              onChangeText={(value) => handlePriceChange(value, setPrecoMax)}
+              style={{
+                backgroundColor: 'white',
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 8,
+                padding: 10,
+                height: 48,
+                fontSize: 16,
+              }}
+              placeholderTextColor="#999"
+            />
+          </View>
+        </AnoContainer>
+
         <View
           style={{
             width: '100%',

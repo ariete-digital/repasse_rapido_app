@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useToast } from 'react-native-toast-notifications';
 import * as yup from 'yup';
 
@@ -27,7 +27,6 @@ interface LegalFormProps {
   senha: string;
   confirmacao: string;
   celular: string;
-  telefone: string;
   cep: string;
   logradouro: string;
   bairro: string;
@@ -53,7 +52,6 @@ const signUpSchema = yup.object({
     .oneOf([yup.ref('senha'), null], 'A confirmação da senha não confere!'),
   nome_fantasia: yup.string().required('Informe o nome fantasia!'),
   celular: yup.string().required('Informe o celular!'),
-  telefone: yup.string().required('Informe o telefone fixo!'),
   cep: yup.string().required('Informe o CEP!'),
   logradouro: yup.string().required('Informe o logradouro!'),
   bairro: yup.string().required('Informe o bairro!'),
@@ -74,8 +72,7 @@ const Legal = () => {
   const [citiesOptions, setCitiesOptions] = useState<Array<{label: string, value: string}>>([]);
   const [loadingCities, setLoadingCities] = useState(false);
   const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false)
-  const [toggleCheckBox1, setToggleCheckBox1] = useState<boolean>(false)
-  const [toggleCheckBox2, setToggleCheckBox2] = useState<boolean>(false)
+  const [receberPedidos, setReceberPedidos] = useState<'sim' | 'nao' | null>(null)
   const [cnhImage, setCnhImage] = useState<string | null>(null);
   const [cnhFileName, setCnhFileName] = useState<string | null>(null);
   const [cnhMimeType, setCnhMimeType] = useState<string>('image/jpeg');
@@ -126,7 +123,6 @@ const Legal = () => {
     formData.append('senha', data.senha);
     formData.append('tipo', 'PJ');
     formData.append('num_documento', data.num_documento.replace(/\D/g, '')); 
-    formData.append('telefone', data.telefone.replace(/\D/g, '')); 
     formData.append('cep', data.cep.replace(/\D/g, '')); 
     formData.append('logradouro', data.logradouro);
     formData.append('numero', data.numero);
@@ -289,20 +285,6 @@ const Legal = () => {
             keyboardType="phone-pad"
             onChangeText={(text) => onChange(text)}
             errorMessage={errors.celular?.message}
-            maxLength={15}
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="telefone"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            label="Telefone Fixo"
-            value={maskPhone(value || '')}
-            keyboardType="phone-pad"
-            onChangeText={(text) => onChange(text)}
-            errorMessage={errors.telefone?.message}
             maxLength={15}
           />
         )}
@@ -477,25 +459,32 @@ const Legal = () => {
           marginTop: 32
         }}
       >
-        <BouncyCheckbox
-          onPress={() => setToggleCheckBox1((prev) => !prev)}
-          isChecked={toggleCheckBox1}
-          innerIconStyle={{
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: toggleCheckBox1 ? "#9A0B26" : "#EBE8D9",
-            backgroundColor: toggleCheckBox1 ? "#9A0B26" : "#F9F7F7",
+        <TouchableOpacity
+          onPress={() => setReceberPedidos('sim')}
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: receberPedidos === 'sim' ? "#9A0B26" : "#EBE8D9",
+            backgroundColor: receberPedidos === 'sim' ? "#9A0B26" : "#F9F7F7",
+            marginRight: 10,
+            marginTop: 2,
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          iconStyle={{
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: toggleCheckBox1 ? "#9A0B26" : "#EBE8D9",
-            backgroundColor: toggleCheckBox1 ? "#9A0B26" : "#F9F7F7",
-          }}
-          textStyle={{
-            color: theme.colors['brand-blue'],
-          }}
-        />
+        >
+          {receberPedidos === 'sim' && (
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: '#fff',
+              }}
+            />
+          )}
+        </TouchableOpacity>
 
         <Text color="black-700" fontStyle='c-12-regular' align="left">
           <Text color="black-700" fontStyle='c-12-bold' align="left">QUERO</Text>
@@ -511,25 +500,32 @@ const Legal = () => {
           marginTop: 20
         }}
       >
-        <BouncyCheckbox
-          onPress={() => setToggleCheckBox2((prev) => !prev)}
-          isChecked={toggleCheckBox2}
-          innerIconStyle={{
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: toggleCheckBox2 ? "#9A0B26" : "#EBE8D9",
-            backgroundColor: toggleCheckBox2 ? "#9A0B26" : "#F9F7F7",
+        <TouchableOpacity
+          onPress={() => setReceberPedidos('nao')}
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: receberPedidos === 'nao' ? "#9A0B26" : "#EBE8D9",
+            backgroundColor: receberPedidos === 'nao' ? "#9A0B26" : "#F9F7F7",
+            marginRight: 10,
+            marginTop: 2,
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          iconStyle={{
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: toggleCheckBox2 ? "#9A0B26" : "#EBE8D9",
-            backgroundColor: toggleCheckBox2 ? "#9A0B26" : "#F9F7F7",
-          }}
-          textStyle={{
-            color: theme.colors['brand-blue'],
-          }}
-        />
+        >
+          {receberPedidos === 'nao' && (
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: '#fff',
+              }}
+            />
+          )}
+        </TouchableOpacity>
 
         <Text color="black-700" fontStyle='c-12-regular' align="left">
           <Text color="black-700" fontStyle='c-12-bold' align="left">NÃO QUERO</Text>

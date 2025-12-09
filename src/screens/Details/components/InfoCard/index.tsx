@@ -15,23 +15,15 @@ const InfoCard = ({ anuncio }: Content) => {
           <Text color="black-700">KM</Text>
           <Text color="black-700" fontStyle="p-14-bold">{anuncio.quilometragem}</Text>
         </I.Item>
+      </I.Row>
+      <I.Row>
         <I.Item>
           <Text color="black-700">Câmbio</Text>
           <Text color="black-700" fontStyle="p-14-bold">{anuncio.tipo_cambio.descricao}</Text>
         </I.Item>
-      </I.Row>
-      <I.Row>
-        <I.Item>
-          <Text color="black-700">Portas</Text>
-          <Text color="black-700" fontStyle="p-14-bold">{anuncio.num_portas || 'N/A'}</Text>
-        </I.Item>
         <I.Item>
           <Text color="black-700">Combustível</Text>
           <Text color="black-700" fontStyle="p-14-bold">{anuncio.tipo_combustivel.descricao}</Text>
-        </I.Item>
-        <I.Item>
-          <Text color="black-700">Troca</Text>
-          <Text color="black-700" fontStyle="p-14-bold" align="center">{anuncio.tipo_troca_str}</Text>
         </I.Item>
       </I.Row>
     </I.Container>
