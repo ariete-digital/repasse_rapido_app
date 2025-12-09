@@ -97,7 +97,7 @@ const OfferHead = ({ anuncio, anunciante }: OfferHeadProps) => {
           >
             {anunciante?.nome || 'Anunciante'}
           </Text>
-          <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+          {/* <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
             <Text 
               color="black-200" 
               fontStyle="p-14-regular"
@@ -135,7 +135,7 @@ const OfferHead = ({ anuncio, anunciante }: OfferHeadProps) => {
                 })()}
               </Text>
             </View>
-          </View>
+          </View> */}
           {anunciante?.qtd_vendas !== undefined && anunciante.qtd_vendas > 0 && (
             <View style={{
               display: 'flex', 

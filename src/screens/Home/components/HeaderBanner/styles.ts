@@ -2,7 +2,7 @@ import styled from 'styled-components/native';
 
 export const Container = styled.View`
   width: 100%;
-  height: 330px;
+  
 `;
 
 export const Content = styled.View`

@@ -9,12 +9,13 @@ export const Container = styled.View`
   justify-content: center;
   border-radius: 8px;
   margin: 0px 10px;
+  gap: 10px;
+  padding: 10px 10px;
 `;
 
 export const Row = styled.View`
   flex-direction: row;
   width: 100%;
-  padding: 20px 10px;
   justify-content: space-between;
   align-items: flex-start;
 `;

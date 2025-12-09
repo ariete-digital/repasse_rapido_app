@@ -27,7 +27,6 @@ const editSchema = yup.object({
   confirmacao: yup.string().optional(),
   nome_fantasia: yup.string(),
   celular: yup.string().required('Informe o celular!'),
-  telefone: yup.string().required('Informe o telefone fixo!'),
   cep: yup.string().required('Informe o CEP!'),
   logradouro: yup.string().required('Informe o logradouro!'),
   bairro: yup.string().required('Informe o bairro!'),
@@ -49,7 +48,6 @@ interface EditLegalFormProps {
   senha?: string;
   confirmacao?: string;
   celular: string;
-  telefone: string;
   cep: string;
   logradouro: string;
   bairro: string;
@@ -96,7 +94,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       num_documento: userData?.num_documento || '',
       email: userData?.email || '',
       celular: userData?.celular || '',
-      telefone: userData?.telefone || '',
       cep: userData?.cep || '',
       logradouro: userData?.logradouro || '',
       bairro: userData?.bairro || '',
@@ -120,7 +117,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       num_documento: userData?.num_documento || '',
       email: userData?.email || '',
       celular: userData?.celular || '',
-      telefone: userData?.telefone || '',
       cep: userData?.cep || '',
       logradouro: userData?.logradouro || '',
       bairro: userData?.bairro || '',
@@ -168,7 +164,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
       formData.append('num_documento', data.num_documento);
       formData.append('email', data.email);
       formData.append('celular', data.celular);
-      formData.append('telefone', data.telefone);
       formData.append('cep', data.cep);
       formData.append('logradouro', data.logradouro);
       formData.append('bairro', data.bairro);
@@ -357,21 +352,6 @@ const EditLegal = ({ userData, onUpdate }: EditLegalProps) => {
             keyboardType="phone-pad"
             onChangeText={(text) => onChange(text)}
             errorMessage={errors.celular?.message}
-            maxLength={15}
-          />
-        )}
-      />
-      
-      <Controller
-        control={control}
-        name="telefone"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            label="Telefone Fixo"
-            value={maskPhone(value || '')}
-            keyboardType="phone-pad"
-            onChangeText={(text) => onChange(text)}
-            errorMessage={errors.telefone?.message}
             maxLength={15}
           />
         )}

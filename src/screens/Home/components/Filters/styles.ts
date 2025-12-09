@@ -4,7 +4,6 @@ export const Container = styled.View`
   flex: 1;
   background-color: #9A0B26;
   padding: 16px;
-  max-height: 340px;
 `;
 
 export const Label = styled.Text`
