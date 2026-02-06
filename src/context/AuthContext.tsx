@@ -19,7 +19,7 @@ export type AuthContextDataProps = {
   user: UserDTO
   signIn: (email: string, password: string) => Promise<void>
   updateUserProfile: (userUpdated: UserDTO) => Promise<void>
-  signOut: () => Promise<void>
+  signOut: (options?: { silent?: boolean }) => Promise<void>
   refreshToken: () => Promise<string | null>
   isLoadingUserStorageData: boolean
   loadTransfers: boolean
@@ -89,7 +89,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     }
   }
 
-  async function signOut() {
+  async function signOut(options?: { silent?: boolean }) {
     try {
       setIsLoadingUserStorageData(true)
 
@@ -99,7 +99,9 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
       delete api.defaults.headers.common['Authorization']
       
-      toast.show('Usuário desconectado com sucesso!', { type: 'success' })
+      if (!options?.silent) {
+        toast.show('Usuário desconectado com sucesso!', { type: 'success' })
+      }
     } catch (error) {
       toast.show('Erro ao fazer logout', { type: 'danger' })
       throw error

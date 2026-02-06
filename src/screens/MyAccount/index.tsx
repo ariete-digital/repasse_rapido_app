@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Alert, View } from 'react-native';
 
 import EditLegal from './components/EditLegal';
 import EditIndividual from './components/EditIndividual';
@@ -12,11 +12,15 @@ import { api } from '@lib/api';
 import { useToast } from 'react-native-toast-notifications';
 import { UserDTO } from '@lib/storage/storageUser';
 import Text from '@components/Text';
+import BasicButton from '@components/BasicButton';
+
+const DELETE_ACCOUNT_ENDPOINT = '/cliente/minha_conta/excluir';
 
 const MyAccount = () => {
-  const { user: authUser } = useAuth();
+  const { signOut } = useAuth();
   const [userData, setUserData] = useState<UserDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -40,6 +44,47 @@ const MyAccount = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const deleteMyAccount = async () => {
+    try {
+      setIsDeletingAccount(true);
+
+      const response = await api.post(DELETE_ACCOUNT_ENDPOINT);
+
+      const message =
+        response?.data?.content?.message ||
+        response?.data?.message ||
+        'Conta excluída com sucesso!';
+
+      toast.show(message, { type: 'success' });
+
+      await signOut({ silent: true });
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        'Não foi possível excluir sua conta. Tente novamente.';
+      toast.show(message, { type: 'danger' });
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
+  const confirmDeleteMyAccount = () => {
+    if (isDeletingAccount) return;
+
+    Alert.alert(
+      'Excluir conta',
+      'Essa ação é irreversível. Sua conta e todos os dados vinculados serão excluídos.\n\nDeseja continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: deleteMyAccount,
+        },
+      ]
+    );
   };
 
   const renderEditForm = () => {
@@ -83,6 +128,39 @@ const MyAccount = () => {
       titleIcon={<SvgXml xml={PersonIcon()} width={20} height={20} />}
     >
       {renderEditForm()}
+
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingTop: 24,
+          paddingBottom: 40,
+          gap: 12,
+        }}
+      >
+        <View
+          style={{
+            borderTopWidth: 1,
+            borderTopColor: '#F1F4F9',
+            paddingTop: 20,
+            gap: 10,
+          }}
+        >
+          <Text fontStyle="p-18-bold" color="red">
+            Zona de perigo
+          </Text>
+          <Text fontStyle="p-14-regular" color="black-300">
+            Exclui sua conta e todos os dados vinculados. Essa ação não pode ser desfeita.
+          </Text>
+
+          <BasicButton
+            label={isDeletingAccount ? 'Excluindo...' : 'Excluir minha conta'}
+            onPress={confirmDeleteMyAccount}
+            disabled={isDeletingAccount}
+            backgroundColor="#E11138"
+            color="white"
+          />
+        </View>
+      </View>
     </PageScaffold>
   );
 };
