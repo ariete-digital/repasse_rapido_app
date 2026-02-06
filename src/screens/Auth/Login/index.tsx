@@ -13,12 +13,13 @@ import {
 import { useAuth } from '@hooks/useAuth';
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes';
 import { openUrl } from '@utils/index';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from 'react-native-toast-notifications';
 import ForgotPasswordButton from './components/ForgotPassword';
 import * as L from './styles';
 import { ChevronLeftIcon } from '@components/CustomIcons';
 import BasicButton from '@components/BasicButton';
+import { api } from '@lib/api';
 
 interface ILoginForm {
   email: string;
@@ -28,10 +29,13 @@ interface ILoginForm {
 const Login = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [apiStatus, setApiStatus] = useState<'verificando' | 'ok' | 'erro'>('verificando');
+  const [apiStatusDetail, setApiStatusDetail] = useState<string>('');
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
   const { signIn } = useAuth();
   const toast = useToast();
+  const apiBaseUrl = api.defaults.baseURL || 'Indefinida';
 
   const handleLogin = async ({ email, password }: ILoginForm) => {
     try {
@@ -43,6 +47,31 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkApi = async () => {
+      try {
+        await api.get('/cliente/home');
+        if (!isMounted) return;
+        setApiStatus('ok');
+        setApiStatusDetail('Conectado');
+      } catch (error: any) {
+        if (!isMounted) return;
+        const status = error?.response?.status;
+        const message = error?.message || 'Erro desconhecido';
+        setApiStatus('erro');
+        setApiStatusDetail(status ? `Erro ${status} - ${message}` : message);
+      }
+    };
+
+    checkApi();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const {
     control,
@@ -157,6 +186,19 @@ const Login = () => {
           </TextContainer>
         </View>
       </L.Form>
+
+      {/* <View style={{ width: '100%', paddingHorizontal: 30, marginBottom: 16 }}>
+        <View style={{ backgroundColor: '#F1F4F9', borderRadius: 8, padding: 12 }}>
+          <Text fontStyle="p-14-regular" color="black-700">Debug API</Text>
+          <Text fontStyle="p-14-regular" color="black-700">URL: {apiBaseUrl}</Text>
+          <Text
+            fontStyle="p-14-regular"
+            color={apiStatus === 'ok' ? 'brand-blue' : 'red'}
+          >
+            Status: {apiStatus === 'verificando' ? 'Verificando...' : apiStatusDetail}
+          </Text>
+        </View>
+      </View> */}
 
       <View>
         <Text color="black-700">Para mais informações, verifique nossos</Text>

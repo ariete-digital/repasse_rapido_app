@@ -1,11 +1,14 @@
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
   View,
 } from 'react-native';
+import Modal from 'react-native-modal';
 import { useHome } from '@hooks/useHome';
 import HeaderHome from './components/HeaderBanner';
 import HeaderUserRow from './components/HeaderUserRow';
+import Filters from './components/Filters';
 
 import * as H from './styles';
 import ItemCard from '@components/ItemCard';
@@ -13,6 +16,10 @@ import Text from '@components/Text';
 
 const Home = () => {
   const { isLoading, loadHomePageData, homePageData } = useHome();
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+
+  const openFilterModal = () => setIsFilterModalVisible(true);
+  const closeFilterModal = () => setIsFilterModalVisible(false);
 
   const renderAds = () => {
     if (isLoading) {
@@ -111,10 +118,38 @@ const Home = () => {
         }
       >
         <HeaderHome />
+        <H.FilterCtaContainer>
+          <H.FilterCtaCard>
+            <H.FilterCtaLabel>Encontre seu veículo</H.FilterCtaLabel>
+            <H.FilterCtaButton onPress={openFilterModal} activeOpacity={0.8}>
+              <H.FilterCtaButtonText>Filtrar</H.FilterCtaButtonText>
+            </H.FilterCtaButton>
+          </H.FilterCtaCard>
+        </H.FilterCtaContainer>
         <H.OffersContainer>
           {renderAds()}
         </H.OffersContainer>
       </H.ScrollingContent>
+
+      <Modal
+        isVisible={isFilterModalVisible}
+        onBackdropPress={closeFilterModal}
+        onBackButtonPress={closeFilterModal}
+        propagateSwipe
+        avoidKeyboard
+        style={{ margin: 16, justifyContent: 'center' }}
+      >
+        <H.ModalContainer>
+          <H.ModalHeader>
+            <H.ModalCloseButton onPress={closeFilterModal} activeOpacity={0.8}>
+              <H.ModalCloseText>Fechar</H.ModalCloseText>
+            </H.ModalCloseButton>
+          </H.ModalHeader>
+          <H.ModalScroll>
+            <Filters onAfterSearch={closeFilterModal} />
+          </H.ModalScroll>
+        </H.ModalContainer>
+      </Modal>
     </H.Container>
   );
 };

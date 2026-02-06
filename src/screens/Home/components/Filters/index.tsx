@@ -51,7 +51,11 @@ type NavigationProps = CompositeNavigationProp<
   NativeStackNavigationProp<SearchStackParamList>
 >;
 
-export default function Filters() {
+type FiltersProps = {
+  onAfterSearch?: () => void;
+};
+
+export default function Filters({ onAfterSearch }: FiltersProps) {
   const navigation = useNavigation<NavigationProps>();
   const { setFilterParams } = useFilters();
   const [listaMarcas, setListaMarcas] = useState<OptionsList[]>([]);
@@ -323,6 +327,10 @@ export default function Filters() {
     if (precoMaxString) filtersToSend.precoMax = precoMaxString;
     if (cidade) filtersToSend.cidade = cidade;
     if (filterParams.cidade_nome) filtersToSend.cidade_nome = filterParams.cidade_nome;
+
+    if (onAfterSearch) {
+      onAfterSearch();
+    }
 
     navigation.navigate('search', {
       screen: 'filter',

@@ -60,3 +60,64 @@ export const ButtonRow = styled.View`
   width: 100%;
   margin-top: 10px;
 `;
+
+export const FilterCtaContainer = styled.View`
+  width: 100%;
+  padding: 0 10px;
+`;
+
+export const FilterCtaCard = styled.View`
+  background-color: #9a0b26;
+  border-radius: 12px;
+  padding: 16px;
+  gap: 12px;
+`;
+
+export const FilterCtaLabel = styled.Text`
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+export const FilterCtaButton = styled.TouchableOpacity`
+  background-color: #ebe8d9;
+  padding: 10px;
+  border-radius: 8px;
+  align-items: center;
+`;
+
+export const FilterCtaButtonText = styled.Text`
+  color: #9a0b26;
+  font-weight: bold;
+  font-size: 14px;
+`;
+
+export const ModalContainer = styled.View`
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 90%;
+`;
+
+export const ModalHeader = styled.View`
+  width: 100%;
+  padding: 12px 16px;
+  align-items: flex-end;
+  background-color: #fff;
+`;
+
+export const ModalCloseButton = styled.TouchableOpacity`
+  padding: 6px 8px;
+`;
+
+export const ModalCloseText = styled.Text`
+  color: #9a0b26;
+  font-weight: bold;
+  font-size: 14px;
+`;
+
+export const ModalScroll = styled.ScrollView.attrs({
+  contentContainerStyle: {
+    flexGrow: 1,
+  },
+})``;

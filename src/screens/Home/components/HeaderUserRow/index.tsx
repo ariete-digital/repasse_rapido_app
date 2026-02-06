@@ -3,15 +3,18 @@ import { PersonIcon, LogoutIcon } from '@components/CustomIcons';
 
 import HeaderLogo from '@components/HeaderLogo';
 import { useAuth } from '@hooks/useAuth';
-import { useNavigation } from '@react-navigation/native';
-import { RootTabParamList } from '@routes/app.routes';
-import { theme } from '@theme/GlobalStyles';
+import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList, RootTabParamList } from '@routes/app.routes';
 import { useToast } from 'react-native-toast-notifications';
-import appConfig from '../../../../../app.config';
 import * as H from './styles';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import Constants from 'expo-constants';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-type NavigationProps = BottomTabNavigationProp<RootTabParamList, 'auth'>;
+type NavigationProps = CompositeNavigationProp<
+  BottomTabNavigationProp<RootTabParamList>,
+  NativeStackNavigationProp<RootStackParamList>
+>;
 
 export default function HeaderUserRow() {
   const { signOut, user } = useAuth();
@@ -19,7 +22,14 @@ export default function HeaderUserRow() {
   const navigation = useNavigation<NavigationProps>();
 
   const showAppVersion = () => {
-    toast.show(`Current app version: v${appConfig.expo.version}`, { type: 'warning' });
+    const version =
+      Constants.expoConfig?.version ||
+      // fallback for older manifest shapes / edge cases
+      // @ts-ignore
+      Constants.manifest?.version ||
+      'unknown';
+
+    toast.show(`Current app version: v${version}`, { type: 'warning' });
   };
 
   const handleButtonAction = () => {

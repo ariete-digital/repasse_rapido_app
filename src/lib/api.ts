@@ -5,7 +5,7 @@ interface AppConfig {
   apiUrl: string;
 }
 
-const { apiUrl } = Constants.expoConfig?.extra as AppConfig;
+const apiUrl = (Constants.expoConfig?.extra as Partial<AppConfig> | undefined)?.apiUrl;
 
 const baseURL = process.env.API_URL_PROD || apiUrl || 'https://api-repasses.arietedigital.com.br/api';
 
