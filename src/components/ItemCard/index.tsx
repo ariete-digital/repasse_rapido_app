@@ -45,6 +45,8 @@ const ItemCard = ({
   isVendido = false,
 }: ItemCardProps) => {
   const navigation = useNavigation<NavigationProp>();
+  const isGridCard = itemPerRow === 2;
+
   const seeOffer = () => {
     
     const codeToUse = codigo || itemID.toString();
@@ -113,18 +115,30 @@ const ItemCard = ({
         )}
       </TouchableOpacity>
       <I.ItemCardTitleContainer>
-        <Text
-          color="black-400"
-          fontStyle={itemPerRow === 1 ? "t-24" : "p-18-regular"}
-          spacingY={6}
-        >{`${brand} ${model}`}</Text>
-        <Text 
-          color="black-700" 
-          fontStyle={itemPerRow === 1 ? "p-18-regular" : "c-12-regular"}
-          spacingY={6}
-        >
-          {description}
-        </Text>
+        <I.TitleBlock $reserveTwoLines={isGridCard}>
+          <Text
+            color="black-400"
+            fontStyle={itemPerRow === 1 ? "t-24" : "p-18-regular"}
+            align="center"
+            numberOfLines={isGridCard ? 2 : undefined}
+            ellipsizeMode={isGridCard ? 'tail' : undefined}
+            style={isGridCard ? { lineHeight: 22 } : undefined}
+          >
+            {`${brand} ${model}`}
+          </Text>
+        </I.TitleBlock>
+
+        <I.DescriptionBlock $fixedLineHeight={isGridCard}>
+          <Text 
+            color="black-700" 
+            fontStyle={itemPerRow === 1 ? "p-18-regular" : "c-12-regular"}
+            align="center"
+            numberOfLines={isGridCard ? 1 : undefined}
+            ellipsizeMode={isGridCard ? 'tail' : undefined}
+          >
+            {description}
+          </Text>
+        </I.DescriptionBlock>
         <Text 
           color="brand-red" 
           spacingX={4} 
@@ -163,6 +177,8 @@ const ItemCard = ({
             color="black-500" 
             fontStyle={itemPerRow === 1 ? "p-18-regular" : "c-12-regular"}
             spacingY={6}
+            numberOfLines={isGridCard ? 1 : undefined}
+            ellipsizeMode={isGridCard ? 'tail' : undefined}
           >
             {storeName}
           </Text>

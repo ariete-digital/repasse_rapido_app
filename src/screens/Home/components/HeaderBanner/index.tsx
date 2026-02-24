@@ -1,11 +1,15 @@
 import bannerImg from '@images/banner_repasse.png';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { Image as ReactNativeImage } from 'react-native';
 import { RootTabParamList } from '@routes/app.routes';
 import { useAuth } from '@hooks/useAuth';
 import * as H from './styles';
 
 type NavigationProps = BottomTabNavigationProp<RootTabParamList>;
+
+const { width: bannerWidth, height: bannerHeight } = ReactNativeImage.resolveAssetSource(bannerImg);
+const bannerAspectRatio = bannerWidth / bannerHeight;
 
 function HeaderHome() {
   const navigation = useNavigation<NavigationProps>();
@@ -30,7 +34,7 @@ function HeaderHome() {
 
   return (
     <H.Container>
-      <H.BannerImage source={bannerImg} contentFit="contain" />
+      <H.BannerImage source={bannerImg} contentFit="contain" $aspectRatio={bannerAspectRatio} />
       <H.ActionsRow>
         <H.ActionButton onPress={handleGoToSearch} activeOpacity={0.85}>
           <H.ActionButtonText>Comprar</H.ActionButtonText>

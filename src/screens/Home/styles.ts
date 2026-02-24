@@ -20,6 +20,7 @@ export const ScrollingContent = styled.ScrollView.attrs({
 export const RowContainer = styled.View`
   flex-direction: row;
   justify-content: flex-start;
+  align-items: stretch;
   margin-bottom: 10px;
   padding: 0 10px;
   gap: 10px;

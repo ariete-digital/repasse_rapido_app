@@ -5,13 +5,12 @@ import { theme } from '@theme/GlobalStyles';
 
 export const Container = styled.View`
   width: 100%;
-  padding: 0 10px;
   position: relative;
 `;
 
-export const BannerImage = styled(Image)`
+export const BannerImage = styled(Image)<{ $aspectRatio: number }>`
   width: 100%;
-  height: 500px;
+  aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
 `;
 
 const styles = StyleSheet.create({
