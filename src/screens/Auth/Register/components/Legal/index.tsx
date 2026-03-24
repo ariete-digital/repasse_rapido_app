@@ -21,23 +21,22 @@ import { maskCNPJ, maskCPF, maskPhone, maskCEP, unmask } from '@utils/masks';
 
 interface LegalFormProps {
   nome: string;
-  nome_fantasia: string;
+  nome_fantasia?: string;
   num_documento: string;
   email: string;
   senha: string;
   confirmacao: string;
-  celular: string;
-  cep: string;
-  logradouro: string;
-  bairro: string;
-  numero: string;
-  complemento?: string; 
-  nome_responsavel: string;
-  cpf_responsavel: string;
-  id_cidade: number;
-  inscricao_estadual: string;
-  rg?: string; 
-
+  celular?: string;
+  cep?: string;
+  logradouro?: string;
+  bairro?: string;
+  numero?: string;
+  complemento?: string;
+  nome_responsavel?: string;
+  cpf_responsavel?: string;
+  id_cidade?: number;
+  inscricao_estadual?: string;
+  rg?: string;
 }
 
 const signUpSchema = yup.object({
@@ -50,20 +49,18 @@ const signUpSchema = yup.object({
     .required('Informe a confirmação de senha!')
     // @ts-ignore
     .oneOf([yup.ref('senha'), null], 'A confirmação da senha não confere!'),
-  nome_fantasia: yup.string().required('Informe o nome fantasia!'),
-  celular: yup.string().required('Informe o celular!'),
-  cep: yup.string().required('Informe o CEP!'),
-  logradouro: yup.string().required('Informe o logradouro!'),
-  bairro: yup.string().required('Informe o bairro!'),
-  numero: yup.string().required('Informe o número!'),
-  complemento: yup.string().optional(), 
-  nome_responsavel: yup.string().required('Informe o nome do responsável!'),
-  cpf_responsavel: yup.string().required('Informe o CPF do responsável'),
-  id_cidade: yup.number().required('Informe a cidade!'),
-  inscricao_estadual: yup
-    .string()
-    .required('Informe o nome a inscrição estadual!'),
-  rg: yup.string().optional(), 
+  nome_fantasia: yup.string().optional(),
+  celular: yup.string().optional(),
+  cep: yup.string().optional(),
+  logradouro: yup.string().optional(),
+  bairro: yup.string().optional(),
+  numero: yup.string().optional(),
+  complemento: yup.string().optional(),
+  nome_responsavel: yup.string().optional(),
+  cpf_responsavel: yup.string().optional(),
+  id_cidade: yup.number().optional(),
+  inscricao_estadual: yup.string().optional(),
+  rg: yup.string().optional(),
 });
 
 const Legal = () => {
@@ -115,27 +112,24 @@ const Legal = () => {
   };
 
   const handleRegister = async (data: LegalFormProps) => {
-    
     const formData = new FormData();
 
     formData.append('nome', data.nome);
     formData.append('email', data.email);
     formData.append('senha', data.senha);
     formData.append('tipo', 'PJ');
-    formData.append('num_documento', data.num_documento.replace(/\D/g, '')); 
-    formData.append('cep', data.cep.replace(/\D/g, '')); 
-    formData.append('logradouro', data.logradouro);
-    formData.append('numero', data.numero);
-    if (data.complemento) {
-      formData.append('complemento', data.complemento);
-    }
-    formData.append('bairro', data.bairro);
-    formData.append('id_cidade', data.id_cidade.toString());
-    formData.append('nome_fantasia', data.nome_fantasia);
-    formData.append('celular', data.celular.replace(/\D/g, '')); 
-    formData.append('nome_responsavel', data.nome_responsavel);
-    formData.append('cpf_responsavel', data.cpf_responsavel.replace(/\D/g, '')); 
-    formData.append('inscricao_estadual', data.inscricao_estadual);
+    formData.append('num_documento', data.num_documento.replace(/\D/g, ''));
+    if (data.cep) formData.append('cep', data.cep.replace(/\D/g, ''));
+    if (data.logradouro) formData.append('logradouro', data.logradouro);
+    if (data.numero) formData.append('numero', data.numero);
+    if (data.complemento) formData.append('complemento', data.complemento);
+    if (data.bairro) formData.append('bairro', data.bairro);
+    if (data.id_cidade != null) formData.append('id_cidade', data.id_cidade.toString());
+    if (data.nome_fantasia) formData.append('nome_fantasia', data.nome_fantasia);
+    if (data.celular) formData.append('celular', data.celular.replace(/\D/g, ''));
+    if (data.nome_responsavel) formData.append('nome_responsavel', data.nome_responsavel);
+    if (data.cpf_responsavel) formData.append('cpf_responsavel', data.cpf_responsavel.replace(/\D/g, ''));
+    if (data.inscricao_estadual) formData.append('inscricao_estadual', data.inscricao_estadual);
 
     if (cnhImage) {
       formData.append('cnh', {
