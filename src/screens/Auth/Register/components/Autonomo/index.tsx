@@ -23,34 +23,34 @@ const signUpSchema = yup.object({
   nome: yup.string().required('Informe o nome completo!'),
   email: yup.string().required('Informe o e-mail!').email('E-mail inválido.'),
   cpf: yup.string().required('Informe o CPF!'),
-  telefone: yup.string().required('Informe o telefone!'),
-  cep: yup.string().required('Informe o CEP!'),
-  endereço: yup.string().required('Informe o endereço!'),
-  numero: yup.string().required('Informe o número!'),
-  complemento: yup.string(),
-  bairro: yup.string().required('Informe o bairro!'),
-  id_cidade: yup.number().required('Informe a cidade!'),
   senha: yup.string().required('Informe a senha!'),
   confirmarSenha: yup
     .string()
     .required('Informe a confirmação de senha!')
     // @ts-ignore
     .oneOf([yup.ref('senha'), null], 'A confirmação da senha não confere!'),
+  telefone: yup.string().optional(),
+  cep: yup.string().optional(),
+  endereço: yup.string().optional(),
+  numero: yup.string().optional(),
+  complemento: yup.string().optional(),
+  bairro: yup.string().optional(),
+  id_cidade: yup.number().optional(),
 });
 
 interface AutonomoFormProps {
   nome: string;
   email: string;
   cpf: string;
-  telefone: string;
-  cep: string;
-  endereço: string;
-  numero: string;
-  complemento?: string;
-  bairro: string;
-  id_cidade: number;
   senha: string;
   confirmarSenha: string;
+  telefone?: string;
+  cep?: string;
+  endereço?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  id_cidade?: number;
 }
 
 const Autonomo = () => {
@@ -144,36 +144,22 @@ const Autonomo = () => {
   };
 
   const handleRegister = async (data: AutonomoFormProps) => {
-    const { 
-      nome, 
-      email,
-      cpf,
-      telefone,
-      cep,
-      endereço,
-      numero,
-      complemento,
-      bairro,
-      id_cidade, 
-      senha
-    } = data;
+    const { nome, email, cpf, senha } = data;
 
     const formData = new FormData();
 
     formData.append('nome', nome);
     formData.append('email', email);
     formData.append('senha', senha);
-    formData.append('tipo', 'A'); 
-    formData.append('num_documento', cpf.replace(/\D/g, '')); 
-    formData.append('telefone', telefone.replace(/\D/g, '')); 
-    formData.append('cep', cep.replace(/\D/g, '')); 
-    formData.append('logradouro', endereço);
-    formData.append('numero', numero);
-    if (complemento) {
-      formData.append('complemento', complemento);
-    }
-    formData.append('bairro', bairro);
-    formData.append('id_cidade', id_cidade.toString());
+    formData.append('tipo', 'A');
+    formData.append('num_documento', cpf.replace(/\D/g, ''));
+    if (data.telefone) formData.append('telefone', data.telefone.replace(/\D/g, ''));
+    if (data.cep) formData.append('cep', data.cep.replace(/\D/g, ''));
+    if (data.endereço) formData.append('logradouro', data.endereço);
+    if (data.numero) formData.append('numero', data.numero);
+    if (data.complemento) formData.append('complemento', data.complemento);
+    if (data.bairro) formData.append('bairro', data.bairro);
+    if (data.id_cidade != null) formData.append('id_cidade', data.id_cidade.toString());
 
     if (cnhImage) {
       formData.append('cnh', {
