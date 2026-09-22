@@ -8,11 +8,12 @@ export const Wrapper = styled.SafeAreaView`
 export const Container = styled.ScrollView.attrs({
   contentContainerStyle: {
     gap: 20,
-    alignItems: 'center',
+    alignItems: 'stretch',
     paddingHorizontal: 30,
     paddingBottom: 30
   },
 })`
+  flex: 1;
   padding: 0px 10px;
   background-color: ${(props) => props.theme.colors['white']};
 `;

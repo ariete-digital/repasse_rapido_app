@@ -23,6 +23,7 @@ interface Props {
   errorMessage?: string
   filter: 'modelos' | 'marcas' | 'estados' | 'cidades'
   placeholder: string
+  initialQuery?: string
 }
 
 const AutocompleteDropdown = ({
@@ -30,7 +31,8 @@ const AutocompleteDropdown = ({
   onChangeValue,
   errorMessage,
   filter,
-  placeholder
+  placeholder,
+  initialQuery,
 }: Props) => {
   const [query, setQuery] = useState('')
   const [data, setData] = useState<DataProps[]>([])
@@ -62,6 +64,13 @@ const AutocompleteDropdown = ({
       setQuery(selected.label)
     }
   }, [selected])
+
+  useEffect(() => {
+    if (initialQuery) {
+      setSelected(undefined)
+      setQuery(initialQuery)
+    }
+  }, [initialQuery])
 
   const handleSelect = (item: DataProps) => {
     const returnValue = filter === "cidades" || filter === "estados" ? item : item.label

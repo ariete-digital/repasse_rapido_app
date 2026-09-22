@@ -273,11 +273,14 @@ export default function Filters() {
         filterParams.cidade_nome = cidadeSelecionada.label;
       }
     }
-    if (marca) {
-      filterParams.id_marca = parseInt(marca);
+    const marcaSelecionada = listaMarcas.find(m => m.value === marca);
+    const modeloSelecionado = listaModelos.find(m => m.value === modelo);
+
+    if (marcaSelecionada?.label) {
+      filterParams.marca = marcaSelecionada.label;
     }
-    if (modelo) {
-      filterParams.modelo = modelo;
+    if (modeloSelecionado?.label) {
+      filterParams.modelo = modeloSelecionado.label;
     }
     if (anoMin) {
       filterParams.ano = { ...filterParams.ano, min: parseInt(anoMin) };
@@ -302,9 +305,6 @@ export default function Filters() {
       setFilterParams(filterParams);
     }
 
-    const marcaSelecionada = listaMarcas.find(m => m.value === marca);
-    const modeloSelecionado = listaModelos.find(m => m.value === modelo);
-    
     const precoMinString = precoMin && precoMin.trim() !== '' ? unmaskCurrency(precoMin).toString() : undefined;
     const precoMaxString = precoMax && precoMax.trim() !== '' ? unmaskCurrency(precoMax).toString() : undefined;
     

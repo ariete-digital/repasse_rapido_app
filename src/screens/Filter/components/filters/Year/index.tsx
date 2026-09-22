@@ -34,7 +34,8 @@ const YearFilter = ({
   };
 
   const years: { label: string; value: string }[] = [];
-  for (let i = 2024; i >= 1924; i--) {
+  const newestYear = new Date().getFullYear() + 1;
+  for (let i = newestYear; i >= 1924; i--) {
     years.push({ label: i.toString(), value: i.toString() });
   }
 

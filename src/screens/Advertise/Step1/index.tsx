@@ -14,6 +14,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { api } from '@lib/api';
 import { maskPlaca } from '@utils/masks';
 import { useAdvertise } from '../context/AdvertiseContext';
+import AutocompleteDropdown, { DataProps } from '@components/Autocomplete';
 
 const convertFipeValueToNumeric = (valorFipe: string): string => {
   if (!valorFipe) return '0';
@@ -33,6 +34,8 @@ interface VehicleFormProps {
   placa: string;
   marca: string;
   modelo: string;
+  versao: string;
+  cidade: string;
   ano_fabricacao: string;
   ano_modelo: string;
   quilometragem: string;
@@ -46,6 +49,8 @@ const vehicleSchema = yup.object({
   placa: yup.string().required('Informe a placa!'),
   marca: yup.string().required('Informe a marca!'),
   modelo: yup.string().required('Informe o modelo!'),
+  versao: yup.string().required('Informe a versão!'),
+  cidade: yup.string().required('Informe a cidade do veículo!'),
   ano_fabricacao: yup.string().required('Selecione o ano de fabricação!'),
   ano_modelo: yup.string().required('Selecione o ano do modelo!'),
   quilometragem: yup.string().required('Informe a quilometragem!'),
@@ -67,6 +72,7 @@ const Step1 = () => {
   const placaInputRef = useRef<View>(null);
   const placaContainerRef = useRef<View>(null);
   const [placaYPosition, setPlacaYPosition] = useState(0);
+  const [cidadeLabel, setCidadeLabel] = useState('');
 
   const {
     control,
@@ -120,6 +126,9 @@ const Step1 = () => {
       if (advertiseData.placa) setValue('placa', advertiseData.placa);
       if (advertiseData.marca_veiculo) setValue('marca', advertiseData.marca_veiculo);
       if (advertiseData.modelo_veiculo) setValue('modelo', advertiseData.modelo_veiculo);
+      if (advertiseData.submodelo) setValue('versao', advertiseData.submodelo);
+      if (advertiseData.id_cidade) setValue('cidade', advertiseData.id_cidade);
+      if (advertiseData.cidade_nome) setCidadeLabel(advertiseData.cidade_nome);
       if (advertiseData.ano_fabricacao) setValue('ano_fabricacao', advertiseData.ano_fabricacao);
       if (advertiseData.ano_modelo) setValue('ano_modelo', advertiseData.ano_modelo);
       if (advertiseData.quilometragem) setValue('quilometragem', advertiseData.quilometragem);
@@ -136,6 +145,8 @@ const Step1 = () => {
     formValues.placa &&
     formValues.marca &&
     formValues.modelo &&
+    formValues.versao &&
+    formValues.cidade &&
     formValues.ano_fabricacao &&
     formValues.ano_modelo &&
     formValues.quilometragem &&
@@ -158,11 +169,50 @@ const Step1 = () => {
   const modelo = watch('modelo');
   const [isLoadingVehicleInfo, setIsLoadingVehicleInfo] = useState(false);
 
-  const extractSubmodelo = (modeloCompleto: string): string => {
-    if (!modeloCompleto) return '';
-    
-    const palavras = modeloCompleto.trim().split(/\s+/);
-    return palavras[0] || '';
+  const pickVersion = (data: any): string => {
+    const explicit = [data?.versao, data?.versao_veiculo, data?.VERSAO]
+      .map((value) => (value == null ? '' : String(value).trim()))
+      .find(Boolean);
+    if (explicit) return explicit;
+
+    const modelo = String(data?.modelo || '').trim();
+    const parts = modelo.split(/\s+/).filter(Boolean);
+    const submodelo = data?.submodelo ? String(data.submodelo).trim() : '';
+    const remainder = parts.length > 1 ? parts.slice(1).join(' ') : '';
+
+    if (submodelo && submodelo.toLowerCase() !== parts[0]?.toLowerCase()) {
+      return submodelo;
+    }
+
+    return remainder || submodelo;
+  };
+
+  const pickCityName = (data: any): string => {
+    const city = data?.municipio || data?.cidade || data?.municipio_nome || data?.localidade || data?.cidade_veiculo;
+    if (!city) return '';
+    if (typeof city === 'string') return city;
+    return city.nome || city.label || '';
+  };
+
+  const resolveCity = async (name: string) => {
+    const query = name.trim();
+    if (query.length < 3) return;
+
+    try {
+      const response = await api.get(`/cliente/listagem/cidades?filtro=${encodeURIComponent(query)}`);
+      const cities = Array.isArray(response.data?.content) ? response.data.content : [];
+      const normalized = query.toLowerCase();
+      const match = cities.find((city: DataProps) => {
+        const label = String(city.label || '').toLowerCase();
+        return label.startsWith(normalized) || label.includes(normalized);
+      });
+
+      if (match) {
+        setValue('cidade', String(match.value));
+        setCidadeLabel(match.label);
+      }
+    } catch (error) {
+    }
   };
 
   const generateYearOptions = () => {
@@ -206,6 +256,7 @@ const Step1 = () => {
       if (currentMarca) {
         setValue('marca', '');
         setValue('modelo', '');
+        setValue('versao', '');
         setValue('ano_fabricacao', '');
         setValue('ano_modelo', '');
         updateStep1Data({
@@ -237,19 +288,23 @@ const Step1 = () => {
               if (data.ano_fabricacao) setValue('ano_fabricacao', data.ano_fabricacao.toString());
               if (data.ano_modelo) setValue('ano_modelo', data.ano_modelo.toString());
 
-              if (data.submodelo || data.modelo) {
-                const submodelo = data.submodelo || extractSubmodelo(data.modelo);
+              const versao = pickVersion(data);
+              if (versao) setValue('versao', versao);
 
-                let valorFipeConvertido = null;
-                if (data.valor_fipe) {
-                  valorFipeConvertido = convertFipeValueToNumeric(data.valor_fipe);
-                }
-                
-                updateStep1Data({
-                  submodelo: submodelo,
-                  valor_fipe: valorFipeConvertido || undefined,
-                });
+              const cityName = pickCityName(data);
+              if (cityName) {
+                resolveCity(cityName);
               }
+
+              let valorFipeConvertido = null;
+              if (data.valor_fipe) {
+                valorFipeConvertido = convertFipeValueToNumeric(data.valor_fipe);
+              }
+
+              updateStep1Data({
+                submodelo: versao || undefined,
+                valor_fipe: valorFipeConvertido || undefined,
+              });
             }
           } catch (error) {
           } finally {
@@ -265,16 +320,10 @@ const Step1 = () => {
   }, [placa, setValue, updateStep1Data]);
 
   useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      if (name === 'modelo' && value.modelo) {
-        const submodelo = extractSubmodelo(value.modelo);
-        updateStep1Data({
-          submodelo: submodelo,
-        });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, updateStep1Data, extractSubmodelo]);
+    if (cidadeLabel && !watch('cidade')) {
+      resolveCity(cidadeLabel);
+    }
+  }, [cidadeLabel]);
 
   const handleContinue = (data: VehicleFormProps) => {
 
@@ -282,6 +331,9 @@ const Step1 = () => {
       placa: data.placa,
       marca_veiculo: data.marca,
       modelo_veiculo: data.modelo,
+      submodelo: data.versao,
+      id_cidade: data.cidade,
+      cidade_nome: cidadeLabel,
       ano_fabricacao: data.ano_fabricacao,
       ano_modelo: data.ano_modelo,
       quilometragem: data.quilometragem,
@@ -495,6 +547,39 @@ const Step1 = () => {
                 onChangeText={onChange}
                 errorMessage={errors.modelo?.message}
                 editable={false}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="versao"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                label="Versão"
+                value={value}
+                onChangeText={onChange}
+                errorMessage={errors.versao?.message}
+                placeholder="Ex: 1.0 MPI, XRX Hybrid"
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="cidade"
+            render={({ field: { onChange } }) => (
+              <AutocompleteDropdown
+                label="Cidade do veículo"
+                placeholder="Digite a cidade onde o veículo está"
+                filter="cidades"
+                initialQuery={cidadeLabel}
+                errorMessage={errors.cidade?.message}
+                onChangeValue={(selected) => {
+                  const city = selected as DataProps;
+                  onChange(String(city.value));
+                  setCidadeLabel(city.label);
+                }}
               />
             )}
           />

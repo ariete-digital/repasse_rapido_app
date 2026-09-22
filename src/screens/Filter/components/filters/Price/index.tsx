@@ -35,13 +35,17 @@ const PriceFilter = ({
   };
 
   const handleSubmit = () => {
-    if ((minPrice && maxPrice) && (minPrice >= maxPrice)) {
-      Alert.alert('Atenção', 'O valor mínimo precisa ser inferior ao valor máximo')
+    const min = minPrice ? unmaskCurrency(minPrice) : undefined;
+    const max = maxPrice ? unmaskCurrency(maxPrice) : undefined;
+
+    if (min && max && min >= max) {
+      Alert.alert('Atenção', 'O valor mínimo precisa ser inferior ao valor máximo');
       return;
     }
+
     setFilterParams({
       ...filterParams,
-      valor: { min: unmaskCurrency(minPrice), max: unmaskCurrency(maxPrice) },
+      valor: min || max ? { min, max } : undefined,
     });
     handleConfirm();
   };

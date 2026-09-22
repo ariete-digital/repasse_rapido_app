@@ -5,7 +5,6 @@ import Text from '@components/Text';
 import { ArrowOrder, Filter } from '@icons/index';
 import { RootTabParamList, SearchStackParamList } from '@routes/app.routes';
 import {
-  CommonActions,
   CompositeNavigationProp,
   useNavigation,
 } from '@react-navigation/native';
@@ -32,6 +31,7 @@ const SearchResults = () => {
     if (filters.id_cidade || filters.cidade_nome) return true;
     if (filters.id_marca || filters.marca) return true;
     if (filters.modelo) return true;
+    if (filters.versao_veiculo) return true;
     if (filters.id_estado) return true;
 
     if (filters.ano?.min || filters.ano?.max) return true;
@@ -65,21 +65,7 @@ const SearchResults = () => {
   const navigation = useNavigation<NavigationProps>();
 
   const goToFilter = () => {
-    navigation.dispatch(
-      CommonActions.navigate({
-        name: 'search',
-        params: {
-          screen: 'filter',
-          params: { filters: {} },
-          state: {
-            routes: [
-              { name: 'searchScreen' },
-              { name: 'filter', params: { filters: {} } },
-            ],
-          },
-        },
-      })
-    );
+    navigation.navigate('filter', { filters: {} });
   };
 
   const toggleOrderingModal = () => {
@@ -124,7 +110,7 @@ const SearchResults = () => {
 
     return anuncios.map((ad) => (
       <ItemCard
-        key={ad.codigo}
+        key={ad.id || ad.codigo}
         itemID={ad.id}
         codigo={ad.codigo}
         imageUrl={getImageUrl(ad)}

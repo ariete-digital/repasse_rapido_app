@@ -39,8 +39,28 @@ const Step4 = () => {
     }
   }, [advertiseData.id, advertiseData.imagens]);
 
-  const pickImage = async (index: number) => {
-    
+  const syncPhotos = (updatedPhotos: Photo[]) => {
+    setPhotos(updatedPhotos);
+
+    const imageData = updatedPhotos.map((photo, arrayIndex) => {
+      const hasNewBase64 = photo.base64 && photo.base64.length > 0;
+      return {
+        uri: photo.uri,
+        base64: photo.base64,
+        name: `image_${photo.index}.jpg`,
+        type: 'image/jpeg',
+        principal: arrayIndex === 0,
+        index: photo.index,
+        id: hasNewBase64 ? undefined : photo.originalId
+      };
+    });
+
+    updateStep4Data({
+      imagens: imageData,
+    });
+  };
+
+  const pickImage = async (index: number, multiple = false) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
     if (status !== 'granted') {
@@ -51,65 +71,61 @@ const Step4 = () => {
       return;
     }
 
+    const usedIndexes = new Set(photos.map((photo) => photo.index));
+    const freeIndexes = Array.from({ length: 15 }, (_, slot) => slot).filter((slot) => !usedIndexes.has(slot));
+    const slots = multiple ? freeIndexes : [index];
+
+    if (multiple && slots.length === 0) {
+      Alert.alert('Limite de fotos', 'Você já adicionou as 15 fotos do anúncio.');
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: !multiple,
+      allowsMultipleSelection: multiple,
+      selectionLimit: multiple ? slots.length : 1,
       aspect: [1, 1],
       quality: 0.8,
       base64: true, 
     });
 
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      
-      if (!asset.base64) {
-        Alert.alert('Erro', 'Não foi possível obter a imagem em base64');
-        return;
-      }
+    if (result.canceled || !result.assets?.length) return;
 
+    const assets = multiple ? result.assets.slice(0, slots.length) : result.assets.slice(0, 1);
+    let updatedPhotos = [...photos];
+
+    assets.forEach((asset, assetIndex) => {
+      if (!asset.uri) return;
+
+      const slot = slots[assetIndex];
       const newPhoto: Photo = {
         uri: asset.uri,
-        base64: asset.base64,
-        index: index,
+        base64: asset.base64 || 'local',
+        index: slot,
       };
+      const existingPhotoIndex = updatedPhotos.findIndex((photo) => photo.index === slot);
 
-      const existingPhotoIndex = photos.findIndex(p => p.index === index);
-      
-      let updatedPhotos: Photo[];
-      
       if (existingPhotoIndex >= 0) {
-        
-        updatedPhotos = [...photos];
         updatedPhotos[existingPhotoIndex] = newPhoto;
       } else {
-        
-        updatedPhotos = [...photos, newPhoto];
+        updatedPhotos = [...updatedPhotos, newPhoto];
       }
-      
-      setPhotos(updatedPhotos);
+    });
 
-      const imageData = updatedPhotos.map((photo, arrayIndex) => {
+    syncPhotos(updatedPhotos);
 
-        const hasNewBase64 = photo.base64 && photo.base64.length > 0;
-        return {
-          uri: photo.uri,
-          base64: photo.base64,
-          name: `image_${photo.index}.jpg`,
-          type: 'image/jpeg',
-          principal: arrayIndex === 0,
-          index: photo.index,
-          id: hasNewBase64 ? undefined : photo.originalId 
-        };
-      });
-      
-      updateStep4Data({
-        imagens: imageData,
-      });
+    if (multiple && result.assets.length > slots.length) {
+      Alert.alert('Limite de fotos', 'Algumas fotos não foram adicionadas porque o anúncio aceita no máximo 15.');
     }
   };
 
   const handleAddPhoto = (index: number) => {
     pickImage(index);
+  };
+
+  const handleAddMultiplePhotos = () => {
+    pickImage(0, true);
   };
 
   const handleRemovePhoto = (index: number) => {
@@ -350,9 +366,17 @@ const Step4 = () => {
         </View>
 
         <View style={{ paddingHorizontal: 30, paddingTop: 30 }}>
-          <Text fontStyle="p-16-bold" color="gray-500" style={{marginBottom: 30}}>
+          <Text fontStyle="p-16-bold" color="gray-500" style={{marginBottom: 16}}>
           Inclua fotos no seu anúncio
           </Text>
+
+          <BasicButton
+            label="Selecionar várias fotos"
+            onPress={handleAddMultiplePhotos}
+            backgroundColor="#1E3A8A"
+            color="white"
+            customStyles={{ marginBottom: 20 }}
+          />
 
           {renderPhotoGrid()}
 

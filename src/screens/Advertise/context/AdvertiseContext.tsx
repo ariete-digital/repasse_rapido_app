@@ -12,6 +12,8 @@ interface AdvertiseData {
   marca_veiculo?: string;
   modelo_veiculo?: string;
   submodelo?: string;
+  id_cidade?: string;
+  cidade_nome?: string;
   placa?: string;
   ano_fabricacao?: string;
   ano_modelo?: string;
@@ -201,6 +203,8 @@ export const AdvertiseProvider: React.FC<AdvertiseProviderProps> = ({ children }
           marca_veiculo: ad.marca_veiculo || '',
           modelo_veiculo: ad.modelo_veiculo || '',
           submodelo: ad.submodelo || '',
+          id_cidade: ad.id_cidade != null ? convertToString(ad.id_cidade) : (ad.cidade?.id != null ? convertToString(ad.cidade.id) : ''),
+          cidade_nome: ad.cidade?.nome || ad.cidadeAnunciante || '',
           ano_fabricacao: convertToString(ad.ano_fabricacao),
           ano_modelo: convertToString(ad.ano_modelo),
           quilometragem: convertToString(ad.quilometragem),

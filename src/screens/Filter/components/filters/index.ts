@@ -13,3 +13,4 @@ export { default as Location } from './Location';
 export { default as Km } from './Km';
 export { default as Order } from './Order';
 export { default as VehicleType } from './VehicleType';
+export { default as Version } from './Version';

@@ -2,7 +2,7 @@
   expo: {
     name: 'Repasse Rápido',
     slug: 'repasse-rapido',
-    owner: "repasse-rapido",
+    owner: "ariete",
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -62,8 +62,8 @@
     extra: {
       apiUrl: process.env.API_URL_PROD || 'https://api-repasses.arietedigital.com.br/api',
       eas: {
-        projectId: '2b0cf35b-cdb7-43fa-8bf1-bd294cb41b9a',
-      },
+      projectId: '64c8174d-50ca-4852-98fc-df384f31fcfa',
+    },
     },
   },
 };

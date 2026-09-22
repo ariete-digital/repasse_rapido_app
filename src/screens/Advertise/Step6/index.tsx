@@ -117,6 +117,7 @@ const Step6 = () => {
       if (advertiseData.marca_veiculo) formData.append('marca_veiculo', advertiseData.marca_veiculo);
       if (advertiseData.modelo_veiculo) formData.append('modelo_veiculo', advertiseData.modelo_veiculo);
       if (advertiseData.submodelo) formData.append('submodelo', advertiseData.submodelo);
+      if (advertiseData.id_cidade) formData.append('id_cidade', advertiseData.id_cidade);
 
       if (advertiseData.ano_fabricacao) formData.append('ano_fabricacao', stringToNumber(advertiseData.ano_fabricacao)!.toString());
       if (advertiseData.ano_modelo) formData.append('ano_modelo', stringToNumber(advertiseData.ano_modelo)!.toString());

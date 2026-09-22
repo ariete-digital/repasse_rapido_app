@@ -24,6 +24,7 @@ import {
   SellType,
   VehicleType,
   YearPicker,
+  Version,
 } from './components/filters';
 import { items } from './constants';
 import * as F from './styles';
@@ -49,6 +50,8 @@ const Item = ({ label, icon, onPress, filterName, filterValue, onRemoveFilter }:
         return filterValue.marca ? `Marca: ${filterValue.marca}` : null;
       case 'models':
         return filterValue.modelo ? `Modelo: ${filterValue.modelo}` : null;
+      case 'version':
+        return filterValue.versao_veiculo ? `Versão: ${filterValue.versao_veiculo}` : null;
       case 'year':
         if (filterValue.ano?.min || filterValue.ano?.max) {
           const anoMin = filterValue.ano?.min || 'Qualquer';
@@ -216,6 +219,7 @@ const Filter = () => {
     const hasFilters = !!(
       filterParams.marca ||
       filterParams.modelo ||
+      filterParams.versao_veiculo ||
       filterParams.id_marca ||
       filterParams.ano?.min ||
       filterParams.ano?.max ||
@@ -319,6 +323,9 @@ const Filter = () => {
         delete newParams.modelo;
         delete (newParams as any).id_modelo; 
         break;
+      case 'version':
+        delete newParams.versao_veiculo;
+        break;
       case 'year':
         delete newParams.ano;
         break;
@@ -350,6 +357,7 @@ const Filter = () => {
     const hasFilters = !!(
       newParams.marca ||
       newParams.modelo ||
+      newParams.versao_veiculo ||
       newParams.id_marca ||
       (newParams as any).id_modelo || 
       newParams.ano?.min ||
@@ -451,12 +459,10 @@ const Filter = () => {
 
         // Aplicar apenas os filtros que foram enviados
         if (filters.marca) {
-          updated.id_marca = parseInt(filters.marca);
           updated.marca = filters.marca_nome || filters.marca;
         }
         
         if (filters.modelo) {
-          updated.id_modelo = parseInt(filters.modelo);
           updated.modelo = filters.modelo_nome || filters.modelo;
         }
         
@@ -597,6 +603,11 @@ const Filter = () => {
         />
         <Model
           isVisible={currentFilter === 'models'}
+          handleCancel={handleCancel}
+          handleConfirm={handleConfirm}
+        />
+        <Version
+          isVisible={currentFilter === 'version'}
           handleCancel={handleCancel}
           handleConfirm={handleConfirm}
         />
